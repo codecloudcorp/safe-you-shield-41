@@ -1,18 +1,15 @@
-import { Shield, Instagram, Linkedin, Twitter, Mail, Phone } from "lucide-react";
+import { Shield, Instagram, Linkedin, Twitter, Mail } from "lucide-react";
 
 const Footer = () => {
   const footerLinks = {
     produto: [
       { label: "Como Funciona", href: "#como-funciona" },
       { label: "Planos", href: "#planos" },
-      { label: "Empresas", href: "#empresas" },
-      { label: "API", href: "#api" },
     ],
     suporte: [
       { label: "Central de Ajuda", href: "#" },
       { label: "Contato", href: "#contato" },
       { label: "FAQ", href: "#" },
-      { label: "Status", href: "#" },
     ],
     legal: [
       { label: "Termos de Uso", href: "#" },
@@ -44,10 +41,6 @@ const Footer = () => {
               <a href="mailto:contato@safeyou.com.br" className="flex items-center gap-2 hover:text-background transition-colors">
                 <Mail className="w-4 h-4" />
                 contato@safeyou.com.br
-              </a>
-              <a href="tel:+5511999999999" className="flex items-center gap-2 hover:text-background transition-colors">
-                <Phone className="w-4 h-4" />
-                (11) 99999-9999
               </a>
             </div>
           </div>
