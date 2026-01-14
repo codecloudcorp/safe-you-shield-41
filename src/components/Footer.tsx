@@ -20,7 +20,7 @@ const Footer = () => {
     ],
     legal: [
       { label: "Termos de Uso", href: "/termos-de-uso", isRoute: true },
-      { label: "Privacidade", href: "#" },
+      { label: "Privacidade", href: "/politica-de-privacidade", isRoute: true },
       { label: "LGPD", href: "#" },
       { label: "Cookies", href: "#" },
     ],
