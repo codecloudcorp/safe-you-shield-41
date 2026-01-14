@@ -5,6 +5,7 @@ import TrafficLightSection from "@/components/TrafficLightSection";
 import PricingSection from "@/components/PricingSection";
 import LGPDSection from "@/components/LGPDSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
+import FAQSection from "@/components/FAQSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
@@ -19,6 +20,7 @@ const Index = () => {
         <PricingSection />
         <LGPDSection />
         <TestimonialsSection />
+        <FAQSection />
         <CTASection />
       </main>
       <Footer />
