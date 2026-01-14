@@ -1,7 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Shield, Cookie, Settings, BarChart3, Target, Lock, RefreshCw } from "lucide-react";
-import { motion } from "framer-motion";
 
 const CookiesPolicy = () => {
   const cookieTypes = [
@@ -53,12 +52,7 @@ const CookiesPolicy = () => {
       {/* Hero Section */}
       <section className="pt-32 pb-16 bg-gradient-to-br from-rose-soft/20 via-lavender/10 to-background">
         <div className="container mx-auto px-4">
-          <motion.div 
-            className="max-w-4xl mx-auto text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-rose-soft/20 text-rose-soft px-4 py-2 rounded-full text-sm font-medium mb-6">
               <Cookie className="w-4 h-4" />
               Transparência Digital
@@ -75,7 +69,7 @@ const CookiesPolicy = () => {
             <p className="text-sm text-muted-foreground mt-4">
               Última atualização: Janeiro de 2026
             </p>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -83,12 +77,7 @@ const CookiesPolicy = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="bg-card rounded-2xl p-8 shadow-lg border border-border mb-12"
-            >
+            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border mb-12">
               <div className="flex items-center gap-4 mb-6">
                 <div className="bg-gradient-to-br from-rose-soft to-lavender p-3 rounded-xl">
                   <Cookie className="w-6 h-6 text-white" />
@@ -101,7 +90,7 @@ const CookiesPolicy = () => {
               <p className="text-muted-foreground leading-relaxed">
                 Na Safe You, utilizamos cookies para garantir que você tenha a melhor experiência possível, mantendo sua navegação segura e personalizada às suas necessidades.
               </p>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -110,28 +99,19 @@ const CookiesPolicy = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
+            <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-foreground mb-4">
                 Tipos de Cookies que Utilizamos
               </h2>
               <p className="text-muted-foreground">
                 Diferentes cookies servem a propósitos diferentes
               </p>
-            </motion.div>
+            </div>
 
             <div className="space-y-6">
               {cookieTypes.map((cookie, index) => (
-                <motion.div
+                <div
                   key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
                   className="bg-card rounded-2xl p-6 shadow-lg border border-border"
                 >
                   <div className="flex items-start gap-4">
@@ -159,7 +139,7 @@ const CookiesPolicy = () => {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -170,28 +150,19 @@ const CookiesPolicy = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
+            <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-foreground mb-4">
                 Como Gerenciar seus Cookies
               </h2>
               <p className="text-muted-foreground">
                 Você tem controle total sobre os cookies armazenados no seu dispositivo
               </p>
-            </motion.div>
+            </div>
 
             <div className="grid md:grid-cols-3 gap-6">
               {userRights.map((right, index) => (
-                <motion.div
+                <div
                   key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
                   className="bg-card rounded-2xl p-6 shadow-lg border border-border text-center"
                 >
                   <div className="bg-gradient-to-br from-rose-soft to-lavender p-3 rounded-xl w-fit mx-auto mb-4">
@@ -199,7 +170,7 @@ const CookiesPolicy = () => {
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">{right.title}</h3>
                   <p className="text-sm text-muted-foreground">{right.description}</p>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -210,12 +181,7 @@ const CookiesPolicy = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="bg-card rounded-2xl p-8 shadow-lg border border-border"
-            >
+            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border">
               <h2 className="text-2xl font-bold text-foreground mb-6">Cookies de Terceiros</h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
                 Alguns cookies são colocados por serviços de terceiros que aparecem em nossas páginas. Esses cookies podem ser utilizados para:
@@ -241,7 +207,7 @@ const CookiesPolicy = () => {
               <p className="text-sm text-muted-foreground">
                 Recomendamos que você revise as políticas de privacidade desses terceiros para entender como eles utilizam cookies.
               </p>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -250,11 +216,7 @@ const CookiesPolicy = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
+            <div>
               <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
                 Tempo de Armazenamento
               </h2>
@@ -272,7 +234,7 @@ const CookiesPolicy = () => {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -281,11 +243,7 @@ const CookiesPolicy = () => {
       <section className="py-16 bg-gradient-to-br from-rose-soft/10 to-lavender/10">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
+            <div>
               <h2 className="text-2xl font-bold text-foreground mb-4">
                 Dúvidas sobre Cookies?
               </h2>
@@ -300,7 +258,7 @@ const CookiesPolicy = () => {
                   privacidade@safeyou.com.br
                 </a>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
