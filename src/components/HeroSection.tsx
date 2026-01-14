@@ -107,7 +107,7 @@ const HeroSection = () => {
             <div className="flex flex-wrap justify-center gap-6 mt-8">
               {[
                 { value: "500K+", label: "Verificações" },
-                { value: "27", label: "Tribunais" },
+                { value: "Todos os", label: "Tribunais" },
                 { value: "99.9%", label: "Precisão" },
               ].map((stat, index) => (
                 <motion.div
