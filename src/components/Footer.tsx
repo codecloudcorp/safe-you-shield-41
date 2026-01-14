@@ -1,4 +1,5 @@
 import { Shield, Instagram, Linkedin, Twitter, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const TikTokIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -18,7 +19,7 @@ const Footer = () => {
       { label: "FAQ", href: "#" },
     ],
     legal: [
-      { label: "Termos de Uso", href: "#" },
+      { label: "Termos de Uso", href: "/termos-de-uso", isRoute: true },
       { label: "Privacidade", href: "#" },
       { label: "LGPD", href: "#" },
       { label: "Cookies", href: "#" },
@@ -83,9 +84,15 @@ const Footer = () => {
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-sm text-background/60 hover:text-background transition-colors">
-                    {link.label}
-                  </a>
+                  {link.isRoute ? (
+                    <Link to={link.href} className="text-sm text-background/60 hover:text-background transition-colors">
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a href={link.href} className="text-sm text-background/60 hover:text-background transition-colors">
+                      {link.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
