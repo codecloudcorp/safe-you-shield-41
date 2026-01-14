@@ -54,9 +54,6 @@ const CTASection = () => {
               </Button>
             </div>
 
-            <p className="text-white/60 text-sm mt-6">
-              Primeira consulta gratuita • Sem cartão de crédito
-            </p>
           </div>
         </motion.div>
       </div>
