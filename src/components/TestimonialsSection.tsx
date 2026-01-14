@@ -24,6 +24,48 @@ const TestimonialsSection = () => {
       avatar: "JS",
       rating: 5,
     },
+    {
+      name: "Carolina Mendes",
+      role: "Diretora de Escola",
+      content: "Usamos a Safe You para verificar todos os funcionários terceirizados. A paz de espírito que isso traz para pais e professores é inestimável.",
+      avatar: "CM",
+      rating: 5,
+    },
+    {
+      name: "Patrícia Oliveira",
+      role: "Proprietária de Clínica",
+      content: "Em uma clínica, a confiança é fundamental. A Safe You nos ajuda a garantir que nossa equipe seja 100% confiável.",
+      avatar: "PO",
+      rating: 5,
+    },
+    {
+      name: "Amanda Rodrigues",
+      role: "Síndica de Condomínio",
+      content: "Antes de liberar acesso a prestadores de serviço, verifico rapidamente. Os moradores se sentem muito mais seguros.",
+      avatar: "AR",
+      rating: 5,
+    },
+    {
+      name: "Beatriz Almeida",
+      role: "Dona de Pet Shop",
+      content: "Meus clientes confiam seus pets a mim. Com a Safe You, garanto que todos os funcionários são pessoas idôneas.",
+      avatar: "BA",
+      rating: 5,
+    },
+    {
+      name: "Renata Vieira",
+      role: "Coordenadora de Eventos",
+      content: "Contratamos muitos freelancers por evento. A verificação rápida da Safe You tornou nosso processo muito mais seguro.",
+      avatar: "RV",
+      rating: 5,
+    },
+    {
+      name: "Luciana Ferreira",
+      role: "Advogada",
+      content: "Recomendo a Safe You para todas as minhas clientes. Prevenção é sempre o melhor caminho, especialmente em contratações domésticas.",
+      avatar: "LF",
+      rating: 5,
+    },
   ];
 
   return (
