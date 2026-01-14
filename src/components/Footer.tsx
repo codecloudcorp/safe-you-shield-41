@@ -14,9 +14,9 @@ const Footer = () => {
       { label: "Planos", href: "#planos" },
     ],
     suporte: [
-      { label: "Central de Ajuda", href: "#" },
+      { label: "Central de Ajuda", href: "/central-de-ajuda", isRoute: true },
       { label: "Contato", href: "#contato" },
-      { label: "FAQ", href: "#" },
+      { label: "FAQ", href: "#faq" },
     ],
     legal: [
       { label: "Termos de Uso", href: "/termos-de-uso", isRoute: true },
@@ -71,9 +71,15 @@ const Footer = () => {
             <ul className="space-y-2">
               {footerLinks.suporte.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-sm text-background/60 hover:text-background transition-colors">
-                    {link.label}
-                  </a>
+                  {link.isRoute ? (
+                    <Link to={link.href} className="text-sm text-background/60 hover:text-background transition-colors">
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a href={link.href} className="text-sm text-background/60 hover:text-background transition-colors">
+                      {link.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
