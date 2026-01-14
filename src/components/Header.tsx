@@ -10,7 +10,6 @@ const Header = () => {
     { label: "Como Funciona", href: "#como-funciona" },
     { label: "Planos", href: "#planos" },
     { label: "Segurança", href: "#seguranca" },
-    { label: "Contato", href: "#contato" },
   ];
 
   return (
