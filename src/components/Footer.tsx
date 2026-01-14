@@ -15,7 +15,6 @@ const Footer = () => {
     ],
     suporte: [
       { label: "Central de Ajuda", href: "/central-de-ajuda", isRoute: true },
-      { label: "Contato", href: "#contato" },
       { label: "FAQ", href: "#faq" },
     ],
     legal: [
