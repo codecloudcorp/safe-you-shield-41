@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Shield, Search, CheckCircle, ArrowRight, ChevronDown } from "lucide-react";
+import { Shield, Search, CheckCircle, ArrowRight, User, BadgeCheck, Scale, MapPin, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Progress } from "@/components/ui/progress";
 
 const HeroSection = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -139,49 +140,112 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="hidden lg:block"
           >
-            <div className="bg-white rounded-2xl shadow-strong p-8 border border-border/30 max-w-md ml-auto">
-              {/* Card Header */}
-              <div className="flex items-start gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-lavender-light flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-lavender" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Resultado da Verificação</h3>
+            <div className="bg-white rounded-2xl shadow-strong p-8 border border-border/30 max-w-md ml-auto relative overflow-hidden">
+              {/* Verified Badge */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 1, type: "spring", stiffness: 200 }}
+                className="absolute -top-2 -right-2 bg-safe-green text-white p-2 rounded-full shadow-lg"
+              >
+                <BadgeCheck className="w-6 h-6" />
+              </motion.div>
+
+              {/* Card Header with Avatar */}
+              <div className="flex items-start gap-4 mb-6">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, type: "spring" }}
+                  className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-light to-rose-soft/30 flex items-center justify-center border-2 border-white shadow-md"
+                >
+                  <User className="w-7 h-7 text-lavender" />
+                </motion.div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground text-lg">Resultado da Verificação</h3>
                   <p className="text-sm text-muted-foreground">Consulta realizada há 2 min</p>
                 </div>
               </div>
 
-              {/* Status Badge */}
-              <div className="mb-6">
-                <span className="inline-flex px-4 py-2 rounded-full bg-safe-green/10 text-safe-green font-semibold text-sm border border-safe-green/30">
+              {/* Progress Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="mb-6"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-muted-foreground">Verificação completa</span>
+                  <span className="text-xs font-semibold text-safe-green">100%</span>
+                </div>
+                <Progress value={100} className="h-2 bg-muted" />
+              </motion.div>
+
+              {/* Status Badge with Pulse */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.7 }}
+                className="mb-6"
+              >
+                <span className="relative inline-flex px-4 py-2 rounded-full bg-safe-green/10 text-safe-green font-semibold text-sm border border-safe-green/30">
+                  <motion.span
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 rounded-full bg-safe-green/20"
+                  />
+                  <CheckCircle className="w-4 h-4 mr-2" />
                   Perfil Seguro
                 </span>
-              </div>
+              </motion.div>
 
-              {/* Results List */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-border/50">
-                  <span className="text-muted-foreground">Antecedentes Criminais</span>
-                  <span className="font-semibold text-safe-green">Nenhum</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-border/50">
-                  <span className="text-muted-foreground">Processos Judiciais</span>
-                  <span className="font-semibold text-safe-green">Nenhum</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-border/50">
-                  <span className="text-muted-foreground">Tribunais Consultados</span>
-                  <span className="font-semibold text-foreground">27 Estados</span>
-                </div>
-                <div className="flex justify-between items-center py-3">
-                  <span className="text-muted-foreground">Confiabilidade</span>
-                  <span className="font-semibold text-foreground">Alta</span>
-                </div>
+              {/* Results List with Stagger Animation */}
+              <div className="space-y-1">
+                {[
+                  { label: "Antecedentes Criminais", value: "Nenhum", icon: Shield, isGreen: true },
+                  { label: "Processos Judiciais", value: "Nenhum", icon: Scale, isGreen: true },
+                  { label: "Tribunais Consultados", value: "27 Estados", icon: MapPin, isGreen: false },
+                  { label: "Confiabilidade", value: "Alta", icon: TrendingUp, isGreen: false },
+                ].map((item, index) => (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.8 + index * 0.15 }}
+                    className="flex justify-between items-center py-3 px-3 rounded-lg border-b border-border/50 hover:bg-muted/50 transition-colors cursor-default group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon className="w-4 h-4 text-muted-foreground group-hover:text-lavender transition-colors" />
+                      <span className="text-muted-foreground">{item.label}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.isGreen && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 1.2 + index * 0.15, type: "spring" }}
+                        >
+                          <CheckCircle className="w-4 h-4 text-safe-green" />
+                        </motion.div>
+                      )}
+                      <span className={`font-semibold ${item.isGreen ? 'text-safe-green' : 'text-foreground'}`}>
+                        {item.value}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
 
               {/* CTA Button */}
-              <Button variant="outline" className="w-full mt-6 h-12 rounded-xl bg-muted/50 border-0 text-muted-foreground hover:bg-muted">
-                Ver Relatório Completo
-              </Button>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.4 }}
+              >
+                <Button variant="outline" className="w-full mt-6 h-12 rounded-xl bg-muted/50 border-0 text-muted-foreground hover:bg-muted hover:text-foreground transition-all">
+                  Ver Relatório Completo
+                </Button>
+              </motion.div>
             </div>
           </motion.div>
         </div>
