@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Shield, Search, CheckCircle, ArrowRight, User, BadgeCheck, Scale, MapPin, TrendingUp } from "lucide-react";
+import { Shield, Search, CheckCircle, ArrowRight, Scale, MapPin, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -140,28 +140,13 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="hidden lg:block"
           >
-            <div className="bg-white rounded-2xl shadow-strong p-8 border border-border/30 max-w-md ml-auto relative overflow-hidden">
-              {/* Verified Badge */}
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 1, type: "spring", stiffness: 200 }}
-                className="absolute -top-2 -right-2 bg-safe-green text-white p-2 rounded-full shadow-lg"
-              >
-                <BadgeCheck className="w-6 h-6" />
-              </motion.div>
-
-              {/* Card Header with Avatar */}
-              <div className="flex items-start gap-4 mb-6">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.5, type: "spring" }}
-                  className="w-14 h-14 rounded-full bg-gradient-to-br from-lavender-light to-rose-soft/30 flex items-center justify-center border-2 border-white shadow-md"
-                >
-                  <User className="w-7 h-7 text-lavender" />
-                </motion.div>
-                <div className="flex-1">
+            <div className="bg-white rounded-2xl shadow-strong p-8 border border-border/30 max-w-md ml-auto">
+              {/* Card Header */}
+              <div className="flex items-start gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-lavender-light flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-lavender" />
+                </div>
+                <div>
                   <h3 className="font-semibold text-foreground text-lg">Resultado da Verificação</h3>
                   <p className="text-sm text-muted-foreground">Consulta realizada há 2 min</p>
                 </div>
