@@ -92,10 +92,14 @@ const PricingSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className={`relative bg-card rounded-2xl p-8 shadow-soft hover:shadow-strong transition-all border ${
+              whileHover={{ 
+                y: -8,
+                transition: { duration: 0.2 }
+              }}
+              className={`relative bg-card rounded-2xl p-8 shadow-soft hover:shadow-strong transition-all duration-300 border cursor-pointer ${
                 plan.popular 
                   ? "border-rose-soft/50 scale-105 shadow-glow" 
-                  : "border-border/50"
+                  : "border-border/50 hover:border-lavender/30"
               }`}
             >
               {/* Popular Badge */}
