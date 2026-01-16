@@ -15,30 +15,30 @@ const HeroSection = () => {
       {/* Bottom gradient fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-muted/30 to-transparent" />
 
-      {/* Floating bubbles */}
+      {/* Floating shields */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(12)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full bg-gradient-to-br from-rose-soft/30 to-lavender/20"
+            className="absolute text-rose-soft/15"
             style={{
-              width: Math.random() * 20 + 8,
-              height: Math.random() * 20 + 8,
-              left: `${Math.random() * 100}%`,
-              bottom: -30,
+              left: `${10 + Math.random() * 80}%`,
+              bottom: -40,
             }}
             animate={{
-              y: [0, -800 - Math.random() * 400],
-              opacity: [0, 0.6, 0.4, 0],
-              scale: [0.8, 1, 0.9],
+              y: [0, -900 - Math.random() * 300],
+              opacity: [0, 0.25, 0.15, 0],
+              rotate: [0, 10, -10, 0],
             }}
             transition={{
-              duration: 8 + Math.random() * 6,
+              duration: 12 + Math.random() * 8,
               repeat: Infinity,
-              delay: Math.random() * 8,
+              delay: Math.random() * 10,
               ease: "easeOut",
             }}
-          />
+          >
+            <Shield size={16 + Math.random() * 12} strokeWidth={1} />
+          </motion.div>
         ))}
       </div>
 
