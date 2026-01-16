@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Shield, Search, CheckCircle, ArrowRight } from "lucide-react";
+import { Shield, Search, CheckCircle, ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -186,6 +186,30 @@ const HeroSection = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Scroll Indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 0.5 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+      >
+        <motion.a
+          href="#como-funciona"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+        >
+          <span className="text-xs font-medium">Saiba mais</span>
+          <div className="w-8 h-12 rounded-full border-2 border-current flex items-start justify-center p-2">
+            <motion.div
+              animate={{ y: [0, 12, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-1.5 h-1.5 rounded-full bg-current"
+            />
+          </div>
+        </motion.a>
+      </motion.div>
     </section>
   );
 };
