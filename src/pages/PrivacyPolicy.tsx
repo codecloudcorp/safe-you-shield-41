@@ -172,7 +172,7 @@ const PrivacyPolicy = () => {
               Para dúvidas, solicitações ou reclamações relacionadas a esta Política de Privacidade ou ao tratamento de seus dados pessoais, entre em contato conosco:
             </p>
             <ul className="list-none mt-4 space-y-2 text-muted-foreground">
-              <li><strong>E-mail:</strong> privacidade@safeyou.com.br</li>
+              <li><strong>E-mail:</strong> contato@safeyou.com.br</li>
               <li><strong>Endereços:</strong> Florianópolis - SC | Goiânia - GO</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-4">
