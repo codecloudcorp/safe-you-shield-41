@@ -101,51 +101,55 @@ const TestimonialsSection = () => {
         </div>
 
         {/* Testimonials Carousel */}
-        <div className="max-w-6xl mx-auto px-12">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            plugins={[plugin.current]}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-4">
-              {testimonials.map((testimonial) => (
-                <CarouselItem key={testimonial.name} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                  <div className="relative bg-card rounded-2xl p-8 shadow-soft border border-border/50 hover:shadow-medium transition-all h-full">
-                    {/* Quote Icon */}
-                    <Quote className="absolute top-6 right-6 w-8 h-8 text-rose-soft/20" />
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-4">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              plugins={[plugin.current]}
+              className="w-full"
+            >
+              <div className="flex items-center gap-4">
+                <CarouselPrevious className="relative left-0 top-0 translate-y-0 h-10 w-10 border-rose-soft/30 text-rose-soft hover:bg-rose-soft/10 hover:text-rose-soft" />
+                <CarouselContent className="-ml-4">
+                  {testimonials.map((testimonial) => (
+                    <CarouselItem key={testimonial.name} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                      <div className="relative bg-card rounded-2xl p-8 shadow-soft border border-border/50 hover:shadow-medium transition-all h-full">
+                        {/* Quote Icon */}
+                        <Quote className="absolute top-6 right-6 w-8 h-8 text-rose-soft/20" />
 
-                    {/* Rating */}
-                    <div className="flex gap-1 mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-caution-yellow text-caution-yellow" />
-                      ))}
-                    </div>
+                        {/* Rating */}
+                        <div className="flex gap-1 mb-4">
+                          {[...Array(testimonial.rating)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-caution-yellow text-caution-yellow" />
+                          ))}
+                        </div>
 
-                    {/* Content */}
-                    <p className="text-muted-foreground mb-6 leading-relaxed">
-                      "{testimonial.content}"
-                    </p>
+                        {/* Content */}
+                        <p className="text-muted-foreground mb-6 leading-relaxed">
+                          "{testimonial.content}"
+                        </p>
 
-                    {/* Author */}
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-soft to-lavender flex items-center justify-center text-white font-semibold">
-                        {testimonial.avatar}
+                        {/* Author */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-soft to-lavender flex items-center justify-center text-white font-semibold">
+                            {testimonial.avatar}
+                          </div>
+                          <div>
+                            <div className="font-semibold">{testimonial.name}</div>
+                            <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-semibold">{testimonial.name}</div>
-                        <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                      </div>
-                    </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-0" />
-            <CarouselNext className="right-0" />
-          </Carousel>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselNext className="relative right-0 top-0 translate-y-0 h-10 w-10 border-rose-soft/30 text-rose-soft hover:bg-rose-soft/10 hover:text-rose-soft" />
+              </div>
+            </Carousel>
+          </div>
         </div>
       </div>
     </section>
