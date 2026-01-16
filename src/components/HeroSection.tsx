@@ -9,61 +9,11 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
-      {/* Background Base */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-50" />
+      {/* Background with subtle pink gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-rose-soft/20 via-white to-white" />
       
-      {/* Pink/Rose Gradient - Top Right */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-rose-soft/30 via-rose-light/20 to-transparent rounded-full blur-3xl" />
-      
-      {/* Lavender Gradient - Top Center */}
-      <div className="absolute -top-20 left-1/3 w-[500px] h-[400px] bg-gradient-to-b from-lavender/20 via-lavender-light/10 to-transparent rounded-full blur-3xl" />
-      
-      {/* Teal/Turquoise Gradient - Left Side */}
-      <div className="absolute top-1/3 -left-20 w-[400px] h-[500px] bg-gradient-to-r from-turquoise/15 via-turquoise/10 to-transparent rounded-full blur-3xl" />
-      
-      {/* Subtle grid pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.02]" style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-        backgroundSize: '40px 40px'
-      }} />
-
-      {/* Animated floating elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{ 
-            y: [0, -20, 0],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-gradient-to-br from-rose-soft/10 to-lavender/10 blur-2xl"
-        />
-        <motion.div
-          animate={{ 
-            y: [0, 20, 0],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute bottom-1/3 left-1/4 w-48 h-48 rounded-full bg-gradient-to-tr from-turquoise/10 to-lavender/10 blur-2xl"
-        />
-      </div>
-
-      {/* Curved wave at bottom */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
-          <path 
-            d="M0 120V60C240 20 480 0 720 20C960 40 1200 80 1440 60V120H0Z" 
-            fill="url(#wave-gradient)" 
-            fillOpacity="0.1"
-          />
-          <defs>
-            <linearGradient id="wave-gradient" x1="0" y1="0" x2="1440" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--turquoise))" />
-              <stop offset="50%" stopColor="hsl(var(--lavender))" />
-              <stop offset="100%" stopColor="hsl(var(--rose-soft))" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-muted/30 to-transparent" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
