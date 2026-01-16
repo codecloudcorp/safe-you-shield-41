@@ -63,17 +63,16 @@ const HeroSection = () => {
               <span className="text-gradient">empodera</span>.
             </motion.h1>
 
-            {/* Subtitle */}
-            <motion.p
+            {/* Subtitle - Quote Style */}
+            <motion.blockquote
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg md:text-xl text-muted-foreground max-w-xl mb-8 leading-relaxed"
+              className="text-lg md:text-xl text-muted-foreground max-w-xl mb-8 leading-relaxed italic border-l-4 border-rose-soft/50 pl-4"
             >
-              Verifique antecedentes de pessoas de forma rápida, segura e ética.
-              <br />
-              Proteção para mulheres, famílias e empresas que não querem correr riscos.
-            </motion.p>
+              "Verifique antecedentes de pessoas de forma rápida, segura e ética.
+              Proteção para mulheres, famílias e empresas que não querem correr riscos."
+            </motion.blockquote>
 
             {/* Search Box */}
             <motion.div
