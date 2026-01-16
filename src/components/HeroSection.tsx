@@ -17,27 +17,27 @@ const HeroSection = () => {
 
       {/* Floating shields */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(8)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute text-rose-soft/15"
+            className="absolute text-rose-soft/40"
             style={{
-              left: `${10 + Math.random() * 80}%`,
+              left: `${5 + Math.random() * 90}%`,
               bottom: -40,
             }}
             animate={{
               y: [0, -900 - Math.random() * 300],
-              opacity: [0, 0.25, 0.15, 0],
-              rotate: [0, 10, -10, 0],
+              opacity: [0, 0.5, 0.35, 0],
+              rotate: [0, 15, -15, 0],
             }}
             transition={{
-              duration: 12 + Math.random() * 8,
+              duration: 6 + Math.random() * 4,
               repeat: Infinity,
-              delay: Math.random() * 10,
+              delay: Math.random() * 5,
               ease: "easeOut",
             }}
           >
-            <Shield size={16 + Math.random() * 12} strokeWidth={1} />
+            <Shield size={20 + Math.random() * 16} strokeWidth={1.5} />
           </motion.div>
         ))}
       </div>
