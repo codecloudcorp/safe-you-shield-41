@@ -15,6 +15,33 @@ const HeroSection = () => {
       {/* Bottom gradient fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-muted/30 to-transparent" />
 
+      {/* Floating bubbles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full bg-gradient-to-br from-rose-soft/30 to-lavender/20"
+            style={{
+              width: Math.random() * 20 + 8,
+              height: Math.random() * 20 + 8,
+              left: `${Math.random() * 100}%`,
+              bottom: -30,
+            }}
+            animate={{
+              y: [0, -800 - Math.random() * 400],
+              opacity: [0, 0.6, 0.4, 0],
+              scale: [0.8, 1, 0.9],
+            }}
+            transition={{
+              duration: 8 + Math.random() * 6,
+              repeat: Infinity,
+              delay: Math.random() * 8,
+              ease: "easeOut",
+            }}
+          />
+        ))}
+      </div>
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Content */}
