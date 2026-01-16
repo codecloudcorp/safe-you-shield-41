@@ -27,24 +27,74 @@ const HeroSection = () => {
         backgroundSize: '40px 40px'
       }} />
 
-      {/* Animated floating elements */}
+      {/* Rising Bubbles/Particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{ 
-            y: [0, -20, 0],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-gradient-to-br from-rose-soft/10 to-lavender/10 blur-2xl"
-        />
-        <motion.div
-          animate={{ 
-            y: [0, 20, 0],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute bottom-1/3 left-1/4 w-48 h-48 rounded-full bg-gradient-to-tr from-turquoise/10 to-lavender/10 blur-2xl"
-        />
+        {[...Array(20)].map((_, i) => {
+          const size = Math.random() * 12 + 4;
+          const left = Math.random() * 100;
+          const delay = Math.random() * 5;
+          const duration = Math.random() * 10 + 10;
+          const colors = ['rose-soft', 'lavender', 'turquoise'];
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          
+          return (
+            <motion.div
+              key={i}
+              className={`absolute rounded-full bg-${color}/20 backdrop-blur-sm`}
+              style={{
+                width: size,
+                height: size,
+                left: `${left}%`,
+                bottom: -20,
+              }}
+              animate={{
+                y: [0, -800, -1200],
+                x: [0, Math.random() * 40 - 20, Math.random() * 60 - 30],
+                opacity: [0, 0.6, 0],
+                scale: [0.5, 1, 0.8],
+              }}
+              transition={{
+                duration: duration,
+                repeat: Infinity,
+                delay: delay,
+                ease: "easeOut",
+              }}
+            />
+          );
+        })}
+        
+        {/* Additional larger floating bubbles */}
+        {[...Array(8)].map((_, i) => {
+          const size = Math.random() * 20 + 15;
+          const left = Math.random() * 100;
+          const delay = Math.random() * 8;
+          const duration = Math.random() * 15 + 12;
+          
+          return (
+            <motion.div
+              key={`large-${i}`}
+              className="absolute rounded-full border border-lavender/20 bg-gradient-to-br from-white/40 to-lavender/10 backdrop-blur-sm"
+              style={{
+                width: size,
+                height: size,
+                left: `${left}%`,
+                bottom: -30,
+              }}
+              animate={{
+                y: [0, -600, -1000],
+                x: [0, Math.random() * 30 - 15],
+                opacity: [0, 0.4, 0],
+                scale: [0.3, 1, 0.6],
+              }}
+              transition={{
+                duration: duration,
+                repeat: Infinity,
+                delay: delay,
+                ease: "easeOut",
+              }}
+            />
+          );
+        })}
       </div>
 
       {/* Curved wave at bottom */}
