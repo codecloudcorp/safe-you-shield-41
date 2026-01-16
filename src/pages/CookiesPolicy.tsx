@@ -254,8 +254,8 @@ const CookiesPolicy = () => {
                 <p className="text-foreground font-medium mb-2">Safe You Serviços Digitais LTDA</p>
                 <p className="text-muted-foreground text-sm mb-1">CNPJ: 58.500.491/0001-10</p>
                 <p className="text-muted-foreground text-sm mb-1">Florianópolis - SC | Goiânia - GO</p>
-                <a href="mailto:privacidade@safeyou.com.br" className="text-rose-soft hover:underline text-sm">
-                  privacidade@safeyou.com.br
+                <a href="mailto:contato@safeyou.com.br" className="text-rose-soft hover:underline text-sm">
+                  contato@safeyou.com.br
                 </a>
               </div>
             </div>

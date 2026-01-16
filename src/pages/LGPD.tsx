@@ -319,11 +319,11 @@ const LGPD = () => {
                 ou reportar qualquer preocupação, entre em contato com nosso Encarregado de Proteção de Dados.
               </p>
               <a
-                href="mailto:dpo@safeyou.com.br"
+                href="mailto:contato@safeyou.com.br"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-turquoise text-turquoise-foreground font-semibold hover:opacity-90 transition-opacity"
               >
                 <FileText className="w-5 h-5" />
-                dpo@safeyou.com.br
+                contato@safeyou.com.br
               </a>
               <p className="text-sm text-muted-foreground mt-6">
                 Respondemos todas as solicitações em até 15 dias úteis, conforme previsto na LGPD.
