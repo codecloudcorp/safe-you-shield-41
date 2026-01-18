@@ -30,7 +30,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
 // Import signal images
-import signalHelpGesture from "@/assets/signal-help-gesture.png";
+import signalHelp1 from "@/assets/signal-help-1.png";
+import signalHelp2 from "@/assets/signal-help-2.png";
 import angelShotSignal from "@/assets/angel-shot-signal.png";
 import safetyWordSignal from "@/assets/safety-word-signal.png";
 
@@ -64,7 +65,7 @@ const ProtectionTips = () => {
     {
       title: "Sinal de Socorro",
       description: "Palma aberta, polegar dobrado, fechar os dedos sobre o polegar",
-      image: signalHelpGesture,
+      images: [signalHelp1, signalHelp2],
       steps: [
         "Mostre a palma da mão aberta",
         "Dobre o polegar para dentro",
@@ -74,7 +75,7 @@ const ProtectionTips = () => {
     {
       title: "Código no Bar",
       description: "Peça um 'Angel Shot' ou 'Drink Angela' para alertar o bartender",
-      image: angelShotSignal,
+      images: [angelShotSignal],
       steps: [
         "Peça 'Angel Shot' = Preciso de ajuda",
         "Angel Shot 'Neat' = Preciso de escolta até o carro",
@@ -85,7 +86,7 @@ const ProtectionTips = () => {
     {
       title: "Palavra de Segurança",
       description: "Combine uma palavra-código com família/amigas para emergências",
-      image: safetyWordSignal,
+      images: [safetyWordSignal],
       steps: [
         "Escolha uma palavra discreta e fácil de usar",
         "Combine com pessoas de confiança o que significa",
@@ -330,13 +331,16 @@ const ProtectionTips = () => {
               transition={{ delay: 0.3 + index * 0.1 }}
             >
               <Card className="h-full bg-white/80 backdrop-blur-sm border-border/50 overflow-hidden">
-                {/* Signal Image */}
-                <div className="aspect-video overflow-hidden">
-                  <img 
-                    src={signal.image} 
-                    alt={signal.title}
-                    className="w-full h-full object-cover"
-                  />
+                {/* Signal Image(s) */}
+                <div className={`aspect-video overflow-hidden ${signal.images.length > 1 ? 'grid grid-cols-2 gap-1' : ''}`}>
+                  {signal.images.map((img, imgIndex) => (
+                    <img 
+                      key={imgIndex}
+                      src={img} 
+                      alt={`${signal.title} ${imgIndex + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ))}
                 </div>
                 
                 <CardHeader className="pb-2">
