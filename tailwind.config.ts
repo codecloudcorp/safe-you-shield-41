@@ -85,6 +85,10 @@ export default {
           light: "hsl(var(--turquoise-light))",
         },
         mint: "hsl(var(--mint))",
+        "trust-blue": {
+          DEFAULT: "hsl(var(--trust-blue))",
+          light: "hsl(var(--trust-blue-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
