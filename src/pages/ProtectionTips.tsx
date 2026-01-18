@@ -20,13 +20,53 @@ import {
   Scale,
   Baby,
   Car,
-  Smartphone
+  Smartphone,
+  HandMetal,
+  Play,
+  Info
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 const ProtectionTips = () => {
+  const helpSignals = [
+    {
+      title: "Sinal de Socorro",
+      description: "Palma aberta, polegar dobrado, fechar os dedos sobre o polegar",
+      videoPlaceholder: true,
+      steps: [
+        "Mostre a palma da mão aberta",
+        "Dobre o polegar para dentro",
+        "Feche os outros dedos sobre o polegar"
+      ]
+    },
+    {
+      title: "Código no Bar",
+      description: "Peça um 'Angel Shot' ou 'Drink Angela' para alertar o bartender",
+      videoPlaceholder: true,
+      steps: [
+        "Peça 'Angel Shot' = Preciso de ajuda",
+        "Angel Shot 'Neat' = Preciso de escolta até o carro",
+        "Angel Shot 'On the rocks' = Chame um táxi/Uber",
+        "Angel Shot 'With lime' = Chame a polícia"
+      ]
+    },
+    {
+      title: "Palavra de Segurança",
+      description: "Combine uma palavra-código com família/amigas para emergências",
+      videoPlaceholder: true,
+      steps: [
+        "Escolha uma palavra discreta e fácil de usar",
+        "Combine com pessoas de confiança o que significa",
+        "Use em ligações ou mensagens quando precisar de ajuda",
+        "Exemplo: 'Lembra de comprar maçãs' = 'Preciso de ajuda'"
+      ]
+    }
+  ];
+
   const womenTips = [
     {
       title: "Encontros Online",
@@ -192,15 +232,6 @@ const ProtectionTips = () => {
     }
   ];
 
-  const quickTips = [
-    { icon: Eye, text: "Sempre pesquise antes de confiar" },
-    { icon: MapPin, text: "Compartilhe sua localização" },
-    { icon: Phone, text: "Tenha contatos de emergência" },
-    { icon: Lock, text: "Proteja suas informações" },
-    { icon: AlertTriangle, text: "Confie nos seus instintos" },
-    { icon: MessageCircle, text: "Mantenha comunicação com próximos" }
-  ];
-
   const renderTipCards = (tips: typeof womenTips) => (
     <div className="grid md:grid-cols-2 gap-6">
       {tips.map((category, index) => (
@@ -211,11 +242,16 @@ const ProtectionTips = () => {
           transition={{ delay: index * 0.1 }}
         >
           <Card className="h-full hover:shadow-lg transition-shadow duration-300 border-border/50">
-            <CardHeader>
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-3`}>
-                <category.icon className={`w-6 h-6 ${category.iconColor}`} />
+            <CardHeader className="pb-4">
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center flex-shrink-0`}>
+                  <category.icon className={`w-6 h-6 ${category.iconColor}`} />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">{category.title}</CardTitle>
+                  <CardDescription className="mt-1">{category.tips.length} dicas importantes</CardDescription>
+                </div>
               </div>
-              <CardTitle className="text-xl">{category.title}</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
@@ -239,6 +275,85 @@ const ProtectionTips = () => {
     </div>
   );
 
+  const renderHelpSignalsSection = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+      className="mb-10"
+    >
+      <div className="bg-gradient-to-br from-rose-soft/30 via-lavender-light/20 to-background rounded-2xl p-6 md:p-8 border border-rose-soft/30">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-soft to-rose-400 flex items-center justify-center">
+            <HandMetal className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-foreground">Sinais de Ajuda</h3>
+            <p className="text-sm text-muted-foreground">Aprenda gestos e códigos para pedir socorro discretamente</p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {helpSignals.map((signal, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+            >
+              <Card className="h-full bg-white/80 backdrop-blur-sm border-border/50 overflow-hidden">
+                {/* Video/GIF Placeholder */}
+                <div className="aspect-video bg-gradient-to-br from-lavender-light to-rose-soft/30 flex flex-col items-center justify-center relative group cursor-pointer">
+                  <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Play className="w-6 h-6 text-lavender ml-1" />
+                  </div>
+                  <Badge variant="secondary" className="absolute top-3 right-3 bg-white/90">
+                    <Info className="w-3 h-3 mr-1" />
+                    GIF/Vídeo
+                  </Badge>
+                  <p className="text-xs text-muted-foreground mt-3 px-4 text-center">
+                    Espaço para adicionar vídeo demonstrativo
+                  </p>
+                </div>
+                
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">{signal.title}</CardTitle>
+                  <CardDescription className="text-xs">{signal.description}</CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <ul className="space-y-2">
+                    {signal.steps.map((step, stepIndex) => (
+                      <li key={stepIndex} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <span className="w-5 h-5 rounded-full bg-lavender-light flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-lavender">
+                          {stepIndex + 1}
+                        </span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-6 p-4 bg-white/60 rounded-xl border border-lavender/20">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Importante</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Esses sinais são reconhecidos internacionalmente. Pratique-os e compartilhe com amigas e familiares. 
+                Em situações de perigo, use-os discretamente para alertar pessoas ao seu redor ou estabelecimentos.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -247,7 +362,7 @@ const ProtectionTips = () => {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="w-5 h-5" />
-              <span>Voltar</span>
+              <span className="hidden sm:inline">Voltar</span>
             </Link>
             <Link to="/" className="flex items-center gap-2">
               <Shield className="w-8 h-8 text-lavender" />
@@ -259,7 +374,7 @@ const ProtectionTips = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-lavender-light via-background to-rose-soft/20 py-16">
+      <section className="bg-gradient-to-br from-lavender-light via-background to-rose-soft/20 py-12 md:py-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -267,57 +382,71 @@ const ProtectionTips = () => {
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-lavender/20 mb-6">
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-lavender/20 mb-4">
               <Shield className="w-5 h-5 text-lavender" />
               <span className="text-sm font-medium text-lavender">Guia de Proteção</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-3">
               Dicas de Proteção
             </h1>
-            <p className="text-lg text-muted-foreground">
-              Orientações práticas para você se proteger em diversas situações do dia a dia. 
-              Conhecimento é a sua primeira linha de defesa.
+            <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
+              Orientações práticas para você se proteger. Conhecimento é sua primeira linha de defesa.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Quick Tips Bar */}
-      <section className="bg-white border-b border-border py-6">
+      {/* Quick Stats */}
+      <section className="bg-white border-b border-border py-4">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {quickTips.map((tip, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex items-center gap-2 text-sm text-muted-foreground"
-              >
-                <div className="w-8 h-8 rounded-full bg-lavender-light flex items-center justify-center flex-shrink-0">
-                  <tip.icon className="w-4 h-4 text-lavender" />
-                </div>
-                <span>{tip.text}</span>
-              </motion.div>
-            ))}
+          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-rose-soft/50 flex items-center justify-center">
+                <Heart className="w-4 h-4 text-rose-500" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground">{womenTips.reduce((acc, t) => acc + t.tips.length, 0)}</p>
+                <p className="text-xs text-muted-foreground">Dicas para Mulheres</p>
+              </div>
+            </div>
+            <Separator orientation="vertical" className="h-8 hidden md:block" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-safe-green/20 flex items-center justify-center">
+                <Users className="w-4 h-4 text-safe-green" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground">{familyTips.reduce((acc, t) => acc + t.tips.length, 0)}</p>
+                <p className="text-xs text-muted-foreground">Dicas para Família</p>
+              </div>
+            </div>
+            <Separator orientation="vertical" className="h-8 hidden md:block" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-trust-blue/20 flex items-center justify-center">
+                <Building2 className="w-4 h-4 text-trust-blue" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground">{businessTips.reduce((acc, t) => acc + t.tips.length, 0)}</p>
+                <p className="text-xs text-muted-foreground">Dicas para Empresas</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Tabs Section */}
-      <section className="py-16">
+      <section className="py-10 md:py-16">
         <div className="container mx-auto px-4">
           <Tabs defaultValue="mulheres" className="w-full">
-            <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3 mb-10">
-              <TabsTrigger value="mulheres" className="flex items-center gap-2">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8 h-12">
+              <TabsTrigger value="mulheres" className="flex items-center gap-2 data-[state=active]:bg-rose-soft/30">
                 <Heart className="w-4 h-4" />
                 <span className="hidden sm:inline">Mulheres</span>
               </TabsTrigger>
-              <TabsTrigger value="familia" className="flex items-center gap-2">
+              <TabsTrigger value="familia" className="flex items-center gap-2 data-[state=active]:bg-safe-green/20">
                 <Users className="w-4 h-4" />
                 <span className="hidden sm:inline">Família</span>
               </TabsTrigger>
-              <TabsTrigger value="empresas" className="flex items-center gap-2">
+              <TabsTrigger value="empresas" className="flex items-center gap-2 data-[state=active]:bg-trust-blue/20">
                 <Building2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Empresas</span>
               </TabsTrigger>
@@ -330,9 +459,26 @@ const ProtectionTips = () => {
                 transition={{ duration: 0.3 }}
               >
                 <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Dicas para Mulheres</h2>
-                  <p className="text-muted-foreground">Proteção e segurança no dia a dia</p>
+                  <Badge variant="outline" className="mb-3 border-rose-soft text-rose-500">
+                    <Heart className="w-3 h-3 mr-1" />
+                    Para Mulheres
+                  </Badge>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Proteção e Segurança</h2>
+                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+                    Dicas essenciais para sua segurança no dia a dia, desde encontros até segurança digital
+                  </p>
                 </div>
+
+                {/* Help Signals Section */}
+                {renderHelpSignalsSection()}
+
+                <Separator className="my-8" />
+
+                <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-lavender" />
+                  Dicas de Prevenção
+                </h3>
+
                 {renderTipCards(womenTips)}
               </motion.div>
             </TabsContent>
@@ -344,8 +490,14 @@ const ProtectionTips = () => {
                 transition={{ duration: 0.3 }}
               >
                 <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Dicas para Família</h2>
-                  <p className="text-muted-foreground">Proteja quem você ama</p>
+                  <Badge variant="outline" className="mb-3 border-safe-green text-safe-green">
+                    <Users className="w-3 h-3 mr-1" />
+                    Para Família
+                  </Badge>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Proteja Quem Você Ama</h2>
+                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+                    Orientações para manter toda a família segura em casa e fora dela
+                  </p>
                 </div>
                 {renderTipCards(familyTips)}
               </motion.div>
@@ -358,8 +510,14 @@ const ProtectionTips = () => {
                 transition={{ duration: 0.3 }}
               >
                 <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Dicas para Empresas</h2>
-                  <p className="text-muted-foreground">Segurança corporativa e compliance</p>
+                  <Badge variant="outline" className="mb-3 border-trust-blue text-trust-blue">
+                    <Building2 className="w-3 h-3 mr-1" />
+                    Para Empresas
+                  </Badge>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Segurança Corporativa</h2>
+                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+                    Boas práticas para contratações, parcerias e compliance empresarial
+                  </p>
                 </div>
                 {renderTipCards(businessTips)}
               </motion.div>
@@ -369,22 +527,23 @@ const ProtectionTips = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16">
+      <section className="py-12 bg-gradient-to-r from-lavender/10 to-rose-soft/20">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="max-w-xl mx-auto"
           >
-            <h2 className="text-2xl font-bold text-foreground mb-4">
+            <h2 className="text-2xl font-bold text-foreground mb-3">
               A melhor proteção é a informação
             </h2>
-            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+            <p className="text-muted-foreground mb-6 text-sm">
               Use o Safe You para verificar pessoas antes de se relacionar, contratar ou fazer negócios.
             </p>
             <Link
               to="/"
-              className="inline-flex items-center gap-2 bg-lavender text-white px-6 py-3 rounded-full font-medium hover:bg-lavender/90 transition-colors"
+              className="inline-flex items-center gap-2 bg-lavender text-white px-6 py-3 rounded-full font-medium hover:bg-lavender/90 transition-colors shadow-lg hover:shadow-xl"
             >
               <Shield className="w-5 h-5" />
               Fazer uma Verificação
