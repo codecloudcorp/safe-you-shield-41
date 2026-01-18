@@ -21,22 +21,24 @@ import {
   Baby,
   Car,
   Smartphone,
-  HandMetal,
-  Play,
-  Info
+  HandMetal
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+
+// Import signal images
+import signalHelpGesture from "@/assets/signal-help-gesture.png";
+import angelShotSignal from "@/assets/angel-shot-signal.png";
+import safetyWordSignal from "@/assets/safety-word-signal.png";
 
 const ProtectionTips = () => {
   const helpSignals = [
     {
       title: "Sinal de Socorro",
       description: "Palma aberta, polegar dobrado, fechar os dedos sobre o polegar",
-      videoPlaceholder: true,
+      image: signalHelpGesture,
       steps: [
         "Mostre a palma da mão aberta",
         "Dobre o polegar para dentro",
@@ -46,7 +48,7 @@ const ProtectionTips = () => {
     {
       title: "Código no Bar",
       description: "Peça um 'Angel Shot' ou 'Drink Angela' para alertar o bartender",
-      videoPlaceholder: true,
+      image: angelShotSignal,
       steps: [
         "Peça 'Angel Shot' = Preciso de ajuda",
         "Angel Shot 'Neat' = Preciso de escolta até o carro",
@@ -57,7 +59,7 @@ const ProtectionTips = () => {
     {
       title: "Palavra de Segurança",
       description: "Combine uma palavra-código com família/amigas para emergências",
-      videoPlaceholder: true,
+      image: safetyWordSignal,
       steps: [
         "Escolha uma palavra discreta e fácil de usar",
         "Combine com pessoas de confiança o que significa",
@@ -302,18 +304,13 @@ const ProtectionTips = () => {
               transition={{ delay: 0.3 + index * 0.1 }}
             >
               <Card className="h-full bg-white/80 backdrop-blur-sm border-border/50 overflow-hidden">
-                {/* Video/GIF Placeholder */}
-                <div className="aspect-video bg-gradient-to-br from-lavender-light to-rose-soft/30 flex flex-col items-center justify-center relative group cursor-pointer">
-                  <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Play className="w-6 h-6 text-lavender ml-1" />
-                  </div>
-                  <Badge variant="secondary" className="absolute top-3 right-3 bg-white/90">
-                    <Info className="w-3 h-3 mr-1" />
-                    GIF/Vídeo
-                  </Badge>
-                  <p className="text-xs text-muted-foreground mt-3 px-4 text-center">
-                    Espaço para adicionar vídeo demonstrativo
-                  </p>
+                {/* Signal Image */}
+                <div className="aspect-video overflow-hidden">
+                  <img 
+                    src={signal.image} 
+                    alt={signal.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 
                 <CardHeader className="pb-2">
