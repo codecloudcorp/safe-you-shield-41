@@ -32,7 +32,8 @@ import { Separator } from "@/components/ui/separator";
 // Import signal images
 import signalHelp1 from "@/assets/signal-help-1.png";
 import signalHelp2 from "@/assets/signal-help-2.png";
-import angelShotSignal from "@/assets/angel-shot-signal.png";
+import angelShot1 from "@/assets/angel-shot-1.png";
+import angelShot2 from "@/assets/angel-shot-2.png";
 import safetyWordSignal from "@/assets/safety-word-signal.png";
 
 const ProtectionTips = () => {
@@ -75,7 +76,7 @@ const ProtectionTips = () => {
     {
       title: "Código no Bar",
       description: "Peça um 'Angel Shot' ou 'Drink Angela' para alertar o bartender",
-      images: [angelShotSignal],
+      images: [angelShot1, angelShot2],
       steps: [
         "Peça 'Angel Shot' = Preciso de ajuda",
         "Angel Shot 'Neat' = Preciso de escolta até o carro",
