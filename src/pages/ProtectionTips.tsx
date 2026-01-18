@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Shield, 
@@ -34,6 +35,31 @@ import angelShotSignal from "@/assets/angel-shot-signal.png";
 import safetyWordSignal from "@/assets/safety-word-signal.png";
 
 const ProtectionTips = () => {
+  const [activeTab, setActiveTab] = useState("mulheres");
+
+  const themeColors = {
+    mulheres: {
+      gradient: "from-rose-soft/20 via-lavender-light/30 to-background",
+      badge: "border-rose-soft/30 bg-rose-soft/10",
+      badgeText: "text-rose-soft",
+      icon: "text-rose-soft"
+    },
+    familia: {
+      gradient: "from-safe-green/20 via-safe-green/10 to-background",
+      badge: "border-safe-green/30 bg-safe-green/10",
+      badgeText: "text-safe-green",
+      icon: "text-safe-green"
+    },
+    empresas: {
+      gradient: "from-trust-blue/20 via-trust-blue/10 to-background",
+      badge: "border-trust-blue/30 bg-trust-blue/10",
+      badgeText: "text-trust-blue",
+      icon: "text-trust-blue"
+    }
+  };
+
+  const currentTheme = themeColors[activeTab as keyof typeof themeColors];
+
   const helpSignals = [
     {
       title: "Sinal de Socorro",
@@ -371,7 +397,13 @@ const ProtectionTips = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-lavender-light via-background to-rose-soft/20 py-12 md:py-16">
+      <motion.section 
+        key={activeTab}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className={`bg-gradient-to-br ${currentTheme.gradient} py-12 md:py-16 transition-colors duration-500`}
+      >
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -379,9 +411,9 @@ const ProtectionTips = () => {
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-lavender/20 mb-4">
-              <Shield className="w-5 h-5 text-lavender" />
-              <span className="text-sm font-medium text-lavender">Guia de Proteção</span>
+            <div className={`inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border ${currentTheme.badge} mb-4 transition-colors duration-300`}>
+              <Shield className={`w-5 h-5 ${currentTheme.icon} transition-colors duration-300`} />
+              <span className={`text-sm font-medium ${currentTheme.badgeText} transition-colors duration-300`}>Guia de Proteção</span>
             </div>
             <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-3">
               Dicas de Proteção
@@ -391,12 +423,12 @@ const ProtectionTips = () => {
             </p>
           </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Tabs Section */}
       <section className="py-10 md:py-16">
         <div className="container mx-auto px-4">
-          <Tabs defaultValue="mulheres" className="w-full">
+          <Tabs defaultValue="mulheres" value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8 h-12">
               <TabsTrigger value="mulheres" className="flex items-center gap-2 data-[state=active]:bg-rose-soft/30">
                 <Heart className="w-4 h-4" />
@@ -475,7 +507,11 @@ const ProtectionTips = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 bg-gradient-to-r from-lavender/10 to-rose-soft/20">
+      <section className={`py-12 bg-gradient-to-r ${
+        activeTab === "mulheres" ? "from-rose-soft/10 to-lavender/10" :
+        activeTab === "familia" ? "from-safe-green/10 to-safe-green/5" :
+        "from-trust-blue/10 to-trust-blue/5"
+      } transition-colors duration-500`}>
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
