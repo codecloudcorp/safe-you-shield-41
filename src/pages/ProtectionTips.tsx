@@ -30,7 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
 // Import signal images
-import signalHelpGesture from "@/assets/signal-help-gesture.png";
+import signalHelpGif from "@/assets/signal-for-help.gif";
 import angelShotSignal from "@/assets/angel-shot-signal.png";
 import safetyWordSignal from "@/assets/safety-word-signal.png";
 
@@ -64,7 +64,7 @@ const ProtectionTips = () => {
     {
       title: "Sinal de Socorro",
       description: "Palma aberta, polegar dobrado, fechar os dedos sobre o polegar",
-      image: signalHelpGesture,
+      image: signalHelpGif,
       steps: [
         "Mostre a palma da mão aberta",
         "Dobre o polegar para dentro",
