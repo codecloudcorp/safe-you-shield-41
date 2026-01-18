@@ -14,13 +14,20 @@ import {
   MessageCircle,
   Camera,
   FileText,
-  CheckCircle
+  CheckCircle,
+  Building2,
+  UserCheck,
+  Scale,
+  Baby,
+  Car,
+  Smartphone
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ProtectionTips = () => {
-  const tipCategories = [
+  const womenTips = [
     {
       title: "Encontros Online",
       icon: Heart,
@@ -35,16 +42,58 @@ const ProtectionTips = () => {
       ]
     },
     {
-      title: "Contratação de Serviços",
-      icon: Briefcase,
+      title: "Redes Sociais",
+      icon: Camera,
       color: "from-lavender-light to-lavender-light/50",
       iconColor: "text-lavender",
       tips: [
-        "Verifique referências e histórico do prestador de serviço",
-        "Peça documentos e comprove a identidade antes de contratar",
-        "Nunca deixe estranhos sozinhos em sua casa",
-        "Fotografe documentos de identificação",
-        "Prefira profissionais indicados por conhecidos"
+        "Configure perfis como privados",
+        "Não compartilhe localização em tempo real",
+        "Cuidado com fotos que revelam onde você mora",
+        "Desconfie de perfis novos ou sem fotos reais",
+        "Não aceite solicitações de desconhecidos"
+      ]
+    },
+    {
+      title: "Transporte e Mobilidade",
+      icon: Car,
+      color: "from-trust-blue/20 to-trust-blue/10",
+      iconColor: "text-trust-blue",
+      tips: [
+        "Compartilhe a corrida com pessoas de confiança",
+        "Verifique placa e foto do motorista antes de entrar",
+        "Sente-se sempre no banco de trás",
+        "Evite trajetos por locais isolados à noite",
+        "Tenha app de emergência configurado no celular"
+      ]
+    },
+    {
+      title: "Segurança Digital",
+      icon: Smartphone,
+      color: "from-safe-green/20 to-safe-green/10",
+      iconColor: "text-safe-green",
+      tips: [
+        "Use senhas fortes e diferentes para cada conta",
+        "Ative autenticação em duas etapas",
+        "Cuidado com links suspeitos em mensagens",
+        "Não compartilhe dados bancários por mensagem",
+        "Revise permissões de apps regularmente"
+      ]
+    }
+  ];
+
+  const familyTips = [
+    {
+      title: "Proteção das Crianças",
+      icon: Baby,
+      color: "from-rose-soft to-rose-soft/50",
+      iconColor: "text-rose-500",
+      tips: [
+        "Verifique antecedentes de babás e cuidadores",
+        "Ensine crianças sobre limites e segurança",
+        "Conheça os amigos e contatos dos seus filhos",
+        "Mantenha comunicação aberta sobre situações de risco",
+        "Crie palavras-código para emergências familiares"
       ]
     },
     {
@@ -61,42 +110,84 @@ const ProtectionTips = () => {
       ]
     },
     {
-      title: "Redes Sociais",
-      icon: Camera,
+      title: "Contratação de Serviços",
+      icon: UserCheck,
+      color: "from-lavender-light to-lavender-light/50",
+      iconColor: "text-lavender",
+      tips: [
+        "Verifique referências e histórico do prestador",
+        "Peça documentos e comprove a identidade",
+        "Nunca deixe estranhos sozinhos em sua casa",
+        "Fotografe documentos de identificação",
+        "Prefira profissionais indicados por conhecidos"
+      ]
+    },
+    {
+      title: "Idosos da Família",
+      icon: Users,
+      color: "from-amber-100 to-amber-50",
+      iconColor: "text-amber-600",
+      tips: [
+        "Oriente sobre golpes telefônicos e virtuais",
+        "Verifique cuidadores e acompanhantes",
+        "Mantenha contato regular para identificar problemas",
+        "Configure bloqueios em apps bancários se necessário",
+        "Crie rede de vizinhos para emergências"
+      ]
+    }
+  ];
+
+  const businessTips = [
+    {
+      title: "Contratação de Funcionários",
+      icon: Briefcase,
+      color: "from-lavender-light to-lavender-light/50",
+      iconColor: "text-lavender",
+      tips: [
+        "Realize verificação de antecedentes completa",
+        "Confirme referências profissionais anteriores",
+        "Valide documentos e certificações",
+        "Faça entrevistas presenciais quando possível",
+        "Implemente período de experiência estruturado"
+      ]
+    },
+    {
+      title: "Parceiros Comerciais",
+      icon: Building2,
       color: "from-trust-blue/20 to-trust-blue/10",
       iconColor: "text-trust-blue",
       tips: [
-        "Configure perfis como privados",
-        "Não compartilhe localização em tempo real",
-        "Cuidado com fotos que revelam onde você mora",
-        "Desconfie de perfis novos ou sem fotos reais",
-        "Não aceite solicitações de desconhecidos"
+        "Verifique CNPJ e situação cadastral da empresa",
+        "Consulte processos judiciais e protestos",
+        "Pesquise reputação em sites especializados",
+        "Solicite referências de outros clientes",
+        "Formalize contratos com cláusulas de proteção"
       ]
     },
     {
       title: "Transações Financeiras",
       icon: FileText,
-      color: "from-amber-100 to-amber-50",
-      iconColor: "text-amber-600",
+      color: "from-safe-green/20 to-safe-green/10",
+      iconColor: "text-safe-green",
       tips: [
         "Verifique CPF/CNPJ antes de negociações",
-        "Nunca faça PIX antecipado para desconhecidos",
+        "Nunca faça pagamentos antecipados sem garantias",
         "Pesquise a reputação em sites de reclamação",
         "Desconfie de ofertas muito vantajosas",
-        "Mantenha registros de todas as conversas"
+        "Mantenha registros de todas as transações"
       ]
     },
     {
-      title: "Proteção Familiar",
-      icon: Users,
+      title: "Compliance e LGPD",
+      icon: Scale,
       color: "from-purple-100 to-purple-50",
       iconColor: "text-purple-600",
       tips: [
-        "Verifique antecedentes de babás e cuidadores",
-        "Ensine crianças sobre limites e segurança",
-        "Conheça os amigos e contatos dos seus filhos",
-        "Mantenha comunicação aberta sobre situações de risco",
-        "Crie palavras-código para emergências familiares"
+        "Implemente políticas de proteção de dados",
+        "Treine equipe sobre segurança da informação",
+        "Documente processos de tratamento de dados",
+        "Realize auditorias periódicas de segurança",
+        "Mantenha canal de denúncias anônimas"
       ]
     }
   ];
@@ -109,6 +200,44 @@ const ProtectionTips = () => {
     { icon: AlertTriangle, text: "Confie nos seus instintos" },
     { icon: MessageCircle, text: "Mantenha comunicação com próximos" }
   ];
+
+  const renderTipCards = (tips: typeof womenTips) => (
+    <div className="grid md:grid-cols-2 gap-6">
+      {tips.map((category, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
+          <Card className="h-full hover:shadow-lg transition-shadow duration-300 border-border/50">
+            <CardHeader>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-3`}>
+                <category.icon className={`w-6 h-6 ${category.iconColor}`} />
+              </div>
+              <CardTitle className="text-xl">{category.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {category.tips.map((tip, tipIndex) => (
+                  <motion.li
+                    key={tipIndex}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 + tipIndex * 0.05 }}
+                    className="flex items-start gap-3 text-sm text-muted-foreground"
+                  >
+                    <CheckCircle className="w-4 h-4 text-safe-green flex-shrink-0 mt-0.5" />
+                    <span>{tip}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,44 +304,67 @@ const ProtectionTips = () => {
         </div>
       </section>
 
-      {/* Tips Grid */}
+      {/* Tabs Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tipCategories.map((category, index) => (
+          <Tabs defaultValue="mulheres" className="w-full">
+            <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3 mb-10">
+              <TabsTrigger value="mulheres" className="flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                <span className="hidden sm:inline">Mulheres</span>
+              </TabsTrigger>
+              <TabsTrigger value="familia" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Família</span>
+              </TabsTrigger>
+              <TabsTrigger value="empresas" className="flex items-center gap-2">
+                <Building2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Empresas</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="mulheres">
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
-                <Card className="h-full hover:shadow-lg transition-shadow duration-300 border-border/50">
-                  <CardHeader>
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-3`}>
-                      <category.icon className={`w-6 h-6 ${category.iconColor}`} />
-                    </div>
-                    <CardTitle className="text-xl">{category.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {category.tips.map((tip, tipIndex) => (
-                        <motion.li
-                          key={tipIndex}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 + tipIndex * 0.05 }}
-                          className="flex items-start gap-3 text-sm text-muted-foreground"
-                        >
-                          <CheckCircle className="w-4 h-4 text-safe-green flex-shrink-0 mt-0.5" />
-                          <span>{tip}</span>
-                        </motion.li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Dicas para Mulheres</h2>
+                  <p className="text-muted-foreground">Proteção e segurança no dia a dia</p>
+                </div>
+                {renderTipCards(womenTips)}
               </motion.div>
-            ))}
-          </div>
+            </TabsContent>
+
+            <TabsContent value="familia">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Dicas para Família</h2>
+                  <p className="text-muted-foreground">Proteja quem você ama</p>
+                </div>
+                {renderTipCards(familyTips)}
+              </motion.div>
+            </TabsContent>
+
+            <TabsContent value="empresas">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Dicas para Empresas</h2>
+                  <p className="text-muted-foreground">Segurança corporativa e compliance</p>
+                </div>
+                {renderTipCards(businessTips)}
+              </motion.div>
+            </TabsContent>
+          </Tabs>
         </div>
       </section>
 
