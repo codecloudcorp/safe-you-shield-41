@@ -368,40 +368,6 @@ const ProtectionTips = () => {
         </div>
       </section>
 
-      {/* Emergency Section */}
-      <section className="bg-gradient-to-r from-lavender/10 to-rose-soft/20 py-12">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="bg-white rounded-2xl p-8 shadow-soft max-w-3xl mx-auto text-center"
-          >
-            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle className="w-8 h-8 text-red-500" />
-            </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Em Caso de Emergência</h2>
-            <p className="text-muted-foreground mb-6">
-              Se você está em uma situação de perigo imediato, ligue para os serviços de emergência.
-            </p>
-            <div className="grid sm:grid-cols-3 gap-4">
-              <div className="bg-red-50 rounded-xl p-4">
-                <p className="text-2xl font-bold text-red-600">190</p>
-                <p className="text-sm text-muted-foreground">Polícia Militar</p>
-              </div>
-              <div className="bg-orange-50 rounded-xl p-4">
-                <p className="text-2xl font-bold text-orange-600">192</p>
-                <p className="text-sm text-muted-foreground">SAMU</p>
-              </div>
-              <div className="bg-purple-50 rounded-xl p-4">
-                <p className="text-2xl font-bold text-purple-600">180</p>
-                <p className="text-sm text-muted-foreground">Central da Mulher</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-16">
         <div className="container mx-auto px-4 text-center">
