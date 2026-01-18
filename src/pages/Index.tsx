@@ -11,6 +11,7 @@ import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import UrgencyBanner from "@/components/UrgencyBanner";
+import TipsPreviewSection from "@/components/TipsPreviewSection";
 
 const Index = () => {
   return (
@@ -24,6 +25,7 @@ const Index = () => {
         <BeforeAfterSection />
         <PricingSection />
         <LGPDSection />
+        <TipsPreviewSection />
         <TestimonialsSection />
         <FAQSection />
         <CTASection />
