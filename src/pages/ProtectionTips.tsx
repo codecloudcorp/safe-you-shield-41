@@ -396,43 +396,6 @@ const ProtectionTips = () => {
         </div>
       </section>
 
-      {/* Quick Stats */}
-      <section className="bg-white border-b border-border py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-rose-soft/50 flex items-center justify-center">
-                <Heart className="w-4 h-4 text-rose-500" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-foreground">{womenTips.reduce((acc, t) => acc + t.tips.length, 0)}</p>
-                <p className="text-xs text-muted-foreground">Dicas para Mulheres</p>
-              </div>
-            </div>
-            <Separator orientation="vertical" className="h-8 hidden md:block" />
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-safe-green/20 flex items-center justify-center">
-                <Users className="w-4 h-4 text-safe-green" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-foreground">{familyTips.reduce((acc, t) => acc + t.tips.length, 0)}</p>
-                <p className="text-xs text-muted-foreground">Dicas para Família</p>
-              </div>
-            </div>
-            <Separator orientation="vertical" className="h-8 hidden md:block" />
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-trust-blue/20 flex items-center justify-center">
-                <Building2 className="w-4 h-4 text-trust-blue" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-foreground">{businessTips.reduce((acc, t) => acc + t.tips.length, 0)}</p>
-                <p className="text-xs text-muted-foreground">Dicas para Empresas</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Tabs Section */}
       <section className="py-10 md:py-16">
         <div className="container mx-auto px-4">
@@ -459,10 +422,6 @@ const ProtectionTips = () => {
                 transition={{ duration: 0.3 }}
               >
                 <div className="text-center mb-8">
-                  <Badge variant="outline" className="mb-3 border-rose-soft text-rose-500">
-                    <Heart className="w-3 h-3 mr-1" />
-                    Para Mulheres
-                  </Badge>
                   <h2 className="text-2xl font-bold text-foreground mb-2">Proteção e Segurança</h2>
                   <p className="text-muted-foreground text-sm max-w-lg mx-auto">
                     Dicas essenciais para sua segurança no dia a dia, desde encontros até segurança digital
@@ -490,10 +449,6 @@ const ProtectionTips = () => {
                 transition={{ duration: 0.3 }}
               >
                 <div className="text-center mb-8">
-                  <Badge variant="outline" className="mb-3 border-safe-green text-safe-green">
-                    <Users className="w-3 h-3 mr-1" />
-                    Para Família
-                  </Badge>
                   <h2 className="text-2xl font-bold text-foreground mb-2">Proteja Quem Você Ama</h2>
                   <p className="text-muted-foreground text-sm max-w-lg mx-auto">
                     Orientações para manter toda a família segura em casa e fora dela
@@ -510,10 +465,6 @@ const ProtectionTips = () => {
                 transition={{ duration: 0.3 }}
               >
                 <div className="text-center mb-8">
-                  <Badge variant="outline" className="mb-3 border-trust-blue text-trust-blue">
-                    <Building2 className="w-3 h-3 mr-1" />
-                    Para Empresas
-                  </Badge>
                   <h2 className="text-2xl font-bold text-foreground mb-2">Segurança Corporativa</h2>
                   <p className="text-muted-foreground text-sm max-w-lg mx-auto">
                     Boas práticas para contratações, parcerias e compliance empresarial
