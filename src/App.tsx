@@ -10,6 +10,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import HelpCenter from "./pages/HelpCenter";
 import LGPD from "./pages/LGPD";
 import CookiesPolicy from "./pages/CookiesPolicy";
+import ProtectionTips from "./pages/ProtectionTips";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/central-de-ajuda" element={<HelpCenter />} />
           <Route path="/lgpd" element={<LGPD />} />
           <Route path="/politica-de-cookies" element={<CookiesPolicy />} />
+          <Route path="/dicas-de-protecao" element={<ProtectionTips />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
