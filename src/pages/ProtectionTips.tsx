@@ -34,7 +34,8 @@ import signalHelp1 from "@/assets/signal-help-1.png";
 import signalHelp2 from "@/assets/signal-help-2.png";
 import angelShot1 from "@/assets/angel-shot-1.png";
 import angelShot2 from "@/assets/angel-shot-2.png";
-import safetyWordSignal from "@/assets/safety-word-signal.png";
+import safetyWord1 from "@/assets/safety-word-1.png";
+import safetyWord2 from "@/assets/safety-word-2.png";
 
 const ProtectionTips = () => {
   const [activeTab, setActiveTab] = useState("mulheres");
@@ -87,7 +88,7 @@ const ProtectionTips = () => {
     {
       title: "Palavra de Segurança",
       description: "Combine uma palavra-código com família/amigas para emergências",
-      images: [safetyWordSignal],
+      images: [safetyWord1, safetyWord2],
       steps: [
         "Escolha uma palavra discreta e fácil de usar",
         "Combine com pessoas de confiança o que significa",
