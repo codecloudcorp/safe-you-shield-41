@@ -10,17 +10,24 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Info
+  Info,
+  XCircle,
+  ShieldCheck,
+  ShieldAlert,
+  ShieldX
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
+
+type SimulationType = "seguro" | "alerta" | "perigo";
 
 const Consulta = () => {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [cpfValue, setCpfValue] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedSimulation, setSelectedSimulation] = useState<SimulationType | null>(null);
   const [searchResult, setSearchResult] = useState<null | {
     status: "safe" | "caution" | "alert";
     name: string;
@@ -46,30 +53,88 @@ const Consulta = () => {
     const formatted = formatCPF(e.target.value);
     if (formatted.length <= 14) {
       setCpfValue(formatted);
+      setSelectedSimulation(null);
+      setSearchResult(null);
     }
+  };
+
+  const simulationOptions = [
+    {
+      type: "seguro" as SimulationType,
+      label: "Perfil Seguro",
+      description: "Simular pessoa sem pendências",
+      icon: ShieldCheck,
+      color: "text-safe-green",
+      bgColor: "bg-safe-green/10",
+      borderColor: "border-safe-green/30",
+      hoverColor: "hover:bg-safe-green/20",
+    },
+    {
+      type: "alerta" as SimulationType,
+      label: "Atenção",
+      description: "Simular pessoa com alertas",
+      icon: ShieldAlert,
+      color: "text-caution-yellow",
+      bgColor: "bg-caution-yellow/10",
+      borderColor: "border-caution-yellow/30",
+      hoverColor: "hover:bg-caution-yellow/20",
+    },
+    {
+      type: "perigo" as SimulationType,
+      label: "Alto Risco",
+      description: "Simular pessoa perigosa",
+      icon: ShieldX,
+      color: "text-alert-red",
+      bgColor: "bg-alert-red/10",
+      borderColor: "border-alert-red/30",
+      hoverColor: "hover:bg-alert-red/20",
+    },
+  ];
+
+  const handleSimulationSelect = (type: SimulationType) => {
+    setSelectedSimulation(type);
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cpfValue.trim() || cpfValue.length < 14) return;
+    if (!cpfValue.trim() || cpfValue.length < 14 || !selectedSimulation) return;
     
     setIsSearching(true);
     setSearchResult(null);
 
-    // Simula uma busca
+    // Simula uma busca com base no tipo selecionado
     setTimeout(() => {
-      const statuses: Array<"safe" | "caution" | "alert"> = ["safe", "caution", "alert"];
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      
-      setSearchResult({
-        status: randomStatus,
-        name: "Resultado da Consulta",
-        details: [
+      const statusMap: Record<SimulationType, "safe" | "caution" | "alert"> = {
+        seguro: "safe",
+        alerta: "caution",
+        perigo: "alert",
+      };
+
+      const detailsMap: Record<SimulationType, string[]> = {
+        seguro: [
           "Nenhum registro criminal encontrado",
           "CPF regular na Receita Federal",
-          "Sem restrições financeiras graves",
-          randomStatus === "caution" ? "Possui processos em andamento" : "Histórico limpo",
-        ]
+          "Sem restrições financeiras",
+          "Histórico completamente limpo",
+        ],
+        alerta: [
+          "CPF regular na Receita Federal",
+          "Possui processos cíveis em andamento",
+          "Restrição financeira identificada",
+          "Recomenda-se cautela ao prosseguir",
+        ],
+        perigo: [
+          "Antecedentes criminais identificados",
+          "Múltiplos processos judiciais ativos",
+          "Restrições financeiras graves",
+          "Alto risco - evite contato",
+        ],
+      };
+      
+      setSearchResult({
+        status: statusMap[selectedSimulation],
+        name: "Resultado da Consulta",
+        details: detailsMap[selectedSimulation],
       });
       setIsSearching(false);
     }, 2000);
@@ -101,7 +166,7 @@ const Consulta = () => {
           bgLight: "bg-alert-red/10",
           text: "Alerta de Segurança", 
           textColor: "text-alert-red",
-          icon: AlertTriangle,
+          icon: XCircle,
           description: "Foram encontradas pendências importantes. Tenha cautela."
         };
       default:
@@ -115,6 +180,8 @@ const Consulta = () => {
         };
     }
   };
+
+  const isCpfValid = cpfValue.length === 14;
 
   return (
     <div className="min-h-screen bg-background">
@@ -150,11 +217,11 @@ const Consulta = () => {
                   Consulta por CPF
                 </CardTitle>
                 <CardDescription>
-                  Digite o CPF para verificar informações de segurança
+                  Digite o CPF e escolha o tipo de simulação para testar
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSearch} className="space-y-4">
+                <form onSubmit={handleSearch} className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="cpf">Número do CPF</Label>
                     <div className="relative">
@@ -171,10 +238,72 @@ const Consulta = () => {
                       Digite apenas os números do CPF
                     </p>
                   </div>
+
+                  {/* Simulation Type Selection */}
+                  {isCpfValid && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="space-y-3"
+                    >
+                      <Label>Selecione o tipo de simulação</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {simulationOptions.map((option) => {
+                          const Icon = option.icon;
+                          const isSelected = selectedSimulation === option.type;
+                          
+                          return (
+                            <motion.button
+                              key={option.type}
+                              type="button"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => handleSimulationSelect(option.type)}
+                              className={cn(
+                                "p-4 rounded-xl border-2 transition-all text-left",
+                                option.bgColor,
+                                option.hoverColor,
+                                isSelected 
+                                  ? `${option.borderColor.replace('/30', '')} ring-2 ring-offset-2 ${option.borderColor.replace('border-', 'ring-').replace('/30', '/50')}`
+                                  : "border-transparent"
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={cn(
+                                  "w-10 h-10 rounded-full flex items-center justify-center",
+                                  option.bgColor
+                                )}>
+                                  <Icon className={cn("w-5 h-5", option.color)} />
+                                </div>
+                                <div>
+                                  <p className={cn("font-semibold", option.color)}>
+                                    {option.label}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {option.description}
+                                  </p>
+                                </div>
+                              </div>
+                              {isSelected && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="absolute top-2 right-2"
+                                >
+                                  <CheckCircle className={cn("w-5 h-5", option.color)} />
+                                </motion.div>
+                              )}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+
                   <Button 
                     type="submit" 
                     className="w-full h-14 bg-gradient-to-r from-rose-soft to-lavender text-white text-lg font-medium"
-                    disabled={isSearching || cpfValue.length < 14}
+                    disabled={isSearching || !isCpfValid || !selectedSimulation}
                   >
                     {isSearching ? (
                       <motion.div
@@ -185,7 +314,12 @@ const Consulta = () => {
                     ) : (
                       <>
                         <Search className="w-5 h-5 mr-2" />
-                        Consultar CPF
+                        {!isCpfValid 
+                          ? "Digite o CPF completo" 
+                          : !selectedSimulation 
+                            ? "Selecione o tipo de simulação"
+                            : "Consultar CPF"
+                        }
                       </>
                     )}
                   </Button>
@@ -203,15 +337,20 @@ const Consulta = () => {
               <Card className={cn("border-2", getStatusConfig(searchResult.status).textColor.replace("text-", "border-"))}>
                 <CardHeader>
                   <div className="flex items-center gap-4">
-                    <div className={cn(
-                      "w-14 h-14 rounded-2xl flex items-center justify-center",
-                      getStatusConfig(searchResult.status).bgLight
-                    )}>
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200 }}
+                      className={cn(
+                        "w-14 h-14 rounded-2xl flex items-center justify-center",
+                        getStatusConfig(searchResult.status).bgLight
+                      )}
+                    >
                       {(() => {
                         const StatusIcon = getStatusConfig(searchResult.status).icon;
                         return <StatusIcon className={cn("w-7 h-7", getStatusConfig(searchResult.status).textColor)} />;
                       })()}
-                    </div>
+                    </motion.div>
                     <div>
                       <CardTitle className={getStatusConfig(searchResult.status).textColor}>
                         {getStatusConfig(searchResult.status).text}
@@ -224,13 +363,47 @@ const Consulta = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
+                    <div className="bg-muted/30 rounded-lg p-3 mb-4">
+                      <p className="text-xs text-muted-foreground mb-1">CPF Consultado</p>
+                      <p className="font-mono font-semibold text-foreground">{cpfValue}</p>
+                    </div>
                     <p className="text-sm font-medium text-muted-foreground">Detalhes da consulta:</p>
-                    {searchResult.details.map((detail, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                        <CheckCircle className="w-4 h-4 text-safe-green flex-shrink-0" />
-                        <span className="text-sm text-foreground">{detail}</span>
-                      </div>
-                    ))}
+                    {searchResult.details.map((detail, index) => {
+                      const statusConfig = getStatusConfig(searchResult.status);
+                      const DetailIcon = searchResult.status === "safe" ? CheckCircle : 
+                                        searchResult.status === "caution" ? AlertTriangle : XCircle;
+                      return (
+                        <motion.div 
+                          key={index} 
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className={cn("flex items-center gap-3 p-3 rounded-lg", statusConfig.bgLight)}
+                        >
+                          <DetailIcon className={cn("w-4 h-4 flex-shrink-0", statusConfig.textColor)} />
+                          <span className="text-sm text-foreground">{detail}</span>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-6 flex gap-3">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => {
+                        setCpfValue("");
+                        setSelectedSimulation(null);
+                        setSearchResult(null);
+                      }}
+                    >
+                      Nova Consulta
+                    </Button>
+                    <Button 
+                      className="flex-1 bg-gradient-to-r from-rose-soft to-lavender text-white"
+                      onClick={() => navigate("/dashboard/historico")}
+                    >
+                      Ver Histórico
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -251,12 +424,12 @@ const Consulta = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground mb-1">
-                      Sobre nossas consultas
+                      Modo de Demonstração
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      Nossas consultas são realizadas em bases de dados públicas e oficiais, 
-                      garantindo informações precisas e atualizadas. Todos os dados são 
-                      tratados de acordo com a LGPD.
+                      Esta é uma versão de demonstração. Selecione o tipo de resultado 
+                      que deseja simular para testar as diferentes respostas do sistema. 
+                      Em produção, os resultados serão obtidos de bases de dados reais.
                     </p>
                   </div>
                 </div>
