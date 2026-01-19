@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { 
   Search, 
   FileText,
@@ -27,6 +28,8 @@ const Consulta = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [cpfValue, setCpfValue] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [searchProgress, setSearchProgress] = useState(0);
+  const [searchStep, setSearchStep] = useState("");
   const [selectedSimulation, setSelectedSimulation] = useState<SimulationType | null>(null);
   const [searchResult, setSearchResult] = useState<null | {
     status: "safe" | "caution" | "alert";
@@ -95,14 +98,35 @@ const Consulta = () => {
     setSelectedSimulation(type);
   };
 
+  const searchSteps = [
+    "Validando CPF...",
+    "Consultando bases criminais...",
+    "Verificando processos cíveis...",
+    "Analisando restrições financeiras...",
+    "Compilando resultados..."
+  ];
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!cpfValue.trim() || cpfValue.length < 14 || !selectedSimulation) return;
     
     setIsSearching(true);
     setSearchResult(null);
+    setSearchProgress(0);
+    setSearchStep(searchSteps[0]);
 
-    // Simula uma busca com base no tipo selecionado
+    // Simulate progress updates
+    const totalDuration = 3000;
+    const stepDuration = totalDuration / searchSteps.length;
+    
+    searchSteps.forEach((step, index) => {
+      setTimeout(() => {
+        setSearchStep(step);
+        setSearchProgress(((index + 1) / searchSteps.length) * 100);
+      }, stepDuration * index);
+    });
+
+    // Complete the search
     setTimeout(() => {
       const statusMap: Record<SimulationType, "safe" | "caution" | "alert"> = {
         seguro: "safe",
@@ -137,7 +161,8 @@ const Consulta = () => {
         details: detailsMap[selectedSimulation],
       });
       setIsSearching(false);
-    }, 2000);
+      setSearchProgress(0);
+    }, totalDuration);
   };
 
   const getStatusConfig = (status: string) => {
@@ -327,6 +352,76 @@ const Consulta = () => {
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* Progress Bar during Search */}
+          {isSearching && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <Card className="border-lavender/30 bg-gradient-to-r from-lavender/5 to-turquoise/5">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="w-10 h-10 bg-gradient-to-br from-lavender to-turquoise rounded-xl flex items-center justify-center flex-shrink-0"
+                    >
+                      <Search className="w-5 h-5 text-white" />
+                    </motion.div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-foreground mb-1">
+                        Consultando bases de dados...
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {searchStep}
+                      </p>
+                    </div>
+                    <span className="text-sm font-medium text-lavender">
+                      {Math.round(searchProgress)}%
+                    </span>
+                  </div>
+                  <Progress 
+                    value={searchProgress} 
+                    className="h-2 bg-muted"
+                  />
+                  <div className="mt-4 grid grid-cols-5 gap-2">
+                    {searchSteps.map((step, index) => {
+                      const stepProgress = ((index + 1) / searchSteps.length) * 100;
+                      const isCompleted = searchProgress >= stepProgress;
+                      const isCurrent = searchStep === step;
+                      return (
+                        <motion.div
+                          key={index}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: index * 0.1 }}
+                          className={cn(
+                            "flex items-center justify-center p-2 rounded-lg text-xs text-center transition-colors",
+                            isCompleted ? "bg-safe-green/20 text-safe-green" :
+                            isCurrent ? "bg-lavender/20 text-lavender" : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {isCompleted ? (
+                            <CheckCircle className="w-4 h-4" />
+                          ) : isCurrent ? (
+                            <motion.div
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 0.5, repeat: Infinity }}
+                              className="w-2 h-2 rounded-full bg-lavender"
+                            />
+                          ) : (
+                            <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {/* Search Result */}
           {searchResult && (
