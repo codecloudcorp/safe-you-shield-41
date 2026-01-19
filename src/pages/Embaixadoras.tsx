@@ -51,30 +51,6 @@ const Embaixadoras = () => {
     },
   ];
 
-  const testimonials = [
-    {
-      name: "Mariana Costa",
-      role: "Embaixadora Premium",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
-      quote: "Em 3 meses já consegui uma renda extra significativa, além de ajudar dezenas de amigas a se protegerem.",
-      earnings: "R$ 4.500/mês",
-    },
-    {
-      name: "Patricia Almeida",
-      role: "Embaixadora Gold",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      quote: "O melhor é saber que estou fazendo a diferença na vida das pessoas enquanto construo minha liberdade financeira.",
-      earnings: "R$ 3.200/mês",
-    },
-    {
-      name: "Fernanda Lima",
-      role: "Embaixadora Premium",
-      image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop&crop=face",
-      quote: "Programa sério, pagamentos em dia e suporte incrível. Recomendo para todas as mulheres!",
-      earnings: "R$ 5.800/mês",
-    },
-  ];
-
   const faqs = [
     {
       question: "Preciso pagar algo para participar?",
@@ -243,58 +219,6 @@ const Embaixadoras = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
                 <p className="text-muted-foreground">{step.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 bg-card">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Histórias de <span className="text-gradient">Sucesso</span>
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Conheça mulheres que transformaram suas vidas com o Programa Embaixadoras.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-background rounded-2xl p-6 shadow-md border border-border"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-primary/30"
-                  />
-                  <div>
-                    <div className="font-semibold flex items-center gap-2">
-                      {testimonial.name}
-                      <BadgeCheck className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                  </div>
-                </div>
-                <p className="text-muted-foreground mb-4 italic">"{testimonial.quote}"</p>
-                <div className="flex items-center justify-between pt-4 border-t border-border">
-                  <span className="text-sm text-muted-foreground">Ganhos médios:</span>
-                  <span className="text-lg font-bold text-primary">{testimonial.earnings}</span>
-                </div>
               </motion.div>
             ))}
           </div>
