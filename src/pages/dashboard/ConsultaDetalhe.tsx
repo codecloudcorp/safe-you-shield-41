@@ -13,7 +13,8 @@ import {
   MapPin,
   Scale,
   Download,
-  CreditCard
+  CreditCard,
+  Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -401,6 +402,64 @@ const ConsultaDetalhe = () => {
                     {consulta.status === "alerta" && "Foram encontrados alguns pontos que merecem atenção."}
                     {consulta.status === "perigo" && "Foram encontradas pendências importantes. Tenha cautela."}
                   </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Legenda de Níveis de Risco */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <Card className="border-border/50 bg-muted/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Info className="w-4 h-4" />
+                Legenda dos Níveis de Risco
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Nível Seguro */}
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-safe-green/5 border border-safe-green/20">
+                  <div className="p-2 rounded-full bg-safe-green/20">
+                    <CheckCircle className="w-4 h-4 text-safe-green" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-safe-green text-sm">Perfil Seguro</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Nenhuma pendência encontrada. Histórico limpo e sem alertas.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Nível Alerta */}
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-caution-yellow/5 border border-caution-yellow/20">
+                  <div className="p-2 rounded-full bg-caution-yellow/20">
+                    <AlertTriangle className="w-4 h-4 text-caution-yellow" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-caution-yellow text-sm">Atenção Recomendada</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Alguns pontos de atenção. Avalie com cuidado antes de prosseguir.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Nível Perigo */}
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-alert-red/5 border border-alert-red/20">
+                  <div className="p-2 rounded-full bg-alert-red/20">
+                    <XCircle className="w-4 h-4 text-alert-red" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-alert-red text-sm">Alto Risco</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Pendências graves identificadas. Evite contato ou tenha extrema cautela.
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardContent>
