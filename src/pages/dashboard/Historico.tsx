@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   FileText, 
   Search,
@@ -13,9 +12,7 @@ import {
   AlertTriangle,
   Clock,
   Eye,
-  Calendar,
-  Shield,
-  X
+  Calendar
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
@@ -34,8 +31,6 @@ const Historico = () => {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchFilter, setSearchFilter] = useState("");
-  const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -205,8 +200,7 @@ const Historico = () => {
   };
 
   const handleViewConsultation = (consultation: Consultation) => {
-    setSelectedConsultation(consultation);
-    setIsDialogOpen(true);
+    navigate(`/dashboard/consulta/${consultation.id}`);
   };
 
   const stats = {
@@ -400,113 +394,6 @@ const Historico = () => {
           </motion.div>
         </div>
       </main>
-
-      {/* Consultation Details Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-lg">
-          {selectedConsultation && (() => {
-            const statusConfig = getStatusConfig(selectedConsultation.status);
-            const StatusIcon = statusConfig.icon;
-            return (
-              <>
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-primary" />
-                    Resultado da Consulta
-                  </DialogTitle>
-                </DialogHeader>
-
-                <div className="space-y-6">
-                  {/* Status Header */}
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={cn(
-                      "p-4 rounded-xl border-2",
-                      statusConfig.bgLight,
-                      statusConfig.borderColor
-                    )}
-                  >
-                    <div className="flex items-center gap-4">
-                      <motion.div 
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                        className={cn(
-                          "w-14 h-14 rounded-2xl flex items-center justify-center",
-                          statusConfig.bgLight
-                        )}
-                      >
-                        <StatusIcon className={cn("w-7 h-7", statusConfig.textColor)} />
-                      </motion.div>
-                      <div>
-                        <h3 className={cn("font-semibold text-lg", statusConfig.textColor)}>
-                          {statusConfig.text}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {statusConfig.description}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* CPF Info */}
-                  <div className="bg-muted/30 rounded-xl p-4">
-                    <p className="text-sm text-muted-foreground mb-1">CPF Consultado</p>
-                    <p className="font-mono text-lg font-medium text-foreground">
-                      {selectedConsultation.cpf}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Consultado em {selectedConsultation.date} às {selectedConsultation.time}
-                    </p>
-                  </div>
-
-                  {/* Details */}
-                  <div className="space-y-3">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Detalhes da verificação:
-                    </p>
-                    {selectedConsultation.details.map((detail, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 + index * 0.1 }}
-                        className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg"
-                      >
-                        <CheckCircle className={cn(
-                          "w-4 h-4 flex-shrink-0",
-                          selectedConsultation.status === "safe" ? "text-safe-green" :
-                          selectedConsultation.status === "caution" ? "text-caution-yellow" :
-                          "text-alert-red"
-                        )} />
-                        <span className="text-sm text-foreground">{detail}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3 pt-2">
-                    <Button 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      Fechar
-                    </Button>
-                    <Button 
-                      className="flex-1 bg-gradient-to-r from-rose-soft to-lavender text-white"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Exportar PDF
-                    </Button>
-                  </div>
-                </div>
-              </>
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
