@@ -21,6 +21,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
+import jsPDF from "jspdf";
 
 // Dados simulados das consultas com informações pessoais
 const consultasData: Record<string, {
@@ -257,6 +259,163 @@ const ConsultaDetalhe = () => {
 
   const consulta = id ? consultasData[id] : null;
 
+  const exportToPDF = () => {
+    if (!consulta) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPos = 20;
+
+    // Helper function to add text
+    const addText = (text: string, x: number, y: number, options?: { fontSize?: number; fontStyle?: string; color?: number[] }) => {
+      if (options?.fontSize) doc.setFontSize(options.fontSize);
+      if (options?.fontStyle) doc.setFont("helvetica", options.fontStyle);
+      if (options?.color) doc.setTextColor(options.color[0], options.color[1], options.color[2]);
+      doc.text(text, x, y);
+      doc.setTextColor(0, 0, 0); // Reset to black
+      doc.setFont("helvetica", "normal");
+    };
+
+    // Header
+    doc.setFillColor(233, 30, 99);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
+    addText("SAFE YOU", 15, 15, { fontSize: 20, fontStyle: "bold", color: [255, 255, 255] });
+    addText("Relatório de Consulta de Segurança", 15, 25, { fontSize: 12, color: [255, 255, 255] });
+
+    yPos = 50;
+
+    // Status
+    const statusLabels = {
+      seguro: { label: "PERFIL SEGURO", color: [34, 197, 94] },
+      alerta: { label: "ATENÇÃO RECOMENDADA", color: [234, 179, 8] },
+      perigo: { label: "ALTO RISCO", color: [239, 68, 68] },
+    };
+    const statusInfo = statusLabels[consulta.status];
+    
+    doc.setFillColor(statusInfo.color[0], statusInfo.color[1], statusInfo.color[2]);
+    doc.roundedRect(15, yPos - 5, pageWidth - 30, 15, 3, 3, 'F');
+    addText(statusInfo.label, pageWidth / 2, yPos + 5, { fontSize: 14, fontStyle: "bold", color: [255, 255, 255] });
+    doc.text(statusInfo.label, pageWidth / 2 - doc.getTextWidth(statusInfo.label) / 2, yPos + 5);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.text(statusInfo.label, pageWidth / 2 - doc.getTextWidth(statusInfo.label) / 2, yPos + 5);
+
+    yPos += 25;
+
+    // Consultation info
+    addText(`Data da Consulta: ${consulta.date} às ${consulta.time}`, 15, yPos, { fontSize: 10, color: [100, 100, 100] });
+    yPos += 15;
+
+    // Personal Data Section
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, yPos, pageWidth - 15, yPos);
+    yPos += 10;
+
+    addText("DADOS PESSOAIS", 15, yPos, { fontSize: 12, fontStyle: "bold" });
+    yPos += 10;
+
+    addText("Nome Completo:", 15, yPos, { fontSize: 10, fontStyle: "bold" });
+    addText(consulta.pessoa.nomeCompleto, 55, yPos, { fontSize: 10 });
+    yPos += 8;
+
+    addText("CPF:", 15, yPos, { fontSize: 10, fontStyle: "bold" });
+    addText(consulta.cpf, 55, yPos, { fontSize: 10 });
+    yPos += 8;
+
+    addText("Idade:", 15, yPos, { fontSize: 10, fontStyle: "bold" });
+    addText(`${consulta.pessoa.idade} anos`, 55, yPos, { fontSize: 10 });
+    
+    addText("Nascimento:", 100, yPos, { fontSize: 10, fontStyle: "bold" });
+    addText(consulta.pessoa.dataNascimento, 130, yPos, { fontSize: 10 });
+    yPos += 8;
+
+    addText("Telefone:", 15, yPos, { fontSize: 10, fontStyle: "bold" });
+    addText(consulta.pessoa.telefone, 55, yPos, { fontSize: 10 });
+    yPos += 8;
+
+    addText("Localização:", 15, yPos, { fontSize: 10, fontStyle: "bold" });
+    addText(`${consulta.pessoa.cidade}/${consulta.pessoa.estado}`, 55, yPos, { fontSize: 10 });
+    yPos += 15;
+
+    // Judicial Results Section
+    doc.line(15, yPos, pageWidth - 15, yPos);
+    yPos += 10;
+
+    addText("RESULTADOS JUDICIAIS", 15, yPos, { fontSize: 12, fontStyle: "bold" });
+    yPos += 10;
+
+    const judicialStatusLabels = {
+      limpo: { label: "Limpo", color: [34, 197, 94] },
+      pendente: { label: "Pendente", color: [234, 179, 8] },
+      condenado: { label: "Registrado", color: [239, 68, 68] },
+    };
+
+    consulta.resultadosJudiciais.forEach((resultado) => {
+      const statusJud = judicialStatusLabels[resultado.status];
+      
+      doc.setFillColor(statusJud.color[0], statusJud.color[1], statusJud.color[2]);
+      doc.circle(20, yPos - 1.5, 2, 'F');
+      
+      addText(resultado.tipo, 25, yPos, { fontSize: 10, fontStyle: "bold" });
+      addText(`- ${resultado.descricao}`, 60, yPos, { fontSize: 9, color: [80, 80, 80] });
+      
+      if (resultado.quantidade && resultado.quantidade > 0) {
+        addText(`(${resultado.quantidade} registro${resultado.quantidade > 1 ? 's' : ''})`, pageWidth - 50, yPos, { fontSize: 9, color: statusJud.color });
+      }
+      
+      yPos += 8;
+    });
+
+    yPos += 7;
+
+    // Other Verifications Section
+    doc.line(15, yPos, pageWidth - 15, yPos);
+    yPos += 10;
+
+    addText("OUTRAS VERIFICAÇÕES", 15, yPos, { fontSize: 12, fontStyle: "bold" });
+    yPos += 10;
+
+    const verificationStatusLabels = {
+      ok: { color: [34, 197, 94] },
+      warning: { color: [234, 179, 8] },
+      danger: { color: [239, 68, 68] },
+    };
+
+    consulta.outrasVerificacoes.forEach((verificacao) => {
+      const statusVer = verificationStatusLabels[verificacao.status];
+      
+      doc.setFillColor(statusVer.color[0], statusVer.color[1], statusVer.color[2]);
+      doc.circle(20, yPos - 1.5, 2, 'F');
+      
+      addText(verificacao.categoria, 25, yPos, { fontSize: 10, fontStyle: "bold" });
+      addText(`- ${verificacao.descricao}`, 75, yPos, { fontSize: 9, color: [80, 80, 80] });
+      
+      yPos += 8;
+    });
+
+    yPos += 15;
+
+    // Footer
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, yPos, pageWidth - 15, yPos);
+    yPos += 10;
+
+    addText("Este documento foi gerado automaticamente pelo sistema Safe You.", 15, yPos, { fontSize: 8, color: [150, 150, 150] });
+    yPos += 5;
+    addText("As informações contidas neste relatório são de caráter informativo.", 15, yPos, { fontSize: 8, color: [150, 150, 150] });
+    yPos += 5;
+    addText(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 15, yPos, { fontSize: 8, color: [150, 150, 150] });
+
+    // Save the PDF
+    const fileName = `consulta-${consulta.cpf.replace(/\D/g, '')}-${consulta.date.replace(/\//g, '-')}.pdf`;
+    doc.save(fileName);
+    
+    toast.success("PDF exportado com sucesso!", {
+      description: `Arquivo: ${fileName}`,
+    });
+  };
+
   if (!consulta) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -362,7 +521,10 @@ const ConsultaDetalhe = () => {
                 Consultado em {consulta.date} às {consulta.time}
               </p>
             </div>
-            <Button className="bg-gradient-to-r from-rose-soft to-lavender text-white gap-2">
+            <Button 
+              onClick={exportToPDF}
+              className="bg-gradient-to-r from-rose-soft to-lavender text-white gap-2"
+            >
               <Download className="w-4 h-4" />
               Exportar PDF
             </Button>
