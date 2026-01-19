@@ -31,19 +31,18 @@ const Historico = () => {
   }, [navigate]);
 
   const consultations = [
-    { id: 1, name: "João Silva", type: "CPF", status: "safe", date: "19/01/2026", time: "14:30" },
-    { id: 2, name: "Maria Santos", type: "Telefone", status: "caution", date: "18/01/2026", time: "10:15" },
-    { id: 3, name: "Pedro Oliveira", type: "CPF", status: "safe", date: "17/01/2026", time: "16:45" },
-    { id: 4, name: "Ana Costa", type: "Nome", status: "safe", date: "16/01/2026", time: "09:20" },
-    { id: 5, name: "Carlos Lima", type: "CPF", status: "alert", date: "15/01/2026", time: "11:00" },
-    { id: 6, name: "Fernanda Souza", type: "Telefone", status: "safe", date: "14/01/2026", time: "15:30" },
-    { id: 7, name: "Roberto Alves", type: "CPF", status: "caution", date: "13/01/2026", time: "08:45" },
-    { id: 8, name: "Juliana Pereira", type: "Nome", status: "safe", date: "12/01/2026", time: "17:10" },
+    { id: 1, cpf: "123.456.789-00", status: "safe", date: "19/01/2026", time: "14:30" },
+    { id: 2, cpf: "987.654.321-00", status: "caution", date: "18/01/2026", time: "10:15" },
+    { id: 3, cpf: "456.789.123-00", status: "safe", date: "17/01/2026", time: "16:45" },
+    { id: 4, cpf: "321.654.987-00", status: "safe", date: "16/01/2026", time: "09:20" },
+    { id: 5, cpf: "789.123.456-00", status: "alert", date: "15/01/2026", time: "11:00" },
+    { id: 6, cpf: "654.987.321-00", status: "safe", date: "14/01/2026", time: "15:30" },
+    { id: 7, cpf: "147.258.369-00", status: "caution", date: "13/01/2026", time: "08:45" },
+    { id: 8, cpf: "369.258.147-00", status: "safe", date: "12/01/2026", time: "17:10" },
   ];
 
   const filteredConsultations = consultations.filter(c => 
-    c.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    c.type.toLowerCase().includes(searchFilter.toLowerCase())
+    c.cpf.includes(searchFilter)
   );
 
   const getStatusConfig = (status: string) => {
@@ -240,9 +239,9 @@ const Historico = () => {
                           <StatusIcon className={cn("w-5 h-5", statusConfig.textColor)} />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">{consultation.name}</p>
+                          <p className="font-medium text-foreground font-mono">{consultation.cpf}</p>
                           <p className="text-sm text-muted-foreground">
-                            {consultation.type} • {consultation.date} às {consultation.time}
+                            CPF • {consultation.date} às {consultation.time}
                           </p>
                         </div>
                       </div>
