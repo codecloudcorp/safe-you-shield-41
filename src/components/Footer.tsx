@@ -30,10 +30,10 @@ const Footer = () => {
         <div className="flex flex-col items-center text-center mb-10">
           {/* Logo */}
           <a href="/" className="group flex items-center gap-3 mb-6">
-            <div className="bg-gradient-to-br from-rose-soft to-lavender p-3 rounded-2xl shadow-lg shadow-rose-soft/20 group-hover:shadow-rose-soft/40 transition-shadow">
-              <Shield className="w-7 h-7 text-white" />
+            <div className="bg-gradient-to-br from-rose-soft to-lavender p-3 rounded-2xl shadow-lg shadow-rose-soft/20 group-hover:shadow-rose-soft/40 group-hover:scale-110 transition-all duration-300">
+              <Shield className="w-7 h-7 text-white group-hover:rotate-12 transition-transform duration-300" />
             </div>
-            <span className="text-2xl font-bold text-white">Safe You</span>
+            <span className="text-2xl font-bold text-white group-hover:text-rose-soft transition-colors duration-300">Safe You</span>
           </a>
 
           {/* Tagline */}
