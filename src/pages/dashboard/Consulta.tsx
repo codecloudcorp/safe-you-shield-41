@@ -21,6 +21,7 @@ import {
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
+import confetti from "canvas-confetti";
 
 type SimulationType = "seguro" | "alerta" | "perigo";
 
@@ -183,8 +184,10 @@ const Consulta = () => {
         ],
       };
       
+      const resultStatus = statusMap[selectedSimulation];
+      
       setSearchResult({
-        status: statusMap[selectedSimulation],
+        status: resultStatus,
         name: "Resultado da Consulta",
         details: detailsMap[selectedSimulation],
       });
@@ -194,6 +197,34 @@ const Consulta = () => {
       
       // Success feedback
       triggerHapticFeedback('success');
+      
+      // Confetti for safe profiles
+      if (resultStatus === "safe") {
+        const duration = 3000;
+        const end = Date.now() + duration;
+
+        const frame = () => {
+          confetti({
+            particleCount: 3,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 0.6 },
+            colors: ['#22c55e', '#10b981', '#34d399', '#6ee7b7']
+          });
+          confetti({
+            particleCount: 3,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 0.6 },
+            colors: ['#22c55e', '#10b981', '#34d399', '#6ee7b7']
+          });
+
+          if (Date.now() < end) {
+            requestAnimationFrame(frame);
+          }
+        };
+        frame();
+      }
     }, totalDuration);
     searchTimeoutsRef.current.push(completeTimeout);
   };
