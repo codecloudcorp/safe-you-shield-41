@@ -7,6 +7,11 @@ import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Consulta from "./pages/dashboard/Consulta";
+import Historico from "./pages/dashboard/Historico";
+import Contatos from "./pages/dashboard/Contatos";
+import Alertas from "./pages/dashboard/Alertas";
+import Configuracoes from "./pages/dashboard/Configuracoes";
 import NotFound from "./pages/NotFound";
 import TermsOfUse from "./pages/TermsOfUse";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -29,6 +34,11 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/consulta" element={<Consulta />} />
+          <Route path="/dashboard/historico" element={<Historico />} />
+          <Route path="/dashboard/contatos" element={<Contatos />} />
+          <Route path="/dashboard/alertas" element={<Alertas />} />
+          <Route path="/dashboard/configuracoes" element={<Configuracoes />} />
           <Route path="/termos-de-uso" element={<TermsOfUse />} />
           <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
           <Route path="/central-de-ajuda" element={<HelpCenter />} />
