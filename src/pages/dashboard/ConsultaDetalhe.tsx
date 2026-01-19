@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { 
   ArrowLeft, 
   Shield, 
@@ -256,8 +256,74 @@ const consultasData: Record<string, {
 const ConsultaDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Check if data was passed via state (from Consulta page) or via URL param (from Historico)
+  const stateData = location.state as {
+    cpf?: string;
+    status?: "safe" | "caution" | "alert";
+    name?: string;
+    details?: string[];
+    simulationType?: "seguro" | "alerta" | "perigo";
+  } | null;
 
-  const consulta = id ? consultasData[id] : null;
+  // Map status from state to consulta format
+  const statusMapping: Record<string, "seguro" | "alerta" | "perigo"> = {
+    safe: "seguro",
+    caution: "alerta",
+    alert: "perigo"
+  };
+
+  // Generate consulta data from state if available
+  const consultaFromState = stateData?.cpf ? {
+    id: "new",
+    cpf: stateData.cpf,
+    date: new Date().toLocaleDateString('pt-BR'),
+    time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    status: stateData.simulationType || statusMapping[stateData.status || "safe"],
+    pessoa: {
+      nomeCompleto: stateData.simulationType === "perigo" ? "Carlos Eduardo Pereira Lima" :
+                    stateData.simulationType === "alerta" ? "Ricardo Almeida Ferreira" : "João Carlos da Silva Santos",
+      idade: stateData.simulationType === "perigo" ? 38 :
+             stateData.simulationType === "alerta" ? 42 : 34,
+      dataNascimento: stateData.simulationType === "perigo" ? "10/11/1987" :
+                      stateData.simulationType === "alerta" ? "22/07/1983" : "15/03/1991",
+      telefone: stateData.simulationType === "perigo" ? "(31) 96543-2109" :
+                stateData.simulationType === "alerta" ? "(21) 97654-3210" : "(11) 98765-4321",
+      cidade: stateData.simulationType === "perigo" ? "Belo Horizonte" :
+              stateData.simulationType === "alerta" ? "Rio de Janeiro" : "São Paulo",
+      estado: stateData.simulationType === "perigo" ? "MG" :
+              stateData.simulationType === "alerta" ? "RJ" : "SP"
+    },
+    resultadosJudiciais: stateData.simulationType === "perigo" ? [
+      { tipo: "Criminal", status: "condenado" as const, descricao: "Antecedente criminal registrado", quantidade: 2 },
+      { tipo: "Cível", status: "pendente" as const, descricao: "Múltiplos processos cíveis", quantidade: 4 },
+      { tipo: "Trabalhista", status: "pendente" as const, descricao: "Processos trabalhistas ativos", quantidade: 2 },
+      { tipo: "Federal", status: "limpo" as const, descricao: "Sem pendências na justiça federal" },
+    ] : stateData.simulationType === "alerta" ? [
+      { tipo: "Criminal", status: "limpo" as const, descricao: "Nenhum antecedente criminal encontrado" },
+      { tipo: "Cível", status: "pendente" as const, descricao: "1 processo cível em andamento", quantidade: 1 },
+      { tipo: "Trabalhista", status: "limpo" as const, descricao: "Nenhum processo trabalhista" },
+      { tipo: "Federal", status: "limpo" as const, descricao: "Sem pendências na justiça federal" },
+    ] : [
+      { tipo: "Criminal", status: "limpo" as const, descricao: "Nenhum antecedente criminal encontrado" },
+      { tipo: "Cível", status: "limpo" as const, descricao: "Nenhum processo cível ativo" },
+      { tipo: "Trabalhista", status: "limpo" as const, descricao: "Nenhum processo trabalhista" },
+      { tipo: "Federal", status: "limpo" as const, descricao: "Sem pendências na justiça federal" },
+    ],
+    outrasVerificacoes: stateData.simulationType === "perigo" ? [
+      { categoria: "Situação CPF", status: "warning" as const, descricao: "CPF com pendências" },
+      { categoria: "Restrições Financeiras", status: "danger" as const, descricao: "Múltiplas restrições graves" },
+    ] : stateData.simulationType === "alerta" ? [
+      { categoria: "Situação CPF", status: "ok" as const, descricao: "Regular na Receita Federal" },
+      { categoria: "Restrições Financeiras", status: "warning" as const, descricao: "Restrição menor identificada" },
+    ] : [
+      { categoria: "Situação CPF", status: "ok" as const, descricao: "Regular na Receita Federal" },
+      { categoria: "Restrições Financeiras", status: "ok" as const, descricao: "Sem restrições no SPC/Serasa" },
+    ],
+  } : null;
+
+  const consulta = consultaFromState || (id ? consultasData[id] : null);
 
   const exportToPDF = () => {
     if (!consulta) return;

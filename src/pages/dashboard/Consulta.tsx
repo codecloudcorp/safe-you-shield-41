@@ -400,9 +400,17 @@ const Consulta = () => {
                     </Button>
                     <Button 
                       className="flex-1 bg-gradient-to-r from-rose-soft to-lavender text-white"
-                      onClick={() => navigate("/dashboard/historico")}
+                      onClick={() => navigate("/dashboard/consulta/detalhe", { 
+                        state: { 
+                          cpf: cpfValue,
+                          status: searchResult.status,
+                          name: searchResult.name,
+                          details: searchResult.details,
+                          simulationType: selectedSimulation
+                        } 
+                      })}
                     >
-                      Ver Histórico
+                      Ver Detalhes
                     </Button>
                   </div>
                 </CardContent>
