@@ -1,4 +1,4 @@
-import { Shield, Instagram, Linkedin, Twitter, Mail, Lock } from "lucide-react";
+import { Shield, Instagram, Linkedin, Twitter, Mail, Lock, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -16,69 +16,97 @@ const Footer = () => {
   ];
 
   return (
-    <footer id="contato" className="bg-foreground text-background pt-12 pb-8">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-8">
-          {/* Brand */}
-          <div className="flex flex-col items-center md:items-start">
-            <a href="/" className="flex items-center gap-3 mb-3">
-              <div className="bg-gradient-to-br from-rose-soft to-lavender p-2.5 rounded-xl">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold">Safe You</span>
+    <footer className="relative overflow-hidden">
+      {/* Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+      <div className="absolute inset-0 bg-gradient-to-r from-rose-soft/10 via-transparent to-lavender/10" />
+      
+      {/* Decorative Elements */}
+      <div className="absolute top-0 left-1/4 w-64 h-64 bg-rose-soft/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-lavender/5 rounded-full blur-3xl" />
+
+      <div className="relative container mx-auto px-4 py-12">
+        {/* Main Content */}
+        <div className="flex flex-col items-center text-center mb-10">
+          {/* Logo */}
+          <a href="/" className="group flex items-center gap-3 mb-6">
+            <div className="bg-gradient-to-br from-rose-soft to-lavender p-3 rounded-2xl shadow-lg shadow-rose-soft/20 group-hover:shadow-rose-soft/40 transition-shadow">
+              <Shield className="w-7 h-7 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-white">Safe You</span>
+          </a>
+
+          {/* Tagline */}
+          <p className="text-white/60 text-lg max-w-md mb-8">
+            Informação que protege. Segurança que empodera.
+          </p>
+
+          {/* Social Links */}
+          <div className="flex items-center gap-4 mb-8">
+            <a 
+              href="#" 
+              className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group"
+            >
+              <Instagram className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
             </a>
-            <p className="text-background/60 text-sm max-w-xs text-center md:text-left">
-              Informação que protege. Segurança que empodera.
-            </p>
+            <a 
+              href="#" 
+              className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group"
+            >
+              <Linkedin className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
+            </a>
+            <a 
+              href="#" 
+              className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group"
+            >
+              <Twitter className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
+            </a>
+            <a 
+              href="#" 
+              className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group"
+            >
+              <TikTokIcon className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
+            </a>
           </div>
 
           {/* Contact */}
-          <a href="mailto:contato@safeyou.com.br" className="flex items-center gap-2 text-sm text-background/60 hover:text-background transition-colors">
+          <a 
+            href="mailto:contato@safeyou.com.br" 
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm"
+          >
             <Mail className="w-4 h-4" />
             contato@safeyou.com.br
           </a>
-
-          {/* Social Links */}
-          <div className="flex items-center gap-3">
-            <a href="#" className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors">
-              <Instagram className="w-5 h-5" />
-            </a>
-            <a href="#" className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors">
-              <Linkedin className="w-5 h-5" />
-            </a>
-            <a href="#" className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors">
-              <Twitter className="w-5 h-5" />
-            </a>
-            <a href="#" className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors">
-              <TikTokIcon className="w-5 h-5" />
-            </a>
-          </div>
         </div>
 
-        {/* Legal Links */}
-        <div className="border-t border-background/10 pt-6">
-          <div className="flex flex-wrap justify-center gap-4 mb-6">
-            {legalLinks.map((link) => (
-              <Link 
-                key={link.label} 
-                to={link.href} 
-                className="text-sm text-background/60 hover:text-background transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+        {/* Divider */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-8" />
 
-          {/* Security Badge & Copyright */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-background/70">
-              <Lock className="w-4 h-4" />
-              <span>Feito com segurança de dados para sua segurança</span>
-            </div>
-            <p className="text-xs text-background/50">
-              © {new Date().getFullYear()} Safe You. Todos os direitos reservados.
-            </p>
+        {/* Legal Links */}
+        <div className="flex flex-wrap justify-center gap-6 mb-8">
+          {legalLinks.map((link) => (
+            <Link 
+              key={link.label} 
+              to={link.href} 
+              className="text-sm text-white/50 hover:text-white transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Security Badge */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-rose-soft/20 to-lavender/20 border border-white/10">
+            <Lock className="w-4 h-4 text-rose-soft" />
+            <span className="text-sm text-white/80">Feito com segurança de dados para sua segurança</span>
           </div>
+          
+          <p className="flex items-center gap-1.5 text-xs text-white/40">
+            © {new Date().getFullYear()} Safe You. Feito com 
+            <Heart className="w-3 h-3 text-rose-soft fill-rose-soft" /> 
+            para você.
+          </p>
         </div>
       </div>
     </footer>
