@@ -150,9 +150,9 @@ const Embaixadoras = () => {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
               {[
-                { value: "500+", label: "Embaixadoras Ativas" },
-                { value: "R$ 2M+", label: "Comissões Pagas" },
-                { value: "30%", label: "Comissão Recorrente" },
+                { value: "100%", label: "Gratuito para Participar" },
+                { value: "24h", label: "Suporte Dedicado" },
+                { value: "PIX", label: "Pagamento Rápido" },
               ].map((stat, index) => (
                 <motion.div
                   key={stat.label}
