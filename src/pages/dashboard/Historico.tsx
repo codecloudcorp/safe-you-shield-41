@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   FileText, 
   Search,
@@ -12,16 +13,29 @@ import {
   AlertTriangle,
   Clock,
   Eye,
-  Calendar
+  Calendar,
+  Shield,
+  X
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
 
+interface Consultation {
+  id: number;
+  cpf: string;
+  status: "safe" | "caution" | "alert";
+  date: string;
+  time: string;
+  details: string[];
+}
+
 const Historico = () => {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchFilter, setSearchFilter] = useState("");
+  const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -30,15 +44,111 @@ const Historico = () => {
     }
   }, [navigate]);
 
-  const consultations = [
-    { id: 1, cpf: "123.456.789-00", status: "safe", date: "19/01/2026", time: "14:30" },
-    { id: 2, cpf: "987.654.321-00", status: "caution", date: "18/01/2026", time: "10:15" },
-    { id: 3, cpf: "456.789.123-00", status: "safe", date: "17/01/2026", time: "16:45" },
-    { id: 4, cpf: "321.654.987-00", status: "safe", date: "16/01/2026", time: "09:20" },
-    { id: 5, cpf: "789.123.456-00", status: "alert", date: "15/01/2026", time: "11:00" },
-    { id: 6, cpf: "654.987.321-00", status: "safe", date: "14/01/2026", time: "15:30" },
-    { id: 7, cpf: "147.258.369-00", status: "caution", date: "13/01/2026", time: "08:45" },
-    { id: 8, cpf: "369.258.147-00", status: "safe", date: "12/01/2026", time: "17:10" },
+  const consultations: Consultation[] = [
+    { 
+      id: 1, 
+      cpf: "123.456.789-00", 
+      status: "safe", 
+      date: "19/01/2026", 
+      time: "14:30",
+      details: [
+        "Nenhum registro criminal encontrado",
+        "CPF regular na Receita Federal",
+        "Sem restrições financeiras graves",
+        "Histórico limpo"
+      ]
+    },
+    { 
+      id: 2, 
+      cpf: "987.654.321-00", 
+      status: "caution", 
+      date: "18/01/2026", 
+      time: "10:15",
+      details: [
+        "CPF regular na Receita Federal",
+        "Possui processos em andamento",
+        "Restrição financeira identificada",
+        "Recomenda-se cautela"
+      ]
+    },
+    { 
+      id: 3, 
+      cpf: "456.789.123-00", 
+      status: "safe", 
+      date: "17/01/2026", 
+      time: "16:45",
+      details: [
+        "Nenhum registro criminal encontrado",
+        "CPF regular na Receita Federal",
+        "Sem restrições financeiras",
+        "Histórico limpo"
+      ]
+    },
+    { 
+      id: 4, 
+      cpf: "321.654.987-00", 
+      status: "safe", 
+      date: "16/01/2026", 
+      time: "09:20",
+      details: [
+        "Nenhum registro criminal encontrado",
+        "CPF regular na Receita Federal",
+        "Sem pendências judiciais",
+        "Perfil verificado"
+      ]
+    },
+    { 
+      id: 5, 
+      cpf: "789.123.456-00", 
+      status: "alert", 
+      date: "15/01/2026", 
+      time: "11:00",
+      details: [
+        "Registro criminal identificado",
+        "Múltiplas restrições financeiras",
+        "Processos judiciais ativos",
+        "Alto risco - evite contato"
+      ]
+    },
+    { 
+      id: 6, 
+      cpf: "654.987.321-00", 
+      status: "safe", 
+      date: "14/01/2026", 
+      time: "15:30",
+      details: [
+        "Nenhum registro criminal encontrado",
+        "CPF regular na Receita Federal",
+        "Sem restrições",
+        "Histórico limpo"
+      ]
+    },
+    { 
+      id: 7, 
+      cpf: "147.258.369-00", 
+      status: "caution", 
+      date: "13/01/2026", 
+      time: "08:45",
+      details: [
+        "CPF regular na Receita Federal",
+        "Pendência financeira menor",
+        "Processo cível em andamento",
+        "Atenção recomendada"
+      ]
+    },
+    { 
+      id: 8, 
+      cpf: "369.258.147-00", 
+      status: "safe", 
+      date: "12/01/2026", 
+      time: "17:10",
+      details: [
+        "Nenhum registro criminal encontrado",
+        "CPF regular na Receita Federal",
+        "Sem restrições financeiras",
+        "Perfil seguro"
+      ]
+    },
   ];
 
   const filteredConsultations = consultations.filter(c => 
@@ -50,36 +160,53 @@ const Historico = () => {
       case "safe":
         return { 
           color: "bg-safe-green", 
-          text: "Seguro", 
+          text: "Situação Regular", 
+          shortText: "Seguro",
           textColor: "text-safe-green",
           bgLight: "bg-safe-green/10",
-          icon: CheckCircle 
+          borderColor: "border-safe-green",
+          icon: CheckCircle,
+          description: "Não foram encontradas pendências ou alertas significativos."
         };
       case "caution":
         return { 
           color: "bg-caution-yellow", 
-          text: "Atenção", 
+          text: "Atenção Recomendada", 
+          shortText: "Atenção",
           textColor: "text-caution-yellow",
           bgLight: "bg-caution-yellow/10",
-          icon: AlertTriangle 
+          borderColor: "border-caution-yellow",
+          icon: AlertTriangle,
+          description: "Foram encontrados alguns pontos que merecem atenção."
         };
       case "alert":
         return { 
           color: "bg-alert-red", 
-          text: "Alerta", 
+          text: "Alerta de Segurança", 
+          shortText: "Alerta",
           textColor: "text-alert-red",
           bgLight: "bg-alert-red/10",
-          icon: AlertTriangle 
+          borderColor: "border-alert-red",
+          icon: AlertTriangle,
+          description: "Foram encontradas pendências importantes. Tenha cautela."
         };
       default:
         return { 
           color: "bg-muted", 
           text: "Pendente", 
+          shortText: "Pendente",
           textColor: "text-muted-foreground",
           bgLight: "bg-muted/50",
-          icon: Clock 
+          borderColor: "border-muted",
+          icon: Clock,
+          description: ""
         };
     }
+  };
+
+  const handleViewConsultation = (consultation: Consultation) => {
+    setSelectedConsultation(consultation);
+    setIsDialogOpen(true);
   };
 
   const stats = {
@@ -188,7 +315,7 @@ const Historico = () => {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Buscar por nome ou tipo..."
+                    placeholder="Buscar por CPF..."
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                     className="pl-10"
@@ -233,6 +360,7 @@ const Historico = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                       className="flex items-center justify-between p-4 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => handleViewConsultation(consultation)}
                     >
                       <div className="flex items-center gap-4">
                         <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", statusConfig.bgLight)}>
@@ -251,9 +379,16 @@ const Historico = () => {
                           statusConfig.bgLight,
                           statusConfig.textColor
                         )}>
-                          {statusConfig.text}
+                          {statusConfig.shortText}
                         </span>
-                        <Button variant="ghost" size="icon">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewConsultation(consultation);
+                          }}
+                        >
                           <Eye className="w-4 h-4" />
                         </Button>
                       </div>
@@ -265,6 +400,113 @@ const Historico = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* Consultation Details Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-lg">
+          {selectedConsultation && (() => {
+            const statusConfig = getStatusConfig(selectedConsultation.status);
+            const StatusIcon = statusConfig.icon;
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-primary" />
+                    Resultado da Consulta
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="space-y-6">
+                  {/* Status Header */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={cn(
+                      "p-4 rounded-xl border-2",
+                      statusConfig.bgLight,
+                      statusConfig.borderColor
+                    )}
+                  >
+                    <div className="flex items-center gap-4">
+                      <motion.div 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                        className={cn(
+                          "w-14 h-14 rounded-2xl flex items-center justify-center",
+                          statusConfig.bgLight
+                        )}
+                      >
+                        <StatusIcon className={cn("w-7 h-7", statusConfig.textColor)} />
+                      </motion.div>
+                      <div>
+                        <h3 className={cn("font-semibold text-lg", statusConfig.textColor)}>
+                          {statusConfig.text}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {statusConfig.description}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* CPF Info */}
+                  <div className="bg-muted/30 rounded-xl p-4">
+                    <p className="text-sm text-muted-foreground mb-1">CPF Consultado</p>
+                    <p className="font-mono text-lg font-medium text-foreground">
+                      {selectedConsultation.cpf}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Consultado em {selectedConsultation.date} às {selectedConsultation.time}
+                    </p>
+                  </div>
+
+                  {/* Details */}
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Detalhes da verificação:
+                    </p>
+                    {selectedConsultation.details.map((detail, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 + index * 0.1 }}
+                        className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg"
+                      >
+                        <CheckCircle className={cn(
+                          "w-4 h-4 flex-shrink-0",
+                          selectedConsultation.status === "safe" ? "text-safe-green" :
+                          selectedConsultation.status === "caution" ? "text-caution-yellow" :
+                          "text-alert-red"
+                        )} />
+                        <span className="text-sm text-foreground">{detail}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => setIsDialogOpen(false)}
+                    >
+                      Fechar
+                    </Button>
+                    <Button 
+                      className="flex-1 bg-gradient-to-r from-rose-soft to-lavender text-white"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Exportar PDF
+                    </Button>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
