@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,8 @@ import {
   XCircle,
   ShieldCheck,
   ShieldAlert,
-  ShieldX
+  ShieldX,
+  X
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
@@ -36,6 +37,7 @@ const Consulta = () => {
     name: string;
     details: string[];
   }>(null);
+  const searchTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -123,6 +125,10 @@ const Consulta = () => {
     e.preventDefault();
     if (!cpfValue.trim() || cpfValue.length < 14 || !selectedSimulation) return;
     
+    // Clear any existing timeouts
+    searchTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    searchTimeoutsRef.current = [];
+    
     setIsSearching(true);
     setSearchResult(null);
     setSearchProgress(0);
@@ -136,7 +142,7 @@ const Consulta = () => {
     const stepDuration = totalDuration / searchSteps.length;
     
     searchSteps.forEach((step, index) => {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setSearchStep(step);
         setSearchProgress(((index + 1) / searchSteps.length) * 100);
         
@@ -145,10 +151,11 @@ const Consulta = () => {
           triggerHapticFeedback('light');
         }
       }, stepDuration * index);
+      searchTimeoutsRef.current.push(timeout);
     });
 
     // Complete the search
-    setTimeout(() => {
+    const completeTimeout = setTimeout(() => {
       const statusMap: Record<SimulationType, "safe" | "caution" | "alert"> = {
         seguro: "safe",
         alerta: "caution",
@@ -183,10 +190,26 @@ const Consulta = () => {
       });
       setIsSearching(false);
       setSearchProgress(0);
+      searchTimeoutsRef.current = [];
       
       // Success feedback
       triggerHapticFeedback('success');
     }, totalDuration);
+    searchTimeoutsRef.current.push(completeTimeout);
+  };
+
+  const handleCancelSearch = () => {
+    // Clear all timeouts
+    searchTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    searchTimeoutsRef.current = [];
+    
+    // Reset state
+    setIsSearching(false);
+    setSearchProgress(0);
+    setSearchStep("");
+    
+    // Feedback
+    triggerHapticFeedback('medium');
   };
 
   const getStatusConfig = (status: string) => {
@@ -441,6 +464,17 @@ const Consulta = () => {
                         </motion.div>
                       );
                     })}
+                  </div>
+                  <div className="mt-4 flex justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCancelSearch}
+                      className="gap-2 text-muted-foreground hover:text-destructive hover:border-destructive"
+                    >
+                      <X className="w-4 h-4" />
+                      Cancelar Consulta
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
