@@ -406,8 +406,8 @@ const Embaixadoras = () => {
               Comece Agora Mesmo
             </h2>
             <p className="text-xl text-muted-foreground mb-8">
-              Junte-se a centenas de mulheres que estão transformando vidas e construindo 
-              uma renda extra com propósito. O cadastro é <strong>100% gratuito</strong>.
+              Faça parte do movimento que protege mulheres, famílias e empresas enquanto 
+              constrói sua independência financeira. O cadastro é <strong>100% gratuito</strong>.
             </p>
             <Button size="xl" className="gap-2 shadow-glow">
               <Crown className="w-5 h-5" />
