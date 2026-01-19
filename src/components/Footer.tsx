@@ -1,4 +1,4 @@
-import { Shield, Instagram, Linkedin, Twitter, Mail, Lock, Heart } from "lucide-react";
+import { Shield, Instagram, Linkedin, Twitter, Mail, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -102,10 +102,8 @@ const Footer = () => {
             <span className="text-sm text-white/80">Feito com segurança de dados para sua segurança</span>
           </div>
           
-          <p className="flex items-center gap-1.5 text-xs text-white/40">
-            © {new Date().getFullYear()} Safe You. Feito com 
-            <Heart className="w-3 h-3 text-rose-soft fill-rose-soft" /> 
-            para você.
+          <p className="text-xs text-white/40">
+            © {new Date().getFullYear()} Safe You. Todos os direitos reservados.
           </p>
         </div>
       </div>
