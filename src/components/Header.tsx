@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -48,9 +49,11 @@ const Header = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" size="sm">
-              Entrar
-            </Button>
+            <Link to="/login">
+              <Button variant="ghost" size="sm">
+                Entrar
+              </Button>
+            </Link>
             <Button variant="default" size="sm">
               Começar Agora
             </Button>
@@ -87,9 +90,11 @@ const Header = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-3 pt-4 border-t border-border">
-                <Button variant="ghost" className="w-full">
-                  Entrar
-                </Button>
+                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full">
+                    Entrar
+                  </Button>
+                </Link>
                 <Button variant="default" className="w-full">
                   Começar Agora
                 </Button>
