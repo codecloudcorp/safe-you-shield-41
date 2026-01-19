@@ -4,13 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, 
-  User, 
-  Phone, 
   FileText,
-  Shield,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -23,7 +19,7 @@ import { cn } from "@/lib/utils";
 const Consulta = () => {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  const [cpfValue, setCpfValue] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState<null | {
     status: "safe" | "caution" | "alert";
@@ -38,9 +34,24 @@ const Consulta = () => {
     }
   }, [navigate]);
 
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+    if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
+  };
+
+  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCPF(e.target.value);
+    if (formatted.length <= 14) {
+      setCpfValue(formatted);
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchValue.trim()) return;
+    if (!cpfValue.trim() || cpfValue.length < 14) return;
     
     setIsSearching(true);
     setSearchResult(null);
@@ -121,7 +132,7 @@ const Consulta = () => {
           <div className="px-6 py-4">
             <h1 className="text-2xl font-bold text-foreground">Nova Consulta</h1>
             <p className="text-muted-foreground text-sm">
-              Verifique informações de segurança sobre uma pessoa
+              Verifique informações de segurança através do CPF
             </p>
           </div>
         </header>
@@ -135,129 +146,50 @@ const Consulta = () => {
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Search className="w-5 h-5 text-primary" />
-                  Realizar Consulta
+                  <FileText className="w-5 h-5 text-primary" />
+                  Consulta por CPF
                 </CardTitle>
                 <CardDescription>
-                  Escolha o tipo de consulta e insira os dados para verificar
+                  Digite o CPF para verificar informações de segurança
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="cpf" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3 mb-6">
-                    <TabsTrigger value="cpf" className="gap-2">
-                      <FileText className="w-4 h-4" />
-                      CPF
-                    </TabsTrigger>
-                    <TabsTrigger value="telefone" className="gap-2">
-                      <Phone className="w-4 h-4" />
-                      Telefone
-                    </TabsTrigger>
-                    <TabsTrigger value="nome" className="gap-2">
-                      <User className="w-4 h-4" />
-                      Nome
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="cpf">
-                    <form onSubmit={handleSearch} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="cpf">Número do CPF</Label>
-                        <Input
-                          id="cpf"
-                          placeholder="000.000.000-00"
-                          value={searchValue}
-                          onChange={(e) => setSearchValue(e.target.value)}
-                          className="h-12"
-                        />
-                      </div>
-                      <Button 
-                        type="submit" 
-                        className="w-full h-12 bg-gradient-to-r from-rose-soft to-lavender text-white"
-                        disabled={isSearching}
-                      >
-                        {isSearching ? (
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                          />
-                        ) : (
-                          <>
-                            <Search className="w-4 h-4 mr-2" />
-                            Consultar CPF
-                          </>
-                        )}
-                      </Button>
-                    </form>
-                  </TabsContent>
-
-                  <TabsContent value="telefone">
-                    <form onSubmit={handleSearch} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="telefone">Número de Telefone</Label>
-                        <Input
-                          id="telefone"
-                          placeholder="(00) 00000-0000"
-                          value={searchValue}
-                          onChange={(e) => setSearchValue(e.target.value)}
-                          className="h-12"
-                        />
-                      </div>
-                      <Button 
-                        type="submit" 
-                        className="w-full h-12 bg-gradient-to-r from-rose-soft to-lavender text-white"
-                        disabled={isSearching}
-                      >
-                        {isSearching ? (
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                          />
-                        ) : (
-                          <>
-                            <Search className="w-4 h-4 mr-2" />
-                            Consultar Telefone
-                          </>
-                        )}
-                      </Button>
-                    </form>
-                  </TabsContent>
-
-                  <TabsContent value="nome">
-                    <form onSubmit={handleSearch} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="nome">Nome Completo</Label>
-                        <Input
-                          id="nome"
-                          placeholder="Digite o nome completo"
-                          value={searchValue}
-                          onChange={(e) => setSearchValue(e.target.value)}
-                          className="h-12"
-                        />
-                      </div>
-                      <Button 
-                        type="submit" 
-                        className="w-full h-12 bg-gradient-to-r from-rose-soft to-lavender text-white"
-                        disabled={isSearching}
-                      >
-                        {isSearching ? (
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                          />
-                        ) : (
-                          <>
-                            <Search className="w-4 h-4 mr-2" />
-                            Consultar Nome
-                          </>
-                        )}
-                      </Button>
-                    </form>
-                  </TabsContent>
-                </Tabs>
+                <form onSubmit={handleSearch} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cpf">Número do CPF</Label>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="cpf"
+                        placeholder="000.000.000-00"
+                        value={cpfValue}
+                        onChange={handleCPFChange}
+                        className="h-14 pl-11 text-lg"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Digite apenas os números do CPF
+                    </p>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-14 bg-gradient-to-r from-rose-soft to-lavender text-white text-lg font-medium"
+                    disabled={isSearching || cpfValue.length < 14}
+                  >
+                    {isSearching ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
+                      />
+                    ) : (
+                      <>
+                        <Search className="w-5 h-5 mr-2" />
+                        Consultar CPF
+                      </>
+                    )}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </motion.div>

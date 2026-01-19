@@ -26,7 +26,7 @@ const DashboardSidebar = ({ isCollapsed, onToggle }: DashboardSidebarProps) => {
 
   const menuItems = [
     { icon: Home, label: "Início", path: "/dashboard" },
-    { icon: Search, label: "Nova Consulta", path: "/dashboard/consulta" },
+    { icon: Search, label: "Consultar CPF", path: "/dashboard/consulta" },
     { icon: FileText, label: "Histórico", path: "/dashboard/historico" },
     { icon: Users, label: "Contatos", path: "/dashboard/contatos" },
     { icon: Bell, label: "Alertas", path: "/dashboard/alertas" },

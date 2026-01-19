@@ -43,9 +43,9 @@ const Dashboard = () => {
   ];
 
   const recentConsultations = [
-    { name: "João Silva", status: "safe", date: "Hoje, 14:30", type: "CPF" },
-    { name: "Maria Santos", status: "caution", date: "Ontem, 10:15", type: "Telefone" },
-    { name: "Pedro Oliveira", status: "safe", date: "20/01/2026", type: "CPF" },
+    { cpf: "123.456.789-00", status: "safe", date: "Hoje, 14:30" },
+    { cpf: "987.654.321-00", status: "caution", date: "Ontem, 10:15" },
+    { cpf: "456.789.123-00", status: "safe", date: "20/01/2026" },
   ];
 
   const getStatusConfig = (status: string) => {
@@ -184,14 +184,12 @@ const Dashboard = () => {
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 bg-gradient-to-br from-rose-soft/20 to-lavender/20 rounded-full flex items-center justify-center">
-                            <span className="text-primary font-medium">
-                              {consultation.name.charAt(0)}
-                            </span>
+                            <FileText className="w-5 h-5 text-primary" />
                           </div>
                           <div>
-                            <p className="font-medium text-foreground">{consultation.name}</p>
+                            <p className="font-medium text-foreground font-mono">{consultation.cpf}</p>
                             <p className="text-sm text-muted-foreground">
-                              {consultation.type} • {consultation.date}
+                              CPF • {consultation.date}
                             </p>
                           </div>
                         </div>
