@@ -183,7 +183,7 @@ const Embaixadoras = () => {
               Por que ser uma <span className="text-gradient">Embaixadora?</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Mais do que ganhar dinheiro, você faz parte de um movimento que protege vidas.
+              Mais do que ganhar dinheiro, você faz parte de um movimento que protege mulheres, famílias e empresas.
             </p>
           </motion.div>
 
