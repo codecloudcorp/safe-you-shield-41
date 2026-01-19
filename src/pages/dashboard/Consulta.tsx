@@ -38,6 +38,7 @@ const Consulta = () => {
     name: string;
     details: string[];
   }>(null);
+  const [showAlertPulse, setShowAlertPulse] = useState(false);
   const searchTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
@@ -225,6 +226,12 @@ const Consulta = () => {
         };
         frame();
       }
+      
+      // Alert pulse for dangerous profiles
+      if (resultStatus === "alert") {
+        setShowAlertPulse(true);
+        setTimeout(() => setShowAlertPulse(false), 3000);
+      }
     }, totalDuration);
     searchTimeoutsRef.current.push(completeTimeout);
   };
@@ -287,7 +294,16 @@ const Consulta = () => {
   const isCpfValid = cpfValue.length === 14;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Alert Pulse Overlay */}
+      {showAlertPulse && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.3, 0, 0.3, 0, 0.3, 0] }}
+          transition={{ duration: 3, times: [0, 0.1, 0.2, 0.4, 0.5, 0.7, 1] }}
+          className="fixed inset-0 bg-alert-red pointer-events-none z-50"
+        />
+      )}
       <DashboardSidebar 
         isCollapsed={sidebarCollapsed} 
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
