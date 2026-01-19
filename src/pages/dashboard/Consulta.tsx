@@ -118,37 +118,6 @@ const Consulta = () => {
     }
   };
 
-  // Sound feedback function using Web Audio API
-  const playStepSound = (isComplete: boolean = false) => {
-    try {
-      const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      if (isComplete) {
-        // Success sound - two ascending tones
-        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
-        oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
-        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.4);
-      } else {
-        // Step sound - subtle tick
-        oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
-        gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.1);
-      }
-    } catch {
-      // Audio not supported, fail silently
-    }
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,7 +130,6 @@ const Consulta = () => {
     
     // Initial feedback
     triggerHapticFeedback('light');
-    playStepSound();
 
     // Simulate progress updates
     const totalDuration = 3000;
@@ -175,7 +143,6 @@ const Consulta = () => {
         // Feedback for each step
         if (index < searchSteps.length - 1) {
           triggerHapticFeedback('light');
-          playStepSound();
         }
       }, stepDuration * index);
     });
@@ -219,7 +186,6 @@ const Consulta = () => {
       
       // Success feedback
       triggerHapticFeedback('success');
-      playStepSound(true);
     }, totalDuration);
   };
 
