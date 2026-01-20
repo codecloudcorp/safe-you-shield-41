@@ -29,6 +29,8 @@ const Consulta = () => {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [cpfValue, setCpfValue] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
+  const [nameValue, setNameValue] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchProgress, setSearchProgress] = useState(0);
   const [searchStep, setSearchStep] = useState("");
@@ -56,13 +58,33 @@ const Consulta = () => {
     return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
   };
 
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 2) return numbers;
+    if (numbers.length <= 7) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    if (numbers.length <= 11) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+  };
+
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCPF(e.target.value);
     if (formatted.length <= 14) {
       setCpfValue(formatted);
-      setSelectedSimulation(null);
       setSearchResult(null);
     }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value);
+    if (formatted.length <= 15) {
+      setPhoneValue(formatted);
+      setSearchResult(null);
+    }
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNameValue(e.target.value);
+    setSearchResult(null);
   };
 
   const simulationOptions = [
@@ -103,12 +125,14 @@ const Consulta = () => {
   };
 
   const searchSteps = [
-    "Validando CPF...",
+    "Validando dados informados...",
     "Consultando bases criminais...",
     "Verificando processos cíveis...",
     "Analisando restrições financeiras...",
     "Compilando resultados..."
   ];
+
+  const hasAnyField = cpfValue.trim().length > 0 || phoneValue.trim().length > 0 || nameValue.trim().length > 0;
 
   // Haptic feedback function
   const triggerHapticFeedback = (type: 'light' | 'medium' | 'success') => {
@@ -125,7 +149,7 @@ const Consulta = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cpfValue.trim() || cpfValue.length < 14 || !selectedSimulation) return;
+    if (!hasAnyField || !selectedSimulation) return;
     
     // Clear any existing timeouts
     searchTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
@@ -286,7 +310,7 @@ const Consulta = () => {
     }
   };
 
-  const isCpfValid = cpfValue.length === 14;
+  const canSearch = hasAnyField && selectedSimulation !== null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -304,7 +328,7 @@ const Consulta = () => {
           <div className="px-6 py-4">
             <h1 className="text-2xl font-bold text-foreground">Nova Consulta</h1>
             <p className="text-muted-foreground text-sm">
-              Verifique informações de segurança através do CPF
+              Preencha um ou mais campos para realizar a consulta
             </p>
           </div>
         </header>
@@ -319,33 +343,68 @@ const Consulta = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-primary" />
-                  Consulta por CPF
+                  Consulta de Segurança
                 </CardTitle>
                 <CardDescription>
-                  Digite o CPF e escolha o tipo de simulação para testar
+                  Todos os campos são opcionais. Quanto mais informações, mais preciso o resultado.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSearch} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="cpf">Número do CPF</Label>
-                    <div className="relative">
-                      <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="cpf"
-                        placeholder="000.000.000-00"
-                        value={cpfValue}
-                        onChange={handleCPFChange}
-                        className="h-14 pl-11 text-lg"
-                      />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* CPF Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="cpf">CPF</Label>
+                      <div className="relative">
+                        <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="cpf"
+                          placeholder="000.000.000-00"
+                          value={cpfValue}
+                          onChange={handleCPFChange}
+                          className="h-12 pl-10"
+                        />
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Digite apenas os números do CPF
-                    </p>
+
+                    {/* Phone Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefone</Label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="phone"
+                          placeholder="(00) 00000-0000"
+                          value={phoneValue}
+                          onChange={handlePhoneChange}
+                          className="h-12 pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Name Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome Completo</Label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="name"
+                          placeholder="Nome da pessoa"
+                          value={nameValue}
+                          onChange={handleNameChange}
+                          className="h-12 pl-10"
+                        />
+                      </div>
+                    </div>
                   </div>
+                  
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Info className="w-3 h-3" />
+                    Preencha pelo menos um campo para realizar a consulta
+                  </p>
 
                   {/* Simulation Type Selection */}
-                  {isCpfValid && (
+                  {hasAnyField && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
@@ -408,7 +467,7 @@ const Consulta = () => {
                   <Button 
                     type="submit" 
                     className="w-full h-14 bg-gradient-to-r from-rose-soft to-lavender text-white text-lg font-medium"
-                    disabled={isSearching || !isCpfValid || !selectedSimulation}
+                    disabled={isSearching || !canSearch}
                   >
                     {isSearching ? (
                       <motion.div
@@ -419,11 +478,11 @@ const Consulta = () => {
                     ) : (
                       <>
                         <Search className="w-5 h-5 mr-2" />
-                        {!isCpfValid 
-                          ? "Digite o CPF completo" 
+                        {!hasAnyField 
+                          ? "Preencha pelo menos um campo" 
                           : !selectedSimulation 
                             ? "Selecione o tipo de simulação"
-                            : "Consultar CPF"
+                            : "Consultar"
                         }
                       </>
                     )}
