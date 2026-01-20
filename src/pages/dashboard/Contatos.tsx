@@ -32,13 +32,8 @@ interface Contact {
   isEmergency: boolean;
 }
 
-const initialContacts: Contact[] = [
-  { id: 1, name: "Maria Silva", relation: "Mãe", phone: "(11) 99999-1111", email: "maria@email.com", isEmergency: true },
-  { id: 2, name: "Ana Santos", relation: "Amiga", phone: "(11) 99999-2222", email: "ana@email.com", isEmergency: true },
-  { id: 3, name: "João Oliveira", relation: "Irmão", phone: "(11) 99999-3333", email: "joao@email.com", isEmergency: true },
-  { id: 4, name: "Carla Mendes", relation: "Amiga", phone: "(11) 99999-4444", email: "carla@email.com", isEmergency: false },
-  { id: 5, name: "Roberto Costa", relation: "Pai", phone: "(11) 99999-5555", email: "roberto@email.com", isEmergency: false },
-];
+// Lista vazia - será preenchida com dados reais quando integrado ao backend
+const initialContacts: Contact[] = [];
 
 const Contatos = () => {
   const navigate = useNavigate();
