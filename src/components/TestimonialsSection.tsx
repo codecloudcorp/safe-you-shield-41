@@ -146,7 +146,7 @@ const TestimonialsSection = () => {
             plugins={[plugin.current]}
             className="w-full"
           >
-            <CarouselContent className="-ml-4">
+            <CarouselContent className="-ml-4 py-4">
               {testimonials.map((testimonial, index) => (
                 <CarouselItem key={testimonial.name} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
                   <motion.div
