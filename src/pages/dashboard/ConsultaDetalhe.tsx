@@ -14,7 +14,8 @@ import {
   Scale,
   Download,
   CreditCard,
-  Info
+  Info,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,8 @@ import jsPDF from "jspdf";
 const consultasData: Record<string, {
   id: string;
   cpf: string;
+  phone?: string;
+  searchedName?: string;
   date: string;
   time: string;
   status: "seguro" | "alerta" | "perigo";
@@ -261,11 +264,15 @@ const ConsultaDetalhe = () => {
   // Check if data was passed via state (from Consulta page) or via URL param (from Historico)
   const stateData = location.state as {
     cpf?: string;
-    status?: "safe" | "caution" | "alert";
+    phone?: string;
     name?: string;
+    status?: "safe" | "caution" | "alert";
     details?: string[];
     simulationType?: "seguro" | "alerta" | "perigo";
   } | null;
+
+  // Check if any search data was provided
+  const hasSearchData = stateData?.cpf || stateData?.phone || stateData?.name;
 
   // Map status from state to consulta format
   const statusMapping: Record<string, "seguro" | "alerta" | "perigo"> = {
@@ -275,9 +282,11 @@ const ConsultaDetalhe = () => {
   };
 
   // Generate consulta data from state if available
-  const consultaFromState = stateData?.cpf ? {
+  const consultaFromState = hasSearchData ? {
     id: "new",
-    cpf: stateData.cpf,
+    cpf: stateData?.cpf || "Não informado",
+    phone: stateData?.phone,
+    searchedName: stateData?.name,
     date: new Date().toLocaleDateString('pt-BR'),
     time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
     status: stateData.simulationType || statusMapping[stateData.status || "safe"],
@@ -599,6 +608,44 @@ const ConsultaDetalhe = () => {
       </header>
 
       <div className="max-w-5xl mx-auto p-6 space-y-6">
+        {/* Dados Consultados */}
+        {(consulta.phone || consulta.searchedName || consulta.cpf !== "Não informado") && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card className="border-border/50 bg-muted/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Search className="w-4 h-4" />
+                  Dados Utilizados na Consulta
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {consulta.cpf && consulta.cpf !== "Não informado" && (
+                    <div className="bg-background rounded-lg p-3 border border-border/50">
+                      <p className="text-xs text-muted-foreground mb-1">CPF</p>
+                      <p className="font-mono font-medium text-foreground">{consulta.cpf}</p>
+                    </div>
+                  )}
+                  {consulta.phone && (
+                    <div className="bg-background rounded-lg p-3 border border-border/50">
+                      <p className="text-xs text-muted-foreground mb-1">Telefone</p>
+                      <p className="font-mono font-medium text-foreground">{consulta.phone}</p>
+                    </div>
+                  )}
+                  {consulta.searchedName && (
+                    <div className="bg-background rounded-lg p-3 border border-border/50">
+                      <p className="text-xs text-muted-foreground mb-1">Nome Pesquisado</p>
+                      <p className="font-medium text-foreground">{consulta.searchedName}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
         {/* Status Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
