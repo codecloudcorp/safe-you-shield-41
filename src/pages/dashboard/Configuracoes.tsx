@@ -19,7 +19,12 @@ import {
   Moon,
   Sun,
   Smartphone,
-  Mail
+  Mail,
+  Check,
+  Star,
+  Sparkles,
+  Heart,
+  Building2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
@@ -330,50 +335,143 @@ const Configuracoes = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
               >
+                {/* Current Plan Info */}
                 <Card className="border-primary/20 bg-gradient-to-r from-rose-soft/5 to-lavender/5">
                   <CardHeader>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           <CreditCard className="w-5 h-5 text-primary" />
                           Seu Plano Atual
                         </CardTitle>
                         <CardDescription>
-                          Gerencie sua assinatura
+                          Você está no plano gratuito
                         </CardDescription>
                       </div>
-                      <span className="px-3 py-1 bg-primary text-white text-sm font-medium rounded-full">
-                        Premium
+                      <span className="px-3 py-1 bg-muted text-muted-foreground text-sm font-medium rounded-full">
+                        Gratuito
                       </span>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div className="p-4 bg-white rounded-xl border border-border">
-                        <p className="text-sm text-muted-foreground">Consultas restantes</p>
-                        <p className="text-2xl font-bold text-foreground">45</p>
-                      </div>
-                      <div className="p-4 bg-white rounded-xl border border-border">
-                        <p className="text-sm text-muted-foreground">Próxima renovação</p>
-                        <p className="text-2xl font-bold text-foreground">15/02</p>
-                      </div>
-                      <div className="p-4 bg-white rounded-xl border border-border">
-                        <p className="text-sm text-muted-foreground">Valor mensal</p>
-                        <p className="text-2xl font-bold text-foreground">R$ 29,90</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <Button className="gap-2 bg-gradient-to-r from-rose-soft to-lavender text-white">
-                        Fazer upgrade
-                      </Button>
-                      <Button variant="outline" className="gap-2">
-                        Ver histórico de pagamentos
-                      </Button>
-                    </div>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Faça upgrade para desbloquear mais consultas e recursos avançados.
+                    </p>
                   </CardContent>
                 </Card>
+
+                {/* Available Plans */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Planos Disponíveis</h3>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {/* Consulta Avulsa */}
+                    <Card className="border-border/50 hover:border-lavender/30 transition-all hover:shadow-md relative">
+                      <CardHeader className="text-center pb-2">
+                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center bg-secondary">
+                          <Sparkles className="w-6 h-6 text-foreground" />
+                        </div>
+                        <CardTitle className="text-lg">Consulta Avulsa</CardTitle>
+                        <CardDescription>
+                          Ideal para checagens pontuais
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="text-center">
+                          <div className="flex items-baseline justify-center gap-1">
+                            <span className="text-sm text-muted-foreground">R$</span>
+                            <span className="text-4xl font-bold">19</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">por verificação</span>
+                        </div>
+                        <ul className="space-y-2">
+                          {["1 verificação completa", "Consulta em todos os tribunais", "Resultado em segundos", "Relatório básico em PDF"].map((feature) => (
+                            <li key={feature} className="flex items-start gap-2 text-sm">
+                              <Check className="w-4 h-4 text-turquoise flex-shrink-0 mt-0.5" />
+                              <span className="text-muted-foreground">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <Button variant="outline" className="w-full">
+                          Fazer Consulta
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Plano Família - Popular */}
+                    <Card className="border-rose-soft/50 shadow-lg relative scale-[1.02]">
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-rose-soft to-lavender text-white text-xs font-medium">
+                          <Star className="w-3 h-3" />
+                          Mais Popular
+                        </div>
+                      </div>
+                      <CardHeader className="text-center pb-2 pt-6">
+                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-rose-soft to-lavender">
+                          <Heart className="w-6 h-6 text-white" />
+                        </div>
+                        <CardTitle className="text-lg">Plano Família</CardTitle>
+                        <CardDescription>
+                          Proteção contínua para você e sua família
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="text-center">
+                          <div className="flex items-baseline justify-center gap-1">
+                            <span className="text-sm text-muted-foreground">R$</span>
+                            <span className="text-4xl font-bold">49</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">por mês</span>
+                        </div>
+                        <ul className="space-y-2">
+                          {["10 verificações por mês", "Consulta em todos os tribunais", "Alertas de segurança", "Relatórios detalhados", "Histórico de consultas", "Suporte prioritário"].map((feature) => (
+                            <li key={feature} className="flex items-start gap-2 text-sm">
+                              <Check className="w-4 h-4 text-rose-soft flex-shrink-0 mt-0.5" />
+                              <span className="text-muted-foreground">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <Button className="w-full bg-gradient-to-r from-rose-soft to-lavender text-white hover:opacity-90">
+                          Assinar Agora
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Plano Empresarial */}
+                    <Card className="border-border/50 hover:border-lavender/30 transition-all hover:shadow-md relative">
+                      <CardHeader className="text-center pb-2">
+                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center bg-secondary">
+                          <Building2 className="w-6 h-6 text-foreground" />
+                        </div>
+                        <CardTitle className="text-lg">Plano Empresarial</CardTitle>
+                        <CardDescription>
+                          Para RH, imobiliárias e empresas
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="text-center">
+                          <div className="flex items-baseline justify-center gap-1">
+                            <span className="text-sm text-muted-foreground">R$</span>
+                            <span className="text-4xl font-bold">199</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">por mês</span>
+                        </div>
+                        <ul className="space-y-2">
+                          {["Consultas ilimitadas", "Verificação de PF e PJ", "Score de crédito", "Análise financeira", "API de integração", "Múltiplos usuários", "Gerente de conta"].map((feature) => (
+                            <li key={feature} className="flex items-start gap-2 text-sm">
+                              <Check className="w-4 h-4 text-turquoise flex-shrink-0 mt-0.5" />
+                              <span className="text-muted-foreground">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <Button variant="default" className="w-full">
+                          Falar com Vendas
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               </motion.div>
             </TabsContent>
           </Tabs>
