@@ -60,7 +60,7 @@ const PricingSection = () => {
           </h2>
           <p className="text-muted-foreground text-lg">
             Planos pensados para diferentes necessidades. 
-            Do uso pessoal ao corporativo.
+            Do uso pessoal ao familiar.
           </p>
         </motion.div>
 

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { AlertTriangle, Shield, X, Check, Heart, Users, Building2 } from "lucide-react";
+import { AlertTriangle, Shield, X, Check, Heart, Users } from "lucide-react";
 
 const BeforeAfterSection = () => {
   const scenarios = [
@@ -40,26 +40,6 @@ const BeforeAfterSection = () => {
           "Verificação completa de antecedentes",
           "Relatórios detalhados em segundos",
           "Proteção para toda a família",
-        ],
-      },
-    },
-    {
-      icon: Building2,
-      title: "Empresas",
-      before: {
-        title: "Sem Safe You",
-        items: [
-          "Contratações arriscadas",
-          "Parcerias sem due diligence",
-          "Prejuízos por falta de informação",
-        ],
-      },
-      after: {
-        title: "Com Safe You",
-        items: [
-          "Background check automatizado",
-          "Integração via API",
-          "Decisões de negócio seguras",
         ],
       },
     },
