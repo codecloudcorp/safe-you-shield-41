@@ -7,16 +7,32 @@ import {
   Bell, 
   Search,
   Users,
-  Clock,
   CheckCircle,
   TrendingUp,
   AlertTriangle,
   FileText,
-  ArrowRight
+  ArrowRight,
+  BarChart3,
+  PieChart as PieChartIcon
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend
+} from "recharts";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -43,6 +59,35 @@ const Dashboard = () => {
   ];
 
   const recentConsultations: Array<{ cpf: string; status: string; date: string }> = [];
+
+  // Chart data - empty states ready for real data
+  const consultationsOverTime = [
+    { month: "Jan", consultas: 0 },
+    { month: "Fev", consultas: 0 },
+    { month: "Mar", consultas: 0 },
+    { month: "Abr", consultas: 0 },
+    { month: "Mai", consultas: 0 },
+    { month: "Jun", consultas: 0 },
+  ];
+
+  const statusDistribution = [
+    { name: "Seguro", value: 0, color: "#22c55e" },
+    { name: "Atenção", value: 0, color: "#eab308" },
+    { name: "Alerta", value: 0, color: "#ef4444" },
+  ];
+
+  const weeklyActivity = [
+    { day: "Seg", consultas: 0, alertas: 0 },
+    { day: "Ter", consultas: 0, alertas: 0 },
+    { day: "Qua", consultas: 0, alertas: 0 },
+    { day: "Qui", consultas: 0, alertas: 0 },
+    { day: "Sex", consultas: 0, alertas: 0 },
+    { day: "Sáb", consultas: 0, alertas: 0 },
+    { day: "Dom", consultas: 0, alertas: 0 },
+  ];
+
+  const hasChartData = consultationsOverTime.some(d => d.consultas > 0) || 
+                       statusDistribution.some(d => d.value > 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,6 +188,172 @@ const Dashboard = () => {
               </motion.div>
             ))}
           </div>
+
+          {/* Charts Section */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Consultations Over Time */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <Card className="border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-primary" />
+                    Consultas ao Longo do Tempo
+                  </CardTitle>
+                  <CardDescription>Histórico mensal de consultas realizadas</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {hasChartData ? (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <AreaChart data={consultationsOverTime}>
+                        <defs>
+                          <linearGradient id="colorConsultas" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: "hsl(var(--background))", 
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "8px"
+                          }} 
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="consultas" 
+                          stroke="hsl(var(--primary))" 
+                          fillOpacity={1} 
+                          fill="url(#colorConsultas)" 
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-[200px] flex flex-col items-center justify-center text-center">
+                      <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center mb-3">
+                        <BarChart3 className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground text-sm">Nenhum dado disponível</p>
+                      <p className="text-muted-foreground text-xs mt-1">Faça consultas para ver o gráfico</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Status Distribution */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <PieChartIcon className="w-5 h-5 text-primary" />
+                    Distribuição por Status
+                  </CardTitle>
+                  <CardDescription>Resultados das suas consultas</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {hasChartData ? (
+                    <div className="flex items-center gap-4">
+                      <ResponsiveContainer width="50%" height={200}>
+                        <PieChart>
+                          <Pie
+                            data={statusDistribution}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={70}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            {statusDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="flex-1 space-y-3">
+                        {statusDistribution.map((item) => (
+                          <div key={item.name} className="flex items-center gap-3">
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: item.color }} 
+                            />
+                            <span className="text-sm text-muted-foreground flex-1">{item.name}</span>
+                            <span className="text-sm font-medium">{item.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-[200px] flex flex-col items-center justify-center text-center">
+                      <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center mb-3">
+                        <PieChartIcon className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground text-sm">Nenhum dado disponível</p>
+                      <p className="text-muted-foreground text-xs mt-1">Faça consultas para ver a distribuição</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Weekly Activity Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <Card className="border-border/50">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-primary" />
+                  Atividade Semanal
+                </CardTitle>
+                <CardDescription>Consultas e alertas dos últimos 7 dias</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {hasChartData ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={weeklyActivity}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: "hsl(var(--background))", 
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "8px"
+                        }} 
+                      />
+                      <Legend />
+                      <Bar dataKey="consultas" name="Consultas" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="alertas" name="Alertas" fill="#eab308" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[200px] flex flex-col items-center justify-center text-center">
+                    <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center mb-3">
+                      <TrendingUp className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-muted-foreground text-sm">Nenhuma atividade registrada</p>
+                    <p className="text-muted-foreground text-xs mt-1">Suas atividades aparecerão aqui</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Recent Consultations */}
