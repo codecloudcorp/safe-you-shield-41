@@ -23,7 +23,8 @@ import {
   Check,
   Star,
   Sparkles,
-  Heart
+  Heart,
+  Crown
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
@@ -450,75 +451,110 @@ const Configuracoes = () => {
                 {/* Available Plans */}
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Planos Disponíveis</h3>
-                  <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Consulta Avulsa */}
                     <Card className="border-border/50 hover:border-lavender/30 transition-all hover:shadow-md relative">
                       <CardHeader className="text-center pb-2">
-                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center bg-secondary">
-                          <Sparkles className="w-6 h-6 text-foreground" />
+                        <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-secondary">
+                          <Sparkles className="w-5 h-5 text-foreground" />
                         </div>
-                        <CardTitle className="text-lg">Consulta Avulsa</CardTitle>
-                        <CardDescription>
-                          Ideal para checagens pontuais
+                        <CardTitle className="text-base">Consulta Avulsa</CardTitle>
+                        <CardDescription className="text-xs">
+                          Para checagens pontuais
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-3">
                         <div className="text-center">
                           <div className="flex items-baseline justify-center gap-1">
-                            <span className="text-sm text-muted-foreground">R$</span>
-                            <span className="text-4xl font-bold">19</span>
+                            <span className="text-xs text-muted-foreground">R$</span>
+                            <span className="text-3xl font-bold">19</span>
                           </div>
-                          <span className="text-sm text-muted-foreground">por verificação</span>
+                          <span className="text-xs text-muted-foreground">por verificação</span>
                         </div>
-                        <ul className="space-y-2">
-                          {["1 verificação completa", "Consulta em todos os tribunais", "Resultado em segundos", "Relatório básico em PDF"].map((feature) => (
-                            <li key={feature} className="flex items-start gap-2 text-sm">
-                              <Check className="w-4 h-4 text-turquoise flex-shrink-0 mt-0.5" />
+                        <ul className="space-y-1.5">
+                          {["1 verificação completa", "Todos os tribunais", "Resultado em segundos", "Relatório em PDF"].map((feature) => (
+                            <li key={feature} className="flex items-start gap-2 text-xs">
+                              <Check className="w-3 h-3 text-turquoise flex-shrink-0 mt-0.5" />
                               <span className="text-muted-foreground">{feature}</span>
                             </li>
                           ))}
                         </ul>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" size="sm">
                           Fazer Consulta
                         </Button>
                       </CardContent>
                     </Card>
 
-                    {/* Plano Família - Popular */}
-                    <Card className="border-rose-soft/50 shadow-lg relative scale-[1.02]">
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-rose-soft to-lavender text-white text-xs font-medium">
-                          <Star className="w-3 h-3" />
+                    {/* Plano Mensal - Popular */}
+                    <Card className="border-rose-soft/50 shadow-lg relative md:scale-[1.02]">
+                      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+                        <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-soft to-lavender text-white text-[10px] font-medium">
+                          <Star className="w-2.5 h-2.5" />
                           Mais Popular
                         </div>
                       </div>
-                      <CardHeader className="text-center pb-2 pt-6">
-                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-rose-soft to-lavender">
-                          <Heart className="w-6 h-6 text-white" />
+                      <CardHeader className="text-center pb-2 pt-5">
+                        <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-gradient-to-br from-rose-soft to-lavender">
+                          <Heart className="w-5 h-5 text-white" />
                         </div>
-                        <CardTitle className="text-lg">Plano Família</CardTitle>
-                        <CardDescription>
-                          Proteção contínua para você e sua família
+                        <CardTitle className="text-base">Plano Mensal</CardTitle>
+                        <CardDescription className="text-xs">
+                          Proteção contínua para você
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-3">
                         <div className="text-center">
+                          <div className="text-xs text-muted-foreground line-through">R$ 39</div>
                           <div className="flex items-baseline justify-center gap-1">
-                            <span className="text-sm text-muted-foreground">R$</span>
-                            <span className="text-4xl font-bold">49</span>
+                            <span className="text-xs text-muted-foreground">R$</span>
+                            <span className="text-3xl font-bold">29</span>
                           </div>
-                          <span className="text-sm text-muted-foreground">por mês</span>
+                          <span className="text-xs text-muted-foreground">por mês</span>
                         </div>
-                        <ul className="space-y-2">
-                          {["10 verificações por mês", "Consulta em todos os tribunais", "Alertas de segurança", "Relatórios detalhados", "Histórico de consultas", "Suporte prioritário"].map((feature) => (
-                            <li key={feature} className="flex items-start gap-2 text-sm">
-                              <Check className="w-4 h-4 text-rose-soft flex-shrink-0 mt-0.5" />
+                        <ul className="space-y-1.5">
+                          {["5 verificações/mês", "Alertas de segurança", "Relatórios detalhados", "Histórico de consultas"].map((feature) => (
+                            <li key={feature} className="flex items-start gap-2 text-xs">
+                              <Check className="w-3 h-3 text-rose-soft flex-shrink-0 mt-0.5" />
                               <span className="text-muted-foreground">{feature}</span>
                             </li>
                           ))}
                         </ul>
-                        <Button className="w-full bg-gradient-to-r from-rose-soft to-lavender text-white hover:opacity-90">
+                        <Button className="w-full bg-gradient-to-r from-rose-soft to-lavender text-white hover:opacity-90" size="sm">
                           Assinar Agora
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Plano Família */}
+                    <Card className="border-border/50 hover:border-lavender/30 transition-all hover:shadow-md relative">
+                      <CardHeader className="text-center pb-2">
+                        <div className="w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center bg-secondary">
+                          <Crown className="w-5 h-5 text-foreground" />
+                        </div>
+                        <CardTitle className="text-base">Plano Família</CardTitle>
+                        <CardDescription className="text-xs">
+                          Para toda a família
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground line-through">R$ 69</div>
+                          <div className="flex items-baseline justify-center gap-1">
+                            <span className="text-xs text-muted-foreground">R$</span>
+                            <span className="text-3xl font-bold">49</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">por mês</span>
+                        </div>
+                        <ul className="space-y-1.5">
+                          {["15 verificações/mês", "Múltiplos usuários", "Suporte prioritário 24h", "Histórico ilimitado"].map((feature) => (
+                            <li key={feature} className="flex items-start gap-2 text-xs">
+                              <Check className="w-3 h-3 text-turquoise flex-shrink-0 mt-0.5" />
+                              <span className="text-muted-foreground">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <Button variant="default" className="w-full" size="sm">
+                          Proteger Família
                         </Button>
                       </CardContent>
                     </Card>
