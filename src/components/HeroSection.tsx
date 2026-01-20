@@ -82,7 +82,7 @@ const HeroSection = () => {
               className="text-sm md:text-base text-muted-foreground max-w-xl mb-8 leading-relaxed italic border-l-4 border-rose-soft/50 pl-4"
             >
               "Verifique antecedentes de pessoas de forma rápida, segura e ética.
-              Proteção para mulheres, famílias e empresas que não querem correr riscos."
+              Proteção para mulheres e famílias que não querem correr riscos."
             </motion.blockquote>
 
             {/* Search Box */}
