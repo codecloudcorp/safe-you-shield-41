@@ -692,8 +692,8 @@ const Contatos = () => {
         setIsLocationDialogOpen(open);
         if (!open) setSelectedContact(null);
       }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" />
               Compartilhar Localização
@@ -703,14 +703,14 @@ const Contatos = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
+          <div className="flex-1 overflow-y-auto space-y-4 py-2 pr-1">
             {/* Map Section */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Navigation className="w-4 h-4 text-muted-foreground" />
                 Sua localização atual
               </Label>
-              <div className="h-48 rounded-xl overflow-hidden border border-border relative">
+              <div className="h-40 sm:h-48 rounded-xl overflow-hidden border border-border relative">
                 {isLoadingLocation ? (
                   <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                     <div className="flex flex-col items-center gap-2">
@@ -746,7 +746,7 @@ const Contatos = () => {
                 )}
               </div>
               {locationAddress && (
-                <p className="text-xs text-muted-foreground truncate" title={locationAddress}>
+                <p className="text-xs text-muted-foreground line-clamp-2" title={locationAddress}>
                   📍 {locationAddress}
                 </p>
               )}
@@ -755,12 +755,12 @@ const Contatos = () => {
             {/* Contact Info */}
             <div className="p-3 bg-gradient-to-r from-rose-soft/10 to-lavender/10 rounded-xl border border-primary/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-rose-soft to-lavender rounded-full flex items-center justify-center text-white">
+                <div className="w-10 h-10 bg-gradient-to-br from-rose-soft to-lavender rounded-full flex items-center justify-center text-white flex-shrink-0">
                   {selectedContact?.name.charAt(0)}
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">{selectedContact?.name}</p>
-                  <p className="text-sm text-muted-foreground">{selectedContact?.phone}</p>
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground truncate">{selectedContact?.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">{selectedContact?.phone}</p>
                 </div>
               </div>
             </div>
@@ -775,7 +775,7 @@ const Contatos = () => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione a duração" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[100]">
                   {durationOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -794,7 +794,7 @@ const Contatos = () => {
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-shrink-0 pt-4 border-t border-border mt-2">
             <Button variant="outline" className="flex-1" onClick={() => setIsLocationDialogOpen(false)}>
               Cancelar
             </Button>
