@@ -36,30 +36,13 @@ const Dashboard = () => {
   }, [navigate]);
 
   const stats = [
-    { label: "Consultas Realizadas", value: "12", icon: Search, color: "from-rose-soft to-lavender" },
-    { label: "Alertas Ativos", value: "3", icon: Bell, color: "from-lavender to-turquoise" },
-    { label: "Contatos Protegidos", value: "5", icon: Users, color: "from-turquoise to-mint" },
-    { label: "Dias de Proteção", value: "45", icon: Shield, color: "from-mint to-trust-blue" },
+    { label: "Consultas Realizadas", value: "0", icon: Search, color: "from-rose-soft to-lavender", route: "/dashboard/historico" },
+    { label: "Alertas Ativos", value: "0", icon: Bell, color: "from-lavender to-turquoise", route: "/dashboard/alertas" },
+    { label: "Contatos Protegidos", value: "0", icon: Users, color: "from-turquoise to-mint", route: "/dashboard/contatos" },
+    { label: "Dias de Proteção", value: "0", icon: Shield, color: "from-mint to-trust-blue", route: "/dashboard/configuracoes" },
   ];
 
-  const recentConsultations = [
-    { cpf: "123.456.789-00", status: "safe", date: "Hoje, 14:30" },
-    { cpf: "987.654.321-00", status: "caution", date: "Ontem, 10:15" },
-    { cpf: "456.789.123-00", status: "safe", date: "20/01/2026" },
-  ];
-
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "safe":
-        return { color: "bg-safe-green", text: "Seguro", textColor: "text-safe-green" };
-      case "caution":
-        return { color: "bg-caution-yellow", text: "Atenção", textColor: "text-caution-yellow" };
-      case "alert":
-        return { color: "bg-alert-red", text: "Alerta", textColor: "text-alert-red" };
-      default:
-        return { color: "bg-muted", text: "Pendente", textColor: "text-muted-foreground" };
-    }
-  };
+  const recentConsultations: Array<{ cpf: string; status: string; date: string }> = [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,11 +54,11 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className={cn(
         "transition-all duration-300 min-h-screen",
-        sidebarCollapsed ? "ml-20" : "ml-64"
+        sidebarCollapsed ? "md:ml-20 ml-0" : "md:ml-64 ml-0"
       )}>
         {/* Header */}
         <header className="bg-white border-b border-border sticky top-0 z-40">
-          <div className="px-6 py-4 flex items-center justify-between">
+          <div className="px-4 md:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-2xl font-bold text-foreground">
                 Olá, {userEmail.split("@")[0] || "Usuária"}! 👋
@@ -85,11 +68,13 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative"
+                onClick={() => navigate("/dashboard/alertas")}
+              >
                 <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[10px] text-white flex items-center justify-center">
-                  3
-                </span>
               </Button>
               <div className="w-10 h-10 bg-gradient-to-br from-rose-soft to-lavender rounded-full flex items-center justify-center text-white font-medium">
                 {userEmail.charAt(0).toUpperCase() || "U"}
@@ -98,7 +83,7 @@ const Dashboard = () => {
           </div>
         </header>
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 md:p-6 space-y-6">
           {/* Status Banner */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -120,7 +105,10 @@ const Dashboard = () => {
                   Seu plano está ativo e todas as funcionalidades estão disponíveis.
                 </p>
               </div>
-              <Button className="bg-gradient-to-r from-rose-soft to-lavender text-white hover:opacity-90">
+              <Button 
+                className="bg-gradient-to-r from-rose-soft to-lavender text-white hover:opacity-90 w-full sm:w-auto mt-4 sm:mt-0"
+                onClick={() => navigate("/dashboard/consulta")}
+              >
                 <Search className="w-4 h-4 mr-2" />
                 Nova Consulta
               </Button>
@@ -136,15 +124,18 @@ const Dashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + index * 0.05 }}
               >
-                <Card className="border-border/50 hover:shadow-md transition-shadow">
-                  <CardContent className="p-5">
+                <Card 
+                  className="border-border/50 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => navigate(stat.route)}
+                >
+                  <CardContent className="p-4 md:p-5">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-sm text-muted-foreground">{stat.label}</p>
-                        <p className="text-3xl font-bold text-foreground mt-1">{stat.value}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p>
+                        <p className="text-2xl md:text-3xl font-bold text-foreground mt-1">{stat.value}</p>
                       </div>
-                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br", stat.color)}>
-                        <stat.icon className="w-5 h-5 text-white" />
+                      <div className={cn("w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center bg-gradient-to-br", stat.color)}>
+                        <stat.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                       </div>
                     </div>
                   </CardContent>
@@ -170,17 +161,36 @@ const Dashboard = () => {
                     </CardTitle>
                     <CardDescription>Suas últimas verificações realizadas</CardDescription>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-primary">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-primary"
+                    onClick={() => navigate("/dashboard/historico")}
+                  >
                     Ver todas <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {recentConsultations.map((consultation, index) => {
-                    const statusConfig = getStatusConfig(consultation.status);
-                    return (
+                  {recentConsultations.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 mx-auto bg-muted/50 rounded-full flex items-center justify-center mb-3">
+                        <FileText className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground text-sm">Nenhuma consulta realizada</p>
+                      <Button 
+                        variant="link" 
+                        className="text-primary mt-2"
+                        onClick={() => navigate("/dashboard/consulta")}
+                      >
+                        Fazer primeira consulta →
+                      </Button>
+                    </div>
+                  ) : (
+                    recentConsultations.map((consultation, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-4 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => navigate("/dashboard/historico")}
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 bg-gradient-to-br from-rose-soft/20 to-lavender/20 rounded-full flex items-center justify-center">
@@ -193,17 +203,9 @@ const Dashboard = () => {
                             </p>
                           </div>
                         </div>
-                        <div className={cn(
-                          "px-3 py-1 rounded-full text-xs font-medium",
-                          statusConfig.color === "bg-safe-green" && "bg-safe-green/10 text-safe-green",
-                          statusConfig.color === "bg-caution-yellow" && "bg-caution-yellow/10 text-caution-yellow",
-                          statusConfig.color === "bg-alert-red" && "bg-alert-red/10 text-alert-red"
-                        )}>
-                          {statusConfig.text}
-                        </div>
                       </div>
-                    );
-                  })}
+                    ))
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -223,21 +225,36 @@ const Dashboard = () => {
                   <CardDescription>Acesse rapidamente as funcionalidades</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button className="w-full justify-start gap-3 h-12 bg-gradient-to-r from-rose-soft to-lavender text-white hover:opacity-90">
+                  <Button 
+                    className="w-full justify-start gap-3 h-11 md:h-12 bg-gradient-to-r from-rose-soft to-lavender text-white hover:opacity-90"
+                    onClick={() => navigate("/dashboard/consulta")}
+                  >
                     <Search className="w-5 h-5" />
                     Consultar CPF
                   </Button>
-                  <Button variant="outline" className="w-full justify-start gap-3 h-12">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start gap-3 h-11 md:h-12"
+                    onClick={() => navigate("/dashboard/contatos")}
+                  >
                     <Users className="w-5 h-5 text-primary" />
                     Adicionar Contato
                   </Button>
-                  <Button variant="outline" className="w-full justify-start gap-3 h-12">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start gap-3 h-11 md:h-12"
+                    onClick={() => navigate("/dashboard/alertas")}
+                  >
                     <Bell className="w-5 h-5 text-primary" />
                     Configurar Alertas
                   </Button>
-                  <Button variant="outline" className="w-full justify-start gap-3 h-12">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start gap-3 h-11 md:h-12"
+                    onClick={() => navigate("/dicas-protecao")}
+                  >
                     <AlertTriangle className="w-5 h-5 text-caution-yellow" />
-                    Reportar Situação
+                    Dicas de Proteção
                   </Button>
                 </CardContent>
               </Card>
@@ -264,7 +281,11 @@ const Dashboard = () => {
                       Sempre verifique o histórico de uma pessoa antes de encontros presenciais. 
                       Use nossa ferramenta de consulta para garantir sua segurança.
                     </p>
-                    <Button variant="link" className="px-0 mt-2 text-primary">
+                    <Button 
+                      variant="link" 
+                      className="px-0 mt-2 text-primary"
+                      onClick={() => navigate("/dicas-protecao")}
+                    >
                       Ver mais dicas →
                     </Button>
                   </div>
