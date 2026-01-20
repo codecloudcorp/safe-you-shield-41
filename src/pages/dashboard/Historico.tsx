@@ -39,115 +39,11 @@ const Historico = () => {
     }
   }, [navigate]);
 
-  const consultations: Consultation[] = [
-    { 
-      id: 1, 
-      cpf: "123.456.789-00", 
-      status: "safe", 
-      date: "19/01/2026", 
-      time: "14:30",
-      details: [
-        "Nenhum registro criminal encontrado",
-        "CPF regular na Receita Federal",
-        "Sem restrições financeiras graves",
-        "Histórico limpo"
-      ]
-    },
-    { 
-      id: 2, 
-      cpf: "987.654.321-00", 
-      status: "caution", 
-      date: "18/01/2026", 
-      time: "10:15",
-      details: [
-        "CPF regular na Receita Federal",
-        "Possui processos em andamento",
-        "Restrição financeira identificada",
-        "Recomenda-se cautela"
-      ]
-    },
-    { 
-      id: 3, 
-      cpf: "456.789.123-00", 
-      status: "safe", 
-      date: "17/01/2026", 
-      time: "16:45",
-      details: [
-        "Nenhum registro criminal encontrado",
-        "CPF regular na Receita Federal",
-        "Sem restrições financeiras",
-        "Histórico limpo"
-      ]
-    },
-    { 
-      id: 4, 
-      cpf: "321.654.987-00", 
-      status: "safe", 
-      date: "16/01/2026", 
-      time: "09:20",
-      details: [
-        "Nenhum registro criminal encontrado",
-        "CPF regular na Receita Federal",
-        "Sem pendências judiciais",
-        "Perfil verificado"
-      ]
-    },
-    { 
-      id: 5, 
-      cpf: "789.123.456-00", 
-      status: "alert", 
-      date: "15/01/2026", 
-      time: "11:00",
-      details: [
-        "Registro criminal identificado",
-        "Múltiplas restrições financeiras",
-        "Processos judiciais ativos",
-        "Alto risco - evite contato"
-      ]
-    },
-    { 
-      id: 6, 
-      cpf: "654.987.321-00", 
-      status: "safe", 
-      date: "14/01/2026", 
-      time: "15:30",
-      details: [
-        "Nenhum registro criminal encontrado",
-        "CPF regular na Receita Federal",
-        "Sem restrições",
-        "Histórico limpo"
-      ]
-    },
-    { 
-      id: 7, 
-      cpf: "147.258.369-00", 
-      status: "caution", 
-      date: "13/01/2026", 
-      time: "08:45",
-      details: [
-        "CPF regular na Receita Federal",
-        "Pendência financeira menor",
-        "Processo cível em andamento",
-        "Atenção recomendada"
-      ]
-    },
-    { 
-      id: 8, 
-      cpf: "369.258.147-00", 
-      status: "safe", 
-      date: "12/01/2026", 
-      time: "17:10",
-      details: [
-        "Nenhum registro criminal encontrado",
-        "CPF regular na Receita Federal",
-        "Sem restrições financeiras",
-        "Perfil seguro"
-      ]
-    },
-  ];
+  // Lista vazia - será preenchida com dados reais quando integrado ao backend
+  const consultations: Consultation[] = [];
 
   const filteredConsultations = consultations.filter(c => 
-    c.cpf.includes(searchFilter)
+    c.cpf.toLowerCase().includes(searchFilter.toLowerCase())
   );
 
   const getStatusConfig = (status: string) => {
@@ -344,51 +240,76 @@ const Historico = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {filteredConsultations.map((consultation, index) => {
-                  const statusConfig = getStatusConfig(consultation.status);
-                  const StatusIcon = statusConfig.icon;
-                  return (
-                    <motion.div
-                      key={consultation.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between p-4 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer"
-                      onClick={() => handleViewConsultation(consultation)}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", statusConfig.bgLight)}>
-                          <StatusIcon className={cn("w-5 h-5", statusConfig.textColor)} />
+                {filteredConsultations.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FileText className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium text-foreground mb-2">
+                      Nenhuma consulta encontrada
+                    </h3>
+                    <p className="text-muted-foreground text-sm mb-4">
+                      {searchFilter 
+                        ? "Nenhuma consulta corresponde à sua busca." 
+                        : "Você ainda não realizou nenhuma consulta. Comece agora!"}
+                    </p>
+                    {!searchFilter && (
+                      <Button 
+                        onClick={() => navigate("/dashboard/consulta")}
+                        className="bg-gradient-to-r from-rose-soft to-lavender hover:opacity-90"
+                      >
+                        <Search className="w-4 h-4 mr-2" />
+                        Nova Consulta
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  filteredConsultations.map((consultation, index) => {
+                    const statusConfig = getStatusConfig(consultation.status);
+                    const StatusIcon = statusConfig.icon;
+                    return (
+                      <motion.div
+                        key={consultation.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="flex items-center justify-between p-4 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => handleViewConsultation(consultation)}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", statusConfig.bgLight)}>
+                            <StatusIcon className={cn("w-5 h-5", statusConfig.textColor)} />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground font-mono">{consultation.cpf}</p>
+                            <p className="text-sm text-muted-foreground">
+                              CPF • {consultation.date} às {consultation.time}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-foreground font-mono">{consultation.cpf}</p>
-                          <p className="text-sm text-muted-foreground">
-                            CPF • {consultation.date} às {consultation.time}
-                          </p>
+                        <div className="flex items-center gap-3">
+                          <span className={cn(
+                            "px-3 py-1 rounded-full text-xs font-medium",
+                            statusConfig.bgLight,
+                            statusConfig.textColor
+                          )}>
+                            {statusConfig.shortText}
+                          </span>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewConsultation(consultation);
+                            }}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={cn(
-                          "px-3 py-1 rounded-full text-xs font-medium",
-                          statusConfig.bgLight,
-                          statusConfig.textColor
-                        )}>
-                          {statusConfig.shortText}
-                        </span>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewConsultation(consultation);
-                          }}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                      </motion.div>
+                    );
+                  })
+                )}
               </CardContent>
             </Card>
           </motion.div>
