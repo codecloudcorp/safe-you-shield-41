@@ -23,8 +23,7 @@ import {
   Check,
   Star,
   Sparkles,
-  Heart,
-  Building2
+  Heart
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
@@ -451,7 +450,7 @@ const Configuracoes = () => {
                 {/* Available Plans */}
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Planos Disponíveis</h3>
-                  <div className="grid md:grid-cols-3 gap-6">
+                  <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
                     {/* Consulta Avulsa */}
                     <Card className="border-border/50 hover:border-lavender/30 transition-all hover:shadow-md relative">
                       <CardHeader className="text-center pb-2">
@@ -524,38 +523,6 @@ const Configuracoes = () => {
                       </CardContent>
                     </Card>
 
-                    {/* Plano Empresarial */}
-                    <Card className="border-border/50 hover:border-lavender/30 transition-all hover:shadow-md relative">
-                      <CardHeader className="text-center pb-2">
-                        <div className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center bg-secondary">
-                          <Building2 className="w-6 h-6 text-foreground" />
-                        </div>
-                        <CardTitle className="text-lg">Plano Empresarial</CardTitle>
-                        <CardDescription>
-                          Para RH, imobiliárias e empresas
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="text-center">
-                          <div className="flex items-baseline justify-center gap-1">
-                            <span className="text-sm text-muted-foreground">R$</span>
-                            <span className="text-4xl font-bold">199</span>
-                          </div>
-                          <span className="text-sm text-muted-foreground">por mês</span>
-                        </div>
-                        <ul className="space-y-2">
-                          {["Consultas ilimitadas", "Verificação de PF e PJ", "Score de crédito", "Análise financeira", "API de integração", "Múltiplos usuários", "Gerente de conta"].map((feature) => (
-                            <li key={feature} className="flex items-start gap-2 text-sm">
-                              <Check className="w-4 h-4 text-turquoise flex-shrink-0 mt-0.5" />
-                              <span className="text-muted-foreground">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <Button variant="default" className="w-full">
-                          Falar com Vendas
-                        </Button>
-                      </CardContent>
-                    </Card>
                   </div>
                 </div>
               </motion.div>
