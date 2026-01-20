@@ -16,8 +16,11 @@ import {
   Edit,
   Trash2,
   Shield,
-  UserPlus
+  UserPlus,
+  MapPin,
+  Clock
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
@@ -30,6 +33,11 @@ interface Contact {
   phone: string;
   email: string;
   isEmergency: boolean;
+  locationSharing?: {
+    active: boolean;
+    duration: string;
+    startedAt: Date;
+  };
 }
 
 // Lista vazia - será preenchida com dados reais quando integrado ao backend
@@ -42,6 +50,8 @@ const Contatos = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+  const [locationDuration, setLocationDuration] = useState("1h");
   
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -54,6 +64,21 @@ const Contatos = () => {
     email: "",
     isEmergency: false
   });
+
+  const durationOptions = [
+    { value: "1h", label: "1 hora" },
+    { value: "2h", label: "2 horas" },
+    { value: "4h", label: "4 horas" },
+    { value: "8h", label: "8 horas" },
+    { value: "12h", label: "12 horas" },
+    { value: "1d", label: "1 dia" },
+    { value: "2d", label: "2 dias" },
+    { value: "3d", label: "3 dias" },
+    { value: "1w", label: "1 semana" },
+    { value: "2w", label: "2 semanas" },
+    { value: "1m", label: "1 mês" },
+    { value: "always", label: "Sempre ativo" },
+  ];
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -159,6 +184,57 @@ const Contatos = () => {
   const openDeleteDialog = (contact: Contact) => {
     setSelectedContact(contact);
     setIsDeleteDialogOpen(true);
+  };
+
+  const openLocationDialog = (contact: Contact) => {
+    setSelectedContact(contact);
+    setLocationDuration(contact.locationSharing?.duration || "1h");
+    setIsLocationDialogOpen(true);
+  };
+
+  const handleStartLocationSharing = () => {
+    if (!selectedContact) return;
+
+    if (!navigator.geolocation) {
+      toast.error("Geolocalização não suportada pelo seu navegador");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log("Localização obtida:", position.coords.latitude, position.coords.longitude);
+        
+        setContacts(prev => prev.map(c => 
+          c.id === selectedContact.id 
+            ? { 
+                ...c, 
+                locationSharing: {
+                  active: true,
+                  duration: locationDuration,
+                  startedAt: new Date()
+                }
+              }
+            : c
+        ));
+        
+        const durationLabel = durationOptions.find(d => d.value === locationDuration)?.label;
+        toast.success(`Localização compartilhada com ${selectedContact.name} por ${durationLabel}`);
+        setIsLocationDialogOpen(false);
+      },
+      (error) => {
+        console.error("Erro ao obter localização:", error);
+        toast.error("Não foi possível obter sua localização. Verifique as permissões.");
+      }
+    );
+  };
+
+  const handleStopLocationSharing = (contact: Contact) => {
+    setContacts(prev => prev.map(c => 
+      c.id === contact.id 
+        ? { ...c, locationSharing: undefined }
+        : c
+    ));
+    toast.success(`Compartilhamento de localização com ${contact.name} encerrado`);
   };
 
   const filteredContacts = contacts.filter(c => 
@@ -322,6 +398,12 @@ const Contatos = () => {
                             <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">
                               {contact.relation}
                             </span>
+                            {contact.locationSharing?.active && (
+                              <span className="px-2 py-0.5 bg-safe-green/10 text-safe-green text-xs rounded-full flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                Localização ativa
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
@@ -338,6 +420,27 @@ const Contatos = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        {contact.locationSharing?.active ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-safe-green border-safe-green hover:bg-safe-green/10"
+                            onClick={() => handleStopLocationSharing(contact)}
+                          >
+                            <MapPin className="w-4 h-4 mr-1" />
+                            Parar
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-primary border-primary hover:bg-primary/10"
+                            onClick={() => openLocationDialog(contact)}
+                          >
+                            <MapPin className="w-4 h-4 mr-1" />
+                            Localização
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(contact)}>
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -520,6 +623,80 @@ const Contatos = () => {
             </Button>
             <Button variant="destructive" className="flex-1" onClick={handleDeleteContact}>
               Excluir
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Location Sharing Dialog */}
+      <Dialog open={isLocationDialogOpen} onOpenChange={(open) => {
+        setIsLocationDialogOpen(open);
+        if (!open) setSelectedContact(null);
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              Compartilhar Localização
+            </DialogTitle>
+            <DialogDescription>
+              Compartilhe sua localização em tempo real com <strong>{selectedContact?.name}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="p-4 bg-gradient-to-r from-rose-soft/10 to-lavender/10 rounded-xl border border-primary/10">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-rose-soft to-lavender rounded-full flex items-center justify-center text-white">
+                  {selectedContact?.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">{selectedContact?.name}</p>
+                  <p className="text-sm text-muted-foreground">{selectedContact?.phone}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                Duração do compartilhamento
+              </Label>
+              <Select value={locationDuration} onValueChange={setLocationDuration}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione a duração" />
+                </SelectTrigger>
+                <SelectContent>
+                  {durationOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Sua localização será compartilhada automaticamente durante este período
+              </p>
+            </div>
+
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                <strong className="text-foreground">Nota:</strong> O contato receberá um link para acompanhar sua localização. 
+                Você pode interromper o compartilhamento a qualquer momento.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex-1" onClick={() => setIsLocationDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              className="flex-1 bg-gradient-to-r from-rose-soft to-lavender text-white"
+              onClick={handleStartLocationSharing}
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              Compartilhar
             </Button>
           </div>
         </DialogContent>
