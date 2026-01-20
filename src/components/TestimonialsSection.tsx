@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 import {
   Carousel,
@@ -17,16 +18,9 @@ const TestimonialsSection = () => {
   const testimonials = [
     {
       name: "Mariana Costa",
-      role: "Mãe e Empresária",
+      role: "Mãe",
       content: "A Safe You me deu a tranquilidade que eu precisava ao contratar uma babá para minha filha. Em segundos, tive a confirmação que precisava.",
       avatar: "MC",
-      rating: 5,
-    },
-    {
-      name: "Fernanda Lima",
-      role: "Gerente de RH",
-      content: "Implementamos a Safe You em nosso processo de contratação. Reduziu nossos riscos e agilizou as verificações em 80%.",
-      avatar: "FL",
       rating: 5,
     },
     {
@@ -81,74 +75,81 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-16 md:py-24 relative overflow-hidden">
       {/* Background Decoration */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-rose-soft/10 to-lavender/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-gradient-to-r from-rose-soft/10 to-lavender/10 rounded-full blur-3xl" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-2xl mx-auto mb-10 md:mb-16"
+        >
           <span className="inline-block px-4 py-1.5 rounded-full bg-lavender-light text-lavender text-sm font-medium mb-4">
             Depoimentos
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
             Quem usa,{" "}
             <span className="text-gradient">confia</span>
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-base md:text-lg px-4">
             Veja o que nossas usuárias dizem sobre a experiência com a Safe You.
           </p>
-        </div>
+        </motion.div>
 
         {/* Testimonials Carousel */}
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-4">
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              plugins={[plugin.current]}
-              className="w-full"
-            >
-              <div className="flex items-center gap-4">
-                <CarouselPrevious className="relative left-0 top-0 translate-y-0 h-10 w-10 border-rose-soft/30 text-rose-soft hover:bg-rose-soft/10 hover:text-rose-soft" />
-                <CarouselContent className="-ml-4">
-                  {testimonials.map((testimonial) => (
-                    <CarouselItem key={testimonial.name} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                      <div className="relative bg-card rounded-2xl p-8 shadow-soft border border-border/50 hover:shadow-medium transition-all h-full">
-                        {/* Quote Icon */}
-                        <Quote className="absolute top-6 right-6 w-8 h-8 text-rose-soft/20" />
+        <div className="max-w-6xl mx-auto px-8 md:px-12">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            plugins={[plugin.current]}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-4">
+              {testimonials.map((testimonial) => (
+                <CarouselItem key={testimonial.name} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
+                  <div className="relative bg-card rounded-xl md:rounded-2xl p-5 md:p-6 lg:p-8 shadow-soft border border-border/50 hover:shadow-medium transition-all h-full">
+                    {/* Quote Icon */}
+                    <Quote className="absolute top-4 md:top-6 right-4 md:right-6 w-6 h-6 md:w-8 md:h-8 text-rose-soft/20" />
 
-                        {/* Rating */}
-                        <div className="flex gap-1 mb-4">
-                          {[...Array(testimonial.rating)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-caution-yellow text-caution-yellow" />
-                          ))}
-                        </div>
+                    {/* Rating */}
+                    <div className="flex gap-0.5 md:gap-1 mb-3 md:mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 md:w-4 md:h-4 fill-caution-yellow text-caution-yellow" />
+                      ))}
+                    </div>
 
-                        {/* Content */}
-                        <p className="text-muted-foreground mb-6 leading-relaxed">
-                          "{testimonial.content}"
-                        </p>
+                    {/* Content */}
+                    <p className="text-muted-foreground text-sm md:text-base mb-4 md:mb-6 leading-relaxed">
+                      "{testimonial.content}"
+                    </p>
 
-                        {/* Author */}
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-soft to-lavender flex items-center justify-center text-white font-semibold">
-                            {testimonial.avatar}
-                          </div>
-                          <div>
-                            <div className="font-semibold">{testimonial.name}</div>
-                            <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                          </div>
-                        </div>
+                    {/* Author */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-rose-soft to-lavender flex items-center justify-center text-white text-sm md:text-base font-semibold">
+                        {testimonial.avatar}
                       </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselNext className="relative right-0 top-0 translate-y-0 h-10 w-10 border-rose-soft/30 text-rose-soft hover:bg-rose-soft/10 hover:text-rose-soft" />
-              </div>
-            </Carousel>
+                      <div>
+                        <div className="font-semibold text-sm md:text-base">{testimonial.name}</div>
+                        <div className="text-xs md:text-sm text-muted-foreground">{testimonial.role}</div>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden sm:flex -left-4 md:-left-6 h-9 w-9 md:h-10 md:w-10 border-rose-soft/30 text-rose-soft hover:bg-rose-soft/10 hover:text-rose-soft" />
+            <CarouselNext className="hidden sm:flex -right-4 md:-right-6 h-9 w-9 md:h-10 md:w-10 border-rose-soft/30 text-rose-soft hover:bg-rose-soft/10 hover:text-rose-soft" />
+          </Carousel>
+          
+          {/* Mobile swipe indicator */}
+          <div className="sm:hidden flex justify-center mt-4 gap-1">
+            <span className="text-xs text-muted-foreground">Deslize para ver mais →</span>
           </div>
         </div>
       </div>

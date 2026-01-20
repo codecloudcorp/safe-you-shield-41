@@ -22,7 +22,7 @@ const FAQSection = () => {
     },
     {
       question: "Quem pode usar a Safe You?",
-      answer: "Qualquer pessoa física ou jurídica pode usar nossa plataforma. É ideal para mães que vão contratar babás ou cuidadores, empresas em processos de contratação, corretoras de imóveis, síndicos de condomínios, e qualquer pessoa que precise verificar antecedentes.",
+      answer: "Qualquer pessoa pode usar nossa plataforma. É ideal para mães que vão contratar babás ou cuidadores, para verificar pessoas antes de encontros, síndicos de condomínios, e qualquer pessoa que precise verificar antecedentes.",
     },
     {
       question: "Quanto tempo leva para receber o resultado?",
@@ -37,24 +37,16 @@ const FAQSection = () => {
       answer: "Absolutamente. Todas as consultas são criptografadas e armazenadas de forma segura. Não compartilhamos informações com terceiros e seguimos os mais altos padrões de segurança da informação.",
     },
     {
-      question: "Posso usar a Safe You para verificar funcionários da minha empresa?",
-      answer: "Sim! Muitas empresas utilizam a Safe You em seus processos de recrutamento e seleção. Oferecemos planos empresariais com condições especiais para verificações em volume.",
-    },
-    {
       question: "A pessoa consultada é notificada sobre a verificação?",
       answer: "Não. A consulta é feita de forma discreta em bases públicas de dados. No entanto, recomendamos sempre informar a pessoa consultada como boa prática e transparência.",
-    },
-    {
-      question: "Quais formas de pagamento são aceitas?",
-      answer: "Aceitamos cartões de crédito, débito, PIX e boleto bancário. Para empresas com alto volume de consultas, oferecemos também faturamento mensal.",
     },
   ];
 
   return (
-    <section id="faq" className="py-24 relative overflow-hidden bg-muted/30">
+    <section id="faq" className="py-16 md:py-24 relative overflow-hidden bg-muted/30">
       {/* Background Decoration */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-lavender/10 to-rose-soft/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-rose-soft/10 to-lavender/10 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 w-[300px] md:w-[400px] h-[300px] md:h-[400px] bg-gradient-to-br from-lavender/10 to-rose-soft/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[200px] md:w-[300px] h-[200px] md:h-[300px] bg-gradient-to-tr from-rose-soft/10 to-lavender/10 rounded-full blur-3xl" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
@@ -63,16 +55,16 @@ const FAQSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-2xl mx-auto mb-16"
+          className="text-center max-w-2xl mx-auto mb-10 md:mb-16"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-lavender-light text-lavender text-sm font-medium mb-4">
             Dúvidas Frequentes
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
             Perguntas{" "}
             <span className="text-gradient">Frequentes</span>
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-base md:text-lg px-4">
             Tire suas dúvidas sobre a Safe You e nossos serviços de verificação de antecedentes.
           </p>
         </motion.div>
@@ -85,17 +77,17 @@ const FAQSection = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="max-w-3xl mx-auto"
         >
-          <Accordion type="single" collapsible className="space-y-4">
+          <Accordion type="single" collapsible className="space-y-3 md:space-y-4">
             {faqs.map((faq, index) => (
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-card rounded-xl border border-border/50 px-6 shadow-soft data-[state=open]:shadow-medium transition-all"
+                className="bg-card rounded-lg md:rounded-xl border border-border/50 px-4 md:px-6 shadow-soft data-[state=open]:shadow-medium transition-all"
               >
-                <AccordionTrigger className="text-left font-semibold hover:no-underline py-5">
+                <AccordionTrigger className="text-left text-sm md:text-base font-semibold hover:no-underline py-4 md:py-5">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
+                <AccordionContent className="text-muted-foreground text-sm md:text-base pb-4 md:pb-5 leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -109,9 +101,9 @@ const FAQSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-12"
+          className="text-center mt-8 md:mt-12"
         >
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm md:text-base">
             Ainda tem dúvidas?{" "}
             <a href="mailto:contato@safeyou.com.br" className="text-lavender hover:underline font-medium">
               Entre em contato conosco

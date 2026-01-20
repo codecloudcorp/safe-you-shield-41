@@ -36,10 +36,10 @@ const TrafficLightSection = () => {
   ];
 
   return (
-    <section className="py-24 gradient-soft relative overflow-hidden">
+    <section className="py-16 md:py-24 gradient-soft relative overflow-hidden">
       {/* Background Decoration */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-rose-soft/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-64 h-64 bg-turquoise/5 rounded-full blur-3xl" />
+      <div className="absolute top-0 left-0 w-48 md:w-64 h-48 md:h-64 bg-rose-soft/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-48 md:w-64 h-48 md:h-64 bg-turquoise/5 rounded-full blur-3xl" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
@@ -48,23 +48,23 @@ const TrafficLightSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-2xl mx-auto mb-16"
+          className="text-center max-w-2xl mx-auto mb-10 md:mb-16"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-turquoise-light text-turquoise text-sm font-medium mb-4">
             Resultados Claros
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
             Semáforo de{" "}
             <span className="text-gradient">Segurança</span>
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-base md:text-lg px-4">
             Entenda rapidamente o nível de risco com nosso sistema visual 
             intuitivo e fácil de interpretar.
           </p>
         </motion.div>
 
         {/* Traffic Light Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 max-w-5xl mx-auto">
           {signals.map((signal, index) => (
             <motion.div
               key={signal.color}
@@ -72,22 +72,22 @@ const TrafficLightSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.15 }}
-              className={`relative bg-card rounded-2xl p-8 shadow-medium border ${signal.borderColor} hover:shadow-strong transition-all group`}
+              className={`relative bg-card rounded-xl md:rounded-2xl p-6 md:p-8 shadow-medium border ${signal.borderColor} hover:shadow-strong transition-all group`}
             >
               {/* Glow Effect */}
-              <div className={`absolute inset-0 ${signal.bgLight} rounded-2xl opacity-0 group-hover:opacity-50 transition-opacity blur-xl`} />
+              <div className={`absolute inset-0 ${signal.bgLight} rounded-xl md:rounded-2xl opacity-0 group-hover:opacity-50 transition-opacity blur-xl`} />
               
               <div className="relative z-10">
                 {/* Icon */}
-                <div className={`w-20 h-20 ${signal.bgLight} rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform`}>
-                  <signal.icon className={`w-10 h-10 ${signal.textColor}`} />
+                <div className={`w-16 h-16 md:w-20 md:h-20 ${signal.bgLight} rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6 mx-auto group-hover:scale-110 transition-transform`}>
+                  <signal.icon className={`w-8 h-8 md:w-10 md:h-10 ${signal.textColor}`} />
                 </div>
 
                 {/* Content */}
-                <h3 className={`text-xl font-bold mb-3 text-center ${signal.textColor}`}>
+                <h3 className={`text-lg md:text-xl font-bold mb-2 md:mb-3 text-center ${signal.textColor}`}>
                   {signal.title}
                 </h3>
-                <p className="text-muted-foreground text-center leading-relaxed">
+                <p className="text-muted-foreground text-center text-sm md:text-base leading-relaxed">
                   {signal.description}
                 </p>
               </div>
@@ -101,10 +101,10 @@ const TrafficLightSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-12 flex items-center justify-center gap-2 text-muted-foreground"
+          className="mt-8 md:mt-12 flex items-center justify-center gap-2 text-muted-foreground"
         >
-          <Shield className="w-5 h-5 text-turquoise" />
-          <span className="text-sm">
+          <Shield className="w-4 h-4 md:w-5 md:h-5 text-turquoise" />
+          <span className="text-xs md:text-sm text-center">
             Todos os dados são consultados em fontes públicas e legais
           </span>
         </motion.div>
