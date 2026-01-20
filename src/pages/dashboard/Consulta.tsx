@@ -608,9 +608,26 @@ const Consulta = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="bg-muted/30 rounded-lg p-3 mb-4">
-                      <p className="text-xs text-muted-foreground mb-1">CPF Consultado</p>
-                      <p className="font-mono font-semibold text-foreground">{cpfValue}</p>
+                    <div className="bg-muted/30 rounded-lg p-3 mb-4 space-y-2">
+                      <p className="text-xs text-muted-foreground mb-2">Dados Consultados</p>
+                      {cpfValue && (
+                        <div className="flex justify-between">
+                          <span className="text-xs text-muted-foreground">CPF:</span>
+                          <span className="font-mono font-semibold text-foreground text-sm">{cpfValue}</span>
+                        </div>
+                      )}
+                      {phoneValue && (
+                        <div className="flex justify-between">
+                          <span className="text-xs text-muted-foreground">Telefone:</span>
+                          <span className="font-mono font-semibold text-foreground text-sm">{phoneValue}</span>
+                        </div>
+                      )}
+                      {nameValue && (
+                        <div className="flex justify-between">
+                          <span className="text-xs text-muted-foreground">Nome:</span>
+                          <span className="font-semibold text-foreground text-sm">{nameValue}</span>
+                        </div>
+                      )}
                     </div>
                     <p className="text-sm font-medium text-muted-foreground">Detalhes da consulta:</p>
                     {searchResult.details.map((detail, index) => {
@@ -637,6 +654,8 @@ const Consulta = () => {
                       className="flex-1"
                       onClick={() => {
                         setCpfValue("");
+                        setPhoneValue("");
+                        setNameValue("");
                         setSelectedSimulation(null);
                         setSearchResult(null);
                       }}
@@ -647,9 +666,10 @@ const Consulta = () => {
                       className="flex-1 bg-gradient-to-r from-rose-soft to-lavender text-white"
                       onClick={() => navigate("/dashboard/consulta/detalhe", { 
                         state: { 
-                          cpf: cpfValue,
+                          cpf: cpfValue || undefined,
+                          phone: phoneValue || undefined,
+                          name: nameValue || undefined,
                           status: searchResult.status,
-                          name: searchResult.name,
                           details: searchResult.details,
                           simulationType: selectedSimulation
                         } 
