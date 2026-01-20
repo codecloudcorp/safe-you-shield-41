@@ -42,6 +42,15 @@ const Configuracoes = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [twoFactor, setTwoFactor] = useState(false);
 
+  // Profile edit mode
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    nascimento: ""
+  });
+
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     const email = localStorage.getItem("userEmail");
@@ -49,12 +58,33 @@ const Configuracoes = () => {
       navigate("/login");
     }
     setUserEmail(email || "");
+    setProfileData(prev => ({
+      ...prev,
+      nome: email?.split("@")[0] || "",
+      email: email || ""
+    }));
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userEmail");
     navigate("/login");
+  };
+
+  const handleSaveProfile = () => {
+    setIsEditingProfile(false);
+    // Here you would save to backend
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingProfile(false);
+    // Reset to original values
+    const email = localStorage.getItem("userEmail") || "";
+    setProfileData(prev => ({
+      ...prev,
+      nome: email.split("@")[0] || "",
+      email: email
+    }));
   };
 
   return (
@@ -108,10 +138,24 @@ const Configuracoes = () => {
               >
                 <Card className="border-border/50">
                   <CardHeader>
-                    <CardTitle>Informações do Perfil</CardTitle>
-                    <CardDescription>
-                      Atualize suas informações pessoais
-                    </CardDescription>
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                      <div>
+                        <CardTitle>Informações do Perfil</CardTitle>
+                        <CardDescription>
+                          {isEditingProfile ? "Edite suas informações pessoais" : "Visualize suas informações pessoais"}
+                        </CardDescription>
+                      </div>
+                      {!isEditingProfile && (
+                        <Button 
+                          variant="outline" 
+                          className="gap-2"
+                          onClick={() => setIsEditingProfile(true)}
+                        >
+                          <Settings className="w-4 h-4" />
+                          Editar Perfil
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {/* Avatar */}
@@ -120,14 +164,16 @@ const Configuracoes = () => {
                         <div className="w-24 h-24 bg-gradient-to-br from-rose-soft to-lavender rounded-full flex items-center justify-center text-white text-3xl font-bold">
                           {userEmail.charAt(0).toUpperCase() || "U"}
                         </div>
-                        <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-lg">
-                          <Camera className="w-4 h-4" />
-                        </button>
+                        {isEditingProfile && (
+                          <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-lg hover:bg-primary/90 transition-colors">
+                            <Camera className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                       <div>
                         <p className="font-medium text-foreground">Foto do perfil</p>
                         <p className="text-sm text-muted-foreground">
-                          JPG, PNG ou GIF. Máximo 2MB.
+                          {isEditingProfile ? "Clique no ícone para alterar. JPG, PNG ou GIF. Máximo 2MB." : "JPG, PNG ou GIF. Máximo 2MB."}
                         </p>
                       </div>
                     </div>
@@ -136,26 +182,66 @@ const Configuracoes = () => {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="nome">Nome completo</Label>
-                        <Input id="nome" defaultValue={userEmail.split("@")[0] || ""} />
+                        <Input 
+                          id="nome" 
+                          value={profileData.nome}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, nome: e.target.value }))}
+                          disabled={!isEditingProfile}
+                          className={!isEditingProfile ? "bg-muted cursor-not-allowed" : ""}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="email">E-mail</Label>
-                        <Input id="email" type="email" defaultValue={userEmail} />
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          value={profileData.email}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+                          disabled={!isEditingProfile}
+                          className={!isEditingProfile ? "bg-muted cursor-not-allowed" : ""}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="telefone">Telefone</Label>
-                        <Input id="telefone" placeholder="(00) 00000-0000" />
+                        <Input 
+                          id="telefone" 
+                          placeholder="(00) 00000-0000"
+                          value={profileData.telefone}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, telefone: e.target.value }))}
+                          disabled={!isEditingProfile}
+                          className={!isEditingProfile ? "bg-muted cursor-not-allowed" : ""}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="nascimento">Data de nascimento</Label>
-                        <Input id="nascimento" type="date" />
+                        <Input 
+                          id="nascimento" 
+                          type="date"
+                          value={profileData.nascimento}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, nascimento: e.target.value }))}
+                          disabled={!isEditingProfile}
+                          className={!isEditingProfile ? "bg-muted cursor-not-allowed" : ""}
+                        />
                       </div>
                     </div>
 
-                    <Button className="gap-2 bg-gradient-to-r from-rose-soft to-lavender text-white">
-                      <Save className="w-4 h-4" />
-                      Salvar alterações
-                    </Button>
+                    {isEditingProfile && (
+                      <div className="flex gap-3">
+                        <Button 
+                          className="gap-2 bg-gradient-to-r from-rose-soft to-lavender text-white"
+                          onClick={handleSaveProfile}
+                        >
+                          <Save className="w-4 h-4" />
+                          Salvar alterações
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={handleCancelEdit}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
