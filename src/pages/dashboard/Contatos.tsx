@@ -18,13 +18,46 @@ import {
   Shield,
   UserPlus,
   MapPin,
-  Clock
+  Clock,
+  Loader2,
+  Navigation
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Fix for default marker icon
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+});
+
+// Custom marker icon
+const customIcon = new L.Icon({
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+// Component to recenter map when location changes
+const RecenterMap = ({ lat, lng }: { lat: number; lng: number }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([lat, lng], 15);
+  }, [lat, lng, map]);
+  return null;
+};
 
 interface Contact {
   id: number;
@@ -52,6 +85,9 @@ const Contatos = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
   const [locationDuration, setLocationDuration] = useState("1h");
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [locationAddress, setLocationAddress] = useState<string>("");
   
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -189,43 +225,66 @@ const Contatos = () => {
   const openLocationDialog = (contact: Contact) => {
     setSelectedContact(contact);
     setLocationDuration(contact.locationSharing?.duration || "1h");
+    setCurrentLocation(null);
+    setLocationAddress("");
     setIsLocationDialogOpen(true);
+    
+    // Get current location
+    setIsLoadingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setCurrentLocation({ lat: latitude, lng: longitude });
+          console.log("Localização obtida:", latitude, longitude);
+          
+          // Try to get address from coordinates (reverse geocoding)
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+            );
+            const data = await response.json();
+            if (data.display_name) {
+              setLocationAddress(data.display_name);
+            }
+          } catch (error) {
+            console.error("Erro ao obter endereço:", error);
+          }
+          
+          setIsLoadingLocation(false);
+        },
+        (error) => {
+          console.error("Erro ao obter localização:", error);
+          toast.error("Não foi possível obter sua localização. Verifique as permissões.");
+          setIsLoadingLocation(false);
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      toast.error("Geolocalização não suportada pelo seu navegador");
+      setIsLoadingLocation(false);
+    }
   };
 
   const handleStartLocationSharing = () => {
-    if (!selectedContact) return;
+    if (!selectedContact || !currentLocation) return;
 
-    if (!navigator.geolocation) {
-      toast.error("Geolocalização não suportada pelo seu navegador");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        console.log("Localização obtida:", position.coords.latitude, position.coords.longitude);
-        
-        setContacts(prev => prev.map(c => 
-          c.id === selectedContact.id 
-            ? { 
-                ...c, 
-                locationSharing: {
-                  active: true,
-                  duration: locationDuration,
-                  startedAt: new Date()
-                }
-              }
-            : c
-        ));
-        
-        const durationLabel = durationOptions.find(d => d.value === locationDuration)?.label;
-        toast.success(`Localização compartilhada com ${selectedContact.name} por ${durationLabel}`);
-        setIsLocationDialogOpen(false);
-      },
-      (error) => {
-        console.error("Erro ao obter localização:", error);
-        toast.error("Não foi possível obter sua localização. Verifique as permissões.");
-      }
-    );
+    setContacts(prev => prev.map(c => 
+      c.id === selectedContact.id 
+        ? { 
+            ...c, 
+            locationSharing: {
+              active: true,
+              duration: locationDuration,
+              startedAt: new Date()
+            }
+          }
+        : c
+    ));
+    
+    const durationLabel = durationOptions.find(d => d.value === locationDuration)?.label;
+    toast.success(`Localização compartilhada com ${selectedContact.name} por ${durationLabel}`);
+    setIsLocationDialogOpen(false);
   };
 
   const handleStopLocationSharing = (contact: Contact) => {
@@ -644,9 +703,58 @@ const Contatos = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-6 py-4">
-            <div className="p-4 bg-gradient-to-r from-rose-soft/10 to-lavender/10 rounded-xl border border-primary/10">
-              <div className="flex items-center gap-3 mb-3">
+          <div className="space-y-4 py-4">
+            {/* Map Section */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Navigation className="w-4 h-4 text-muted-foreground" />
+                Sua localização atual
+              </Label>
+              <div className="h-48 rounded-xl overflow-hidden border border-border relative">
+                {isLoadingLocation ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                      <p className="text-sm text-muted-foreground">Obtendo localização...</p>
+                    </div>
+                  </div>
+                ) : currentLocation ? (
+                  <MapContainer
+                    center={[currentLocation.lat, currentLocation.lng]}
+                    zoom={15}
+                    style={{ height: "100%", width: "100%" }}
+                    scrollWheelZoom={false}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={[currentLocation.lat, currentLocation.lng]} icon={customIcon}>
+                      <Popup>Você está aqui</Popup>
+                    </Marker>
+                    <RecenterMap lat={currentLocation.lat} lng={currentLocation.lng} />
+                  </MapContainer>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+                    <div className="flex flex-col items-center gap-2 text-center p-4">
+                      <MapPin className="w-8 h-8 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        Não foi possível obter sua localização
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {locationAddress && (
+                <p className="text-xs text-muted-foreground truncate" title={locationAddress}>
+                  📍 {locationAddress}
+                </p>
+              )}
+            </div>
+
+            {/* Contact Info */}
+            <div className="p-3 bg-gradient-to-r from-rose-soft/10 to-lavender/10 rounded-xl border border-primary/10">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-rose-soft to-lavender rounded-full flex items-center justify-center text-white">
                   {selectedContact?.name.charAt(0)}
                 </div>
@@ -657,7 +765,8 @@ const Contatos = () => {
               </div>
             </div>
 
-            <div className="space-y-3">
+            {/* Duration Selector */}
+            <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted-foreground" />
                 Duração do compartilhamento
@@ -674,13 +783,11 @@ const Contatos = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                Sua localização será compartilhada automaticamente durante este período
-              </p>
             </div>
 
+            {/* Note */}
             <div className="p-3 bg-muted/50 rounded-lg">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 <strong className="text-foreground">Nota:</strong> O contato receberá um link para acompanhar sua localização. 
                 Você pode interromper o compartilhamento a qualquer momento.
               </p>
@@ -694,9 +801,19 @@ const Contatos = () => {
             <Button 
               className="flex-1 bg-gradient-to-r from-rose-soft to-lavender text-white"
               onClick={handleStartLocationSharing}
+              disabled={!currentLocation || isLoadingLocation}
             >
-              <MapPin className="w-4 h-4 mr-2" />
-              Compartilhar
+              {isLoadingLocation ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Carregando...
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Compartilhar
+                </>
+              )}
             </Button>
           </div>
         </DialogContent>
