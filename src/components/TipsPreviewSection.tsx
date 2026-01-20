@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Shield, Heart, Briefcase, Home, ArrowRight } from "lucide-react";
+import { Shield, Heart, Home, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -13,16 +13,9 @@ const TipsPreviewSection = () => {
       iconColor: "text-rose-500"
     },
     {
-      icon: Briefcase,
-      title: "Contratação",
-      tip: "Peça documentos e comprove a identidade antes de contratar",
-      color: "from-lavender-light to-lavender-light/50",
-      iconColor: "text-lavender"
-    },
-    {
       icon: Home,
       title: "Segurança em Casa",
-      tip: "Verifique entregadores antes de abrir a porta",
+      tip: "Verifique entregadores e prestadores antes de abrir a porta",
       color: "from-safe-green/20 to-safe-green/10",
       iconColor: "text-safe-green"
     }
@@ -50,7 +43,7 @@ const TipsPreviewSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-10">
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-10">
           {previewTips.map((item, index) => (
             <motion.div
               key={index}

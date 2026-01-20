@@ -10,15 +10,12 @@ import {
   Lock, 
   AlertTriangle,
   Heart,
-  Briefcase,
   Home,
   MessageCircle,
   Camera,
   FileText,
   CheckCircle,
-  Building2,
   UserCheck,
-  Scale,
   Baby,
   Car,
   Smartphone,
@@ -52,12 +49,6 @@ const ProtectionTips = () => {
       badge: "border-safe-green/30 bg-safe-green/10",
       badgeText: "text-safe-green",
       icon: "text-safe-green"
-    },
-    empresas: {
-      gradient: "from-trust-blue/20 via-trust-blue/10 to-background",
-      badge: "border-trust-blue/30 bg-trust-blue/10",
-      badgeText: "text-trust-blue",
-      icon: "text-trust-blue"
     }
   };
 
@@ -208,60 +199,6 @@ const ProtectionTips = () => {
     }
   ];
 
-  const businessTips = [
-    {
-      title: "Contratação de Funcionários",
-      icon: Briefcase,
-      color: "from-lavender-light to-lavender-light/50",
-      iconColor: "text-lavender",
-      tips: [
-        "Realize verificação de antecedentes completa",
-        "Confirme referências profissionais anteriores",
-        "Valide documentos e certificações",
-        "Faça entrevistas presenciais quando possível",
-        "Implemente período de experiência estruturado"
-      ]
-    },
-    {
-      title: "Parceiros Comerciais",
-      icon: Building2,
-      color: "from-trust-blue/20 to-trust-blue/10",
-      iconColor: "text-trust-blue",
-      tips: [
-        "Verifique CNPJ e situação cadastral da empresa",
-        "Consulte processos judiciais e protestos",
-        "Pesquise reputação em sites especializados",
-        "Solicite referências de outros clientes",
-        "Formalize contratos com cláusulas de proteção"
-      ]
-    },
-    {
-      title: "Transações Financeiras",
-      icon: FileText,
-      color: "from-safe-green/20 to-safe-green/10",
-      iconColor: "text-safe-green",
-      tips: [
-        "Verifique CPF/CNPJ antes de negociações",
-        "Nunca faça pagamentos antecipados sem garantias",
-        "Pesquise a reputação em sites de reclamação",
-        "Desconfie de ofertas muito vantajosas",
-        "Mantenha registros de todas as transações"
-      ]
-    },
-    {
-      title: "Compliance e LGPD",
-      icon: Scale,
-      color: "from-purple-100 to-purple-50",
-      iconColor: "text-purple-600",
-      tips: [
-        "Implemente políticas de proteção de dados",
-        "Treine equipe sobre segurança da informação",
-        "Documente processos de tratamento de dados",
-        "Realize auditorias periódicas de segurança",
-        "Mantenha canal de denúncias anônimas"
-      ]
-    }
-  ];
 
   const renderTipCards = (tips: typeof womenTips) => (
     <div className="grid md:grid-cols-2 gap-6">
@@ -435,7 +372,7 @@ const ProtectionTips = () => {
       <section className="py-10 md:py-16">
         <div className="container mx-auto px-4">
           <Tabs defaultValue="mulheres" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8 h-12">
+            <TabsList className="grid w-full max-w-sm mx-auto grid-cols-2 mb-8 h-12">
               <TabsTrigger value="mulheres" className="flex items-center gap-2 data-[state=active]:bg-rose-soft/30">
                 <Heart className="w-4 h-4" />
                 <span className="hidden sm:inline">Mulheres</span>
@@ -443,10 +380,6 @@ const ProtectionTips = () => {
               <TabsTrigger value="familia" className="flex items-center gap-2 data-[state=active]:bg-safe-green/20">
                 <Users className="w-4 h-4" />
                 <span className="hidden sm:inline">Família</span>
-              </TabsTrigger>
-              <TabsTrigger value="empresas" className="flex items-center gap-2 data-[state=active]:bg-trust-blue/20">
-                <Building2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Empresas</span>
               </TabsTrigger>
             </TabsList>
 
@@ -493,21 +426,6 @@ const ProtectionTips = () => {
               </motion.div>
             </TabsContent>
 
-            <TabsContent value="empresas">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Segurança Corporativa</h2>
-                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">
-                    Boas práticas para contratações, parcerias e compliance empresarial
-                  </p>
-                </div>
-                {renderTipCards(businessTips)}
-              </motion.div>
-            </TabsContent>
           </Tabs>
         </div>
       </section>
@@ -515,8 +433,7 @@ const ProtectionTips = () => {
       {/* CTA Section */}
       <section className={`py-12 bg-gradient-to-r ${
         activeTab === "mulheres" ? "from-rose-soft/10 to-lavender/10" :
-        activeTab === "familia" ? "from-safe-green/10 to-safe-green/5" :
-        "from-trust-blue/10 to-trust-blue/5"
+        "from-safe-green/10 to-safe-green/5"
       } transition-colors duration-500`}>
         <div className="container mx-auto px-4 text-center">
           <motion.div
@@ -529,7 +446,7 @@ const ProtectionTips = () => {
               A melhor proteção é a informação
             </h2>
             <p className="text-muted-foreground mb-6 text-sm">
-              Use o Safe You para verificar pessoas antes de se relacionar, contratar ou fazer negócios.
+              Use o Safe You para verificar pessoas antes de se relacionar ou contratar serviços.
             </p>
             <Link
               to="/"
