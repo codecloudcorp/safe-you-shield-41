@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Star, Building2, Heart, Sparkles } from "lucide-react";
+import { Check, Star, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const PricingSection = () => {
@@ -38,25 +38,6 @@ const PricingSection = () => {
       variant: "hero" as const,
       popular: true,
     },
-    {
-      name: "Plano Empresarial",
-      icon: Building2,
-      price: "199",
-      period: "por mês",
-      description: "Para RH, imobiliárias e empresas.",
-      features: [
-        "Consultas ilimitadas",
-        "Verificação de PF e PJ",
-        "Score de crédito",
-        "Análise financeira",
-        "API de integração",
-        "Múltiplos usuários",
-        "Gerente de conta",
-      ],
-      cta: "Falar com Vendas",
-      variant: "default" as const,
-      popular: false,
-    },
   ];
 
   return (
@@ -84,7 +65,7 @@ const PricingSection = () => {
         </motion.div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
