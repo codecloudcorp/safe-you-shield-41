@@ -23,7 +23,7 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3 group">
+          <Link to="/" className="flex items-center gap-3 group">
             <div className="relative">
               <div className="absolute inset-0 gradient-hero rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
               <div className="relative bg-gradient-to-br from-rose-soft to-lavender p-2.5 rounded-xl">
@@ -31,7 +31,7 @@ const Header = () => {
               </div>
             </div>
             <span className="text-xl font-bold text-gradient">Safe You</span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
@@ -54,9 +54,13 @@ const Header = () => {
                 Entrar
               </Button>
             </Link>
-            <Button variant="default" size="sm">
-              Começar Agora
-            </Button>
+            
+            {/* Botão Começar Agora com Link para Cadastro */}
+            <Link to="/register">
+              <Button variant="default" size="sm">
+                Começar Agora
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -95,9 +99,13 @@ const Header = () => {
                     Entrar
                   </Button>
                 </Link>
-                <Button variant="default" className="w-full">
-                  Começar Agora
-                </Button>
+                
+                {/* Botão Mobile Começar Agora com Link */}
+                <Link to="/register" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="default" className="w-full">
+                    Começar Agora
+                  </Button>
+                </Link>
               </div>
             </nav>
           </motion.div>

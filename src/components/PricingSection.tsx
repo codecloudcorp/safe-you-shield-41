@@ -1,8 +1,22 @@
 import { motion } from "framer-motion";
 import { Check, Star, Heart, Sparkles, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const PricingSection = () => {
+  const navigate = useNavigate();
+
+  const handlePlanClick = () => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (isLoggedIn) {
+      // Se logado, vai direto para a aba de planos nas configurações
+      navigate("/dashboard/configuracoes?tab=plano");
+    } else {
+      // Se não logado, vai para registro
+      navigate("/register");
+    }
+  };
+
   const plans = [
     {
       name: "Consulta Avulsa",
@@ -37,7 +51,7 @@ const PricingSection = () => {
         "Histórico de consultas",
       ],
       cta: "Assinar Agora",
-      variant: "hero" as const,
+      variant: "default" as const, // Trocado para default para usar cores do tema
       popular: true,
       highlight: true,
     },
@@ -162,8 +176,9 @@ const PricingSection = () => {
               {/* CTA Button */}
               <Button 
                 variant={plan.variant} 
-                className={`w-full ${plan.highlight ? "shadow-md" : ""}`} 
+                className={`w-full ${plan.highlight ? "shadow-md bg-gradient-to-r from-rose-soft to-lavender border-0 text-white" : ""}`} 
                 size="lg"
+                onClick={handlePlanClick}
               >
                 {plan.cta}
               </Button>

@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Shield, Heart, Users, TrendingUp, Gift, Star, CheckCircle2, ArrowRight, Sparkles, Crown, BadgeCheck } from "lucide-react";
+import { Shield, Heart, Users, TrendingUp, Gift, Star, CheckCircle2, ArrowRight, Sparkles, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Link } from "react-router-dom"; // Import adicionado
 
 const Embaixadoras = () => {
   const benefits = [
@@ -113,10 +114,14 @@ const Embaixadoras = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="xl" className="gap-2 shadow-glow">
-                <Sparkles className="w-5 h-5" />
-                Quero Ser Embaixadora
-              </Button>
+              {/* Botão com Link para Cadastro */}
+              <Link to="/register">
+                <Button size="xl" className="gap-2 shadow-glow w-full sm:w-auto">
+                  <Sparkles className="w-5 h-5" />
+                  Quero Ser Embaixadora
+                </Button>
+              </Link>
+              
               <Button size="xl" variant="outline" className="gap-2">
                 Saiba Mais
                 <ArrowRight className="w-5 h-5" />
@@ -333,10 +338,15 @@ const Embaixadoras = () => {
               Faça parte do movimento que protege mulheres, famílias e empresas enquanto 
               constrói sua independência financeira. O cadastro é <strong>100% gratuito</strong>.
             </p>
-            <Button size="xl" className="gap-2 shadow-glow">
-              <Crown className="w-5 h-5" />
-              Quero Ser Embaixadora
-            </Button>
+            
+            {/* Botão Final com Link */}
+            <Link to="/register">
+              <Button size="xl" className="gap-2 shadow-glow w-full sm:w-auto">
+                <Crown className="w-5 h-5" />
+                Quero Ser Embaixadora
+              </Button>
+            </Link>
+
             <p className="text-sm text-muted-foreground mt-4">
               Cadastro gratuito • Sem mensalidades • Comece a ganhar hoje
             </p>

@@ -220,10 +220,10 @@ const Login = () => {
             </Button>
           </div>
 
-          {/* Sign Up Link */}
+          {/* Sign Up Link - ALTERADO AQUI */}
           <p className="text-center text-muted-foreground">
             Não tem uma conta?{" "}
-            <Link to="/" className="text-primary hover:text-primary/80 font-semibold transition-colors">
+            <Link to="/register" className="text-primary hover:text-primary/80 font-semibold transition-colors">
               Conheça o Safe You
             </Link>
           </p>

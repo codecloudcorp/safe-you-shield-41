@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Consulta from "./pages/dashboard/Consulta";
 import ConsultaDetalhe from "./pages/dashboard/ConsultaDetalhe";
@@ -13,6 +14,8 @@ import Historico from "./pages/dashboard/Historico";
 import Contatos from "./pages/dashboard/Contatos";
 import Alertas from "./pages/dashboard/Alertas";
 import Configuracoes from "./pages/dashboard/Configuracoes";
+import EmbaixadoraDashboard from "./pages/dashboard/EmbaixadoraDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import TermsOfUse from "./pages/TermsOfUse";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -34,6 +37,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/consulta" element={<Consulta />} />
           <Route path="/dashboard/consulta/detalhe" element={<ConsultaDetalhe />} />
@@ -42,6 +47,10 @@ const App = () => (
           <Route path="/dashboard/contatos" element={<Contatos />} />
           <Route path="/dashboard/alertas" element={<Alertas />} />
           <Route path="/dashboard/configuracoes" element={<Configuracoes />} />
+          
+          <Route path="/embaixadora" element={<EmbaixadoraDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          
           <Route path="/termos-de-uso" element={<TermsOfUse />} />
           <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
           <Route path="/central-de-ajuda" element={<HelpCenter />} />
@@ -49,7 +58,7 @@ const App = () => (
           <Route path="/politica-de-cookies" element={<CookiesPolicy />} />
           <Route path="/dicas-de-protecao" element={<ProtectionTips />} />
           <Route path="/embaixadoras" element={<Embaixadoras />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

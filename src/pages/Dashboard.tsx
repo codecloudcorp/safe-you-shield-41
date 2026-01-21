@@ -9,7 +9,8 @@ import {
   Users,
   CheckCircle,
   FileText,
-  ArrowRight
+  ArrowRight,
+  Crown // Importei o ícone Crown
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
@@ -37,6 +38,8 @@ const Dashboard = () => {
     { label: "Alertas Ativos", value: "0", icon: Bell, color: "from-lavender to-turquoise", route: "/dashboard/alertas" },
     { label: "Contatos Protegidos", value: "0", icon: Users, color: "from-turquoise to-mint", route: "/dashboard/contatos" },
     { label: "Dias de Proteção", value: "0", icon: Shield, color: "from-mint to-trust-blue", route: "/dashboard/configuracoes" },
+    // NOVO CARD ADICIONADO AQUI
+    { label: "Seu Plano", value: "Gratuito", icon: Crown, color: "from-amber-400 to-orange-400", route: "/dashboard/configuracoes?tab=plano" },
   ];
 
   const recentConsultations: Array<{ cpf: string; status: string; date: string }> = [];
@@ -122,14 +125,19 @@ const Dashboard = () => {
                 transition={{ delay: 0.1 + index * 0.05 }}
               >
                 <Card 
-                  className="border-border/50 hover:shadow-md transition-shadow cursor-pointer"
+                  className="border-border/50 hover:shadow-md transition-shadow cursor-pointer h-full"
                   onClick={() => navigate(stat.route)}
                 >
-                  <CardContent className="p-4 md:p-5">
-                    <div className="flex items-start justify-between">
+                  <CardContent className="p-4 md:p-5 flex flex-col justify-between h-full">
+                    <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p>
                         <p className="text-2xl md:text-3xl font-bold text-foreground mt-1">{stat.value}</p>
+                        
+                        {/* Texto extra apenas para o card de Plano */}
+                        {stat.label === "Seu Plano" && (
+                          <p className="text-xs text-primary mt-1 font-medium hover:underline">Fazer Upgrade →</p>
+                        )}
                       </div>
                       <div className={cn("w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center bg-gradient-to-br", stat.color)}>
                         <stat.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
