@@ -86,7 +86,8 @@ export default function EmbaixadoraDashboard() {
                 <span>Gold (25%)</span>
                 <span>Premium (30%)</span>
               </div>
-              <Progress value={progressPercentage} className="h-3 bg-purple-950/50" indicatorColor="bg-yellow-400" />
+              {/* Removed invalid indicatorColor prop */}
+              <Progress value={progressPercentage} className="h-3 bg-purple-950/50" />
               <p className="text-right text-xs text-purple-300 mt-1">{salesCount} / {nextLevelGoal} vendas</p>
             </div>
           </CardContent>

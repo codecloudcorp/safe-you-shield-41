@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Eye, EyeOff, Lock, Mail, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import api from "@/services/api";
+import { toast } from "sonner";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,13 +19,40 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simula um delay de login
-    setTimeout(() => {
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userEmail", email);
-      navigate("/dashboard");
-      setIsLoading(false);
-    }, 1000);
+    try {
+        // Chamada real ao Backend
+        const response = await api.post("/auth/login", {
+            login: email,
+            password: password
+        });
+
+        // Backend retorna { token: "...", roles: [...] }
+        const { token, roles } = response.data;
+
+        localStorage.setItem("userToken", token); // Salva o JWT
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("userRoles", JSON.stringify(roles));
+
+        toast.success("Login realizado com sucesso!");
+
+        // Redirecionamento inteligente baseado no Role
+        if (roles.includes("ADMIN")) {
+            navigate("/admin");
+        } else if (roles.includes("EMBAIXADOR") && !roles.includes("USER")) {
+            // Se for SÓ embaixadora
+            navigate("/embaixadora");
+        } else {
+            // Padrão (Cliente ou Conta Conjunta)
+            navigate("/dashboard");
+        }
+
+    } catch (error: any) {
+        console.error(error);
+        toast.error("Erro ao fazer login. Verifique suas credenciais.");
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -115,14 +144,14 @@ const Login = () => {
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-foreground font-medium">
-                E-mail
+                E-mail ou CPF
               </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="seu@email.com"
+                  type="text"
+                  placeholder="seu@email.com ou 000.000.000-00"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -220,7 +249,7 @@ const Login = () => {
             </Button>
           </div>
 
-          {/* Sign Up Link - ALTERADO AQUI */}
+          {/* Sign Up Link */}
           <p className="text-center text-muted-foreground">
             Não tem uma conta?{" "}
             <Link to="/register" className="text-primary hover:text-primary/80 font-semibold transition-colors">

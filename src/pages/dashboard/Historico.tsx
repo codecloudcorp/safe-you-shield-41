@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  FileText, 
+import {
+  FileText,
   Search,
   Filter,
   Download,
@@ -12,11 +12,14 @@ import {
   AlertTriangle,
   Clock,
   Eye,
-  Calendar
+  Calendar,
+  ShieldX
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
+import api from "@/services/api";
+import { toast } from "sonner";
 
 interface Consultation {
   id: number;
@@ -27,31 +30,68 @@ interface Consultation {
   details: string[];
 }
 
+// Helper to map backend risk string to frontend status string
+const mapRiskToStatus = (risk: string): "safe" | "caution" | "alert" => {
+  const r = risk?.toUpperCase();
+  if (r === "SEGURO" || r === "BAIXO") return "safe";
+  if (r === "MEDIO" || r === "ATENCAO_RECOMENDADA" || r === "ALERTA") return "caution";
+  if (r === "ALTO" || r === "ALTO_RISCO" || r === "PERIGO") return "alert";
+  return "safe"; // Default fallback
+};
+
 const Historico = () => {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchFilter, setSearchFilter] = useState("");
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (!isLoggedIn) {
       navigate("/login");
+      return;
     }
+
+    fetchHistory();
   }, [navigate]);
 
-  // Lista vazia - será preenchida com dados reais quando integrado ao backend
-  const consultations: Consultation[] = [];
+  const fetchHistory = async () => {
+    try {
+      setLoading(true);
+      // Assuming you will create this endpoint in your backend to return List<RelatorioJudicialDTO> or similar
+      // mapped to the frontend structure
+      const response = await api.get("/api/seguranca/historico");
+      
+      // Transform backend data to frontend Consultation interface
+      const mappedData = response.data.map((item: any, index: number) => ({
+        id: item.id || index, // Use DB id or fallback to index
+        cpf: item.termoPesquisado || "CPF não registrado", // Assuming backend returns the search term
+        status: mapRiskToStatus(item.risco),
+        date: new Date(item.dataConsulta).toLocaleDateString('pt-BR'),
+        time: new Date(item.dataConsulta).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        details: item.detalhes || []
+      }));
 
-  const filteredConsultations = consultations.filter(c => 
+      setConsultations(mappedData);
+    } catch (error) {
+      console.error("Error fetching history:", error);
+      // Optional: toast.error("Não foi possível carregar o histórico.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredConsultations = consultations.filter(c =>
     c.cpf.toLowerCase().includes(searchFilter.toLowerCase())
   );
 
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "safe":
-        return { 
-          color: "bg-safe-green", 
-          text: "Situação Regular", 
+        return {
+          color: "bg-safe-green",
+          text: "Situação Regular",
           shortText: "Seguro",
           textColor: "text-safe-green",
           bgLight: "bg-safe-green/10",
@@ -60,9 +100,9 @@ const Historico = () => {
           description: "Não foram encontradas pendências ou alertas significativos."
         };
       case "caution":
-        return { 
-          color: "bg-caution-yellow", 
-          text: "Atenção Recomendada", 
+        return {
+          color: "bg-caution-yellow",
+          text: "Atenção Recomendada",
           shortText: "Atenção",
           textColor: "text-caution-yellow",
           bgLight: "bg-caution-yellow/10",
@@ -71,20 +111,20 @@ const Historico = () => {
           description: "Foram encontrados alguns pontos que merecem atenção."
         };
       case "alert":
-        return { 
-          color: "bg-alert-red", 
-          text: "Alerta de Segurança", 
+        return {
+          color: "bg-alert-red",
+          text: "Alerta de Segurança",
           shortText: "Alerta",
           textColor: "text-alert-red",
           bgLight: "bg-alert-red/10",
           borderColor: "border-alert-red",
-          icon: AlertTriangle,
+          icon: ShieldX,
           description: "Foram encontradas pendências importantes. Tenha cautela."
         };
       default:
-        return { 
-          color: "bg-muted", 
-          text: "Pendente", 
+        return {
+          color: "bg-muted",
+          text: "Pendente",
           shortText: "Pendente",
           textColor: "text-muted-foreground",
           bgLight: "bg-muted/50",
@@ -96,7 +136,27 @@ const Historico = () => {
   };
 
   const handleViewConsultation = (consultation: Consultation) => {
-    navigate(`/dashboard/consulta/${consultation.id}`);
+    // Navigate to details page passing the consultation data to avoid refetching
+    // Note: This relies on ConsultaDetalhe being able to display this structure
+    // Since ConsultaDetalhe expects apiResult structure, we might need to adapt it here or there.
+    // For now, let's construct an object compatible with what ConsultaDetalhe expects
+    const apiResultCompatible = {
+        risco: consultation.status === "safe" ? "SEGURO" : consultation.status === "caution" ? "MEDIO" : "ALTO",
+        resumo: "Consulta histórica recuperada.",
+        detalhes: consultation.details
+    };
+
+    navigate("/dashboard/consulta/detalhe", {
+        state: {
+            apiData: apiResultCompatible,
+            searchParams: {
+                cpf: consultation.cpf,
+                // Phone and Name might not be available in simple history view unless backend stores/returns them
+                phone: "", 
+                name: ""
+            }
+        }
+    });
   };
 
   const stats = {
@@ -108,9 +168,9 @@ const Historico = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardSidebar 
-        isCollapsed={sidebarCollapsed} 
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+      <DashboardSidebar
+        isCollapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
       <main className={cn(
@@ -190,7 +250,7 @@ const Historico = () => {
                       <p className="text-2xl font-bold text-alert-red">{stats.alert}</p>
                     </div>
                     <div className="w-10 h-10 bg-alert-red/10 rounded-xl flex items-center justify-center">
-                      <AlertTriangle className="w-5 h-5 text-alert-red" />
+                      <ShieldX className="w-5 h-5 text-alert-red" />
                     </div>
                   </div>
                 </CardContent>
@@ -240,7 +300,9 @@ const Historico = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {filteredConsultations.length === 0 ? (
+                {loading ? (
+                    <div className="text-center py-12 text-muted-foreground">Carregando histórico...</div>
+                ) : filteredConsultations.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                       <FileText className="w-8 h-8 text-muted-foreground" />
@@ -249,12 +311,12 @@ const Historico = () => {
                       Nenhuma consulta encontrada
                     </h3>
                     <p className="text-muted-foreground text-sm mb-4">
-                      {searchFilter 
-                        ? "Nenhuma consulta corresponde à sua busca." 
+                      {searchFilter
+                        ? "Nenhuma consulta corresponde à sua busca."
                         : "Você ainda não realizou nenhuma consulta. Comece agora!"}
                     </p>
                     {!searchFilter && (
-                      <Button 
+                      <Button
                         onClick={() => navigate("/dashboard/consulta")}
                         className="bg-gradient-to-r from-rose-soft to-lavender hover:opacity-90"
                       >
@@ -283,20 +345,20 @@ const Historico = () => {
                           <div>
                             <p className="font-medium text-foreground font-mono">{consultation.cpf}</p>
                             <p className="text-sm text-muted-foreground">
-                              CPF • {consultation.date} às {consultation.time}
+                              {consultation.date} às {consultation.time}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className={cn(
-                            "px-3 py-1 rounded-full text-xs font-medium",
+                            "px-3 py-1 rounded-full text-xs font-medium hidden sm:inline-block",
                             statusConfig.bgLight,
                             statusConfig.textColor
                           )}>
                             {statusConfig.shortText}
                           </span>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="icon"
                             onClick={(e) => {
                               e.stopPropagation();

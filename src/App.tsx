@@ -25,20 +25,25 @@ import CookiesPolicy from "./pages/CookiesPolicy";
 import ProtectionTips from "./pages/ProtectionTips";
 import Embaixadoras from "./pages/Embaixadoras";
 
+// Cria uma instância do cliente React Query
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      {/* Toasters para notificações */}
       <Toaster />
       <Sonner />
+      
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
+          {/* Rotas Públicas */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
+          {/* Rotas Protegidas (Dashboard do Cliente) */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/consulta" element={<Consulta />} />
           <Route path="/dashboard/consulta/detalhe" element={<ConsultaDetalhe />} />
@@ -48,9 +53,11 @@ const App = () => (
           <Route path="/dashboard/alertas" element={<Alertas />} />
           <Route path="/dashboard/configuracoes" element={<Configuracoes />} />
           
+          {/* Dashboards Específicas (Admin e Embaixadora) */}
           <Route path="/embaixadora" element={<EmbaixadoraDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           
+          {/* Páginas Institucionais e Legais */}
           <Route path="/termos-de-uso" element={<TermsOfUse />} />
           <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
           <Route path="/central-de-ajuda" element={<HelpCenter />} />
@@ -59,6 +66,7 @@ const App = () => (
           <Route path="/dicas-de-protecao" element={<ProtectionTips />} />
           <Route path="/embaixadoras" element={<Embaixadoras />} />
           
+          {/* Rota de Erro 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle2, Shield, HeartHandshake, UserPlus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
+import api from "@/services/api"; // Importe a API criada
 
 export default function Register() {
   const navigate = useNavigate();
@@ -19,9 +20,8 @@ export default function Register() {
     telefone: "",
     senha: "",
     confirmarSenha: "",
-    // Campos específicos de Embaixadora
     chavePix: "",
-    codigoIndicacao: "" // Código que ela define para o link dela
+    codigoIndicacao: "" 
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +38,7 @@ export default function Register() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleRegister = (role: "USER" | "EMBAIXADORA" | "JOINT") => {
+  const handleRegister = async (role: "USER" | "EMBAIXADORA" | "JOINT") => {
     if (!formData.nome || !formData.email || !formData.senha) {
       toast.error("Por favor, preencha todos os campos obrigatórios.");
       return;
@@ -54,16 +54,35 @@ export default function Register() {
     }
 
     setLoading(true);
-    // Simulação de delay
-    setTimeout(() => {
-      setLoading(false);
-      let message = "Conta criada com sucesso!";
-      if (role === "JOINT") message = "Conta Conjunta (Cliente + Embaixadora) criada!";
-      else if (role === "EMBAIXADORA") message = "Conta de Embaixadora criada!";
-      
-      toast.success(message);
-      navigate("/login");
-    }, 1500);
+
+    try {
+        // Mapeamento para o DTO do Java (Backend)
+        const payload = {
+            nome: formData.nome,
+            cpf: formData.cpf.replace(/\D/g, ""), // Remove formatação
+            email: formData.email,
+            telefone: formData.telefone.replace(/\D/g, ""),
+            password: formData.senha,
+            confirmPassword: formData.confirmarSenha,
+            // Mapeia os roles do Front para o Enum do Back (USUARIO, EMBAIXADORA, AMBAS)
+            tipoConta: role === "USER" ? "USUARIO" : role === "JOINT" ? "AMBAS" : "EMBAIXADORA",
+            termosAceitos: true,
+            chavePix: formData.chavePix,
+            codigoIndicacao: formData.codigoIndicacao
+        };
+
+        await api.post("/auth/register", payload);
+        
+        toast.success("Conta criada com sucesso! Faça login.");
+        navigate("/login");
+
+    } catch (error: any) {
+        console.error(error);
+        const errorMsg = error.response?.data || "Erro ao criar conta. Verifique os dados.";
+        toast.error(errorMsg);
+    } finally {
+        setLoading(false);
+    }
   };
 
   return (
@@ -88,7 +107,6 @@ export default function Register() {
               <TabsTrigger value="conjunta" className="text-xs sm:text-sm">Conta Conjunta</TabsTrigger>
             </TabsList>
 
-            {/* ABA CLIENTE */}
             <TabsContent value="cliente">
               <Card>
                 <CardHeader>
@@ -111,7 +129,6 @@ export default function Register() {
               </Card>
             </TabsContent>
 
-            {/* ABA EMBAIXADORA */}
             <TabsContent value="embaixadora">
               <Card className="border-primary/20 shadow-lg">
                 <CardHeader className="bg-primary/5 rounded-t-lg border-b border-primary/10">
@@ -144,7 +161,6 @@ export default function Register() {
               </Card>
             </TabsContent>
 
-            {/* ABA CONJUNTA */}
             <TabsContent value="conjunta">
               <Card className="border-purple-300 shadow-glow">
                 <CardHeader className="bg-gradient-to-r from-rose-soft/10 to-lavender/10 rounded-t-lg border-b border-border">
@@ -209,7 +225,6 @@ function RegistrationForm({ formData, handleChange, loading, onSubmit, buttonTex
         </div>
       </div>
 
-      {/* Campos Extras para Embaixadora */}
       {isAmbassador && (
         <div className="space-y-4 pt-2 border-t border-border mt-2">
             <div className="space-y-2">
