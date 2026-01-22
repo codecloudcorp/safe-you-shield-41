@@ -15,6 +15,7 @@ import Contatos from "./pages/dashboard/Contatos";
 import Alertas from "./pages/dashboard/Alertas";
 import Configuracoes from "./pages/dashboard/Configuracoes";
 import EmbaixadoraDashboard from "./pages/dashboard/EmbaixadoraDashboard";
+import EmbaixadoraConfiguracoes from "./pages/dashboard/EmbaixadoraConfiguracoes"; 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import TermsOfUse from "./pages/TermsOfUse";
@@ -55,6 +56,8 @@ const App = () => (
           
           {/* Dashboards Específicas (Admin e Embaixadora) */}
           <Route path="/embaixadora" element={<EmbaixadoraDashboard />} />
+          <Route path="/embaixadora/configuracoes" element={<EmbaixadoraConfiguracoes />} />
+          
           <Route path="/admin" element={<AdminDashboard />} />
           
           {/* Páginas Institucionais e Legais */}
