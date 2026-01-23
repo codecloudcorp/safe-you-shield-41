@@ -21,6 +21,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface Alert {
   id: number;
@@ -37,6 +38,7 @@ const initialAlerts: Alert[] = [];
 
 const Alertas = () => {
   const navigate = useNavigate();
+  const { isSupported, permission, requestPermission, fcmToken } = useNotifications();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
@@ -45,7 +47,6 @@ const Alertas = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   
-  // Settings state
   const [settings, setSettings] = useState({
     emailNotifications: true,
     pushNotifications: true,
@@ -53,6 +54,28 @@ const Alertas = () => {
     safetyReminders: true,
     weeklyDigest: false
   });
+
+  useEffect(() => {
+    if (permission === 'granted' && fcmToken) {
+      setSettings(prev => ({ ...prev, pushNotifications: true }));
+    } else if (permission === 'denied') {
+      setSettings(prev => ({ ...prev, pushNotifications: false }));
+    }
+  }, [permission, fcmToken]);
+
+  const handlePushNotificationToggle = async (checked: boolean) => {
+    if (checked) {
+      const granted = await requestPermission();
+      if (granted) {
+        setSettings(prev => ({ ...prev, pushNotifications: true }));
+      } else {
+        setSettings(prev => ({ ...prev, pushNotifications: false }));
+      }
+    } else {
+      setSettings(prev => ({ ...prev, pushNotifications: false }));
+      toast.info("Notificações push desativadas");
+    }
+  };
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -445,11 +468,20 @@ const Alertas = () => {
             <div className="flex items-center justify-between py-2 gap-4">
               <div className="min-w-0">
                 <p className="font-medium text-sm">Notificações push</p>
-                <p className="text-xs text-muted-foreground">Receba alertas no navegador</p>
+                <p className="text-xs text-muted-foreground">
+                  {!isSupported 
+                    ? "Navegador não suporta notificações push"
+                    : permission === 'granted' && fcmToken
+                    ? "Notificações ativas"
+                    : permission === 'denied'
+                    ? "Permissão negada - ative nas configurações do navegador"
+                    : "Receba alertas no navegador"}
+                </p>
               </div>
               <Switch
-                checked={settings.pushNotifications}
-                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, pushNotifications: checked }))}
+                checked={settings.pushNotifications && isSupported && permission === 'granted'}
+                onCheckedChange={handlePushNotificationToggle}
+                disabled={!isSupported}
               />
             </div>
             <div className="flex items-center justify-between py-2 gap-4">

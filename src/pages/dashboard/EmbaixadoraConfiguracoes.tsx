@@ -13,6 +13,7 @@ import {
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import api from "@/services/api";
+import { useNotifications } from "@/hooks/useNotifications";
 
 // Interface para Tipagem
 interface UserProfile {
@@ -49,12 +50,35 @@ const EmbaixadoraConfiguracoes = () => {
   const [secretCode, setSecretCode] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   
-  // --- Settings States ---
+  const { isSupported, permission, requestPermission, fcmToken } = useNotifications();
+
   const [activeTab, setActiveTab] = useState("financeiro");
   const [darkMode, setDarkMode] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(false);
+
+  useEffect(() => {
+    if (permission === 'granted' && fcmToken) {
+      setPushNotifications(true);
+    } else if (permission === 'denied') {
+      setPushNotifications(false);
+    }
+  }, [permission, fcmToken]);
+
+  const handlePushNotificationToggle = async (checked: boolean) => {
+    if (checked) {
+      const granted = await requestPermission();
+      if (granted) {
+        setPushNotifications(true);
+      } else {
+        setPushNotifications(false);
+      }
+    } else {
+      setPushNotifications(false);
+      toast.info("Notificações push desativadas");
+    }
+  };
 
   // Efeito para aplicar o Modo Escuro Real
   useEffect(() => {
@@ -469,9 +493,24 @@ const EmbaixadoraConfiguracoes = () => {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center"><Bell className="w-5 h-5 text-primary" /></div>
-                                    <div><p className="font-medium dark:text-white">Push</p><p className="text-sm text-muted-foreground dark:text-gray-400">Notificações no navegador</p></div>
+                                    <div>
+                                        <p className="font-medium dark:text-white">Push</p>
+                                        <p className="text-sm text-muted-foreground dark:text-gray-400">
+                                            {!isSupported 
+                                              ? "Navegador não suporta notificações push"
+                                              : permission === 'granted' && fcmToken
+                                              ? "Notificações ativas"
+                                              : permission === 'denied'
+                                              ? "Permissão negada - ative nas configurações do navegador"
+                                              : "Notificações no navegador"}
+                                        </p>
+                                    </div>
                                 </div>
-                                <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
+                                <Switch 
+                                    checked={pushNotifications && isSupported && permission === 'granted'} 
+                                    onCheckedChange={handlePushNotificationToggle}
+                                    disabled={!isSupported}
+                                />
                             </div>
                              <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">

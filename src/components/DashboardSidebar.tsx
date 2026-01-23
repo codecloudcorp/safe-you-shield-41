@@ -9,7 +9,6 @@ import {
   LogOut,
   Bell,
   FileText,
-  Heart,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -30,7 +29,6 @@ const DashboardSidebar = ({ isCollapsed, onToggle }: DashboardSidebarProps) => {
     { icon: FileText, label: "Histórico", path: "/dashboard/historico" },
     { icon: Users, label: "Contatos", path: "/dashboard/contatos" },
     { icon: Bell, label: "Alertas", path: "/dashboard/alertas" },
-    { icon: Heart, label: "Dicas de Proteção", path: "/dicas-de-protecao" },
   ];
 
   const bottomItems = [

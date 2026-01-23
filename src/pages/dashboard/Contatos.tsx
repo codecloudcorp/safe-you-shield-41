@@ -84,9 +84,10 @@ const Contatos = () => {
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
   const [locationDuration, setLocationDuration] = useState("1h");
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationAddress, setLocationAddress] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false); // Loading state geral
+  const [isLoading, setIsLoading] = useState(false);
   
   // Refs para controle do Rastreamento em Tempo Real
   const watchIdRef = useRef<number | null>(null);
@@ -142,6 +143,7 @@ const Contatos = () => {
     const handlePosition = async (position: GeolocationPosition) => {
         const { latitude, longitude } = position.coords;
         setCurrentLocation({ lat: latitude, lng: longitude });
+        setUserLocation({ lat: latitude, lng: longitude });
 
         // Envia para o backend a cada 10 segundos (Throttling)
         const now = Date.now();
@@ -226,14 +228,54 @@ const Contatos = () => {
   };
 
   useEffect(() => {
-    // CORREÇÃO: Verifica ambas as chaves possíveis para o token
     const token = localStorage.getItem("userToken") || localStorage.getItem("token");
     if (!token) {
       navigate("/login");
     } else {
       fetchContacts();
+      loadUserLocation();
     }
   }, [navigate]);
+
+  const loadUserLocation = async () => {
+    try {
+      const userResponse = await userService.me();
+      const userData = userResponse.data;
+      
+      if (userData.lastLatitude && userData.lastLongitude) {
+        setUserLocation({
+          lat: userData.lastLatitude,
+          lng: userData.lastLongitude
+        });
+      } else {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              setUserLocation({ lat: latitude, lng: longitude });
+              userService.updateLocation(latitude, longitude);
+            },
+            (error) => {
+              console.error("Erro ao obter localização:", error);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar localização do usuário:", error);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            setUserLocation({ lat: latitude, lng: longitude });
+          },
+          () => {},
+          { enableHighAccuracy: true }
+        );
+      }
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -554,6 +596,47 @@ const Contatos = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Mapa com Localização do Usuário */}
+          {userLocation && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="border-border/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-primary" />
+                    Sua Localização Atual
+                  </CardTitle>
+                  <CardDescription>Sua posição exata no mapa</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-96 rounded-xl overflow-hidden border border-border relative">
+                    <MapContainer 
+                      center={[userLocation.lat, userLocation.lng]} 
+                      zoom={15} 
+                      style={{ height: "100%", width: "100%" }} 
+                      scrollWheelZoom={true}
+                    >
+                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                      <Marker 
+                        position={[userLocation.lat, userLocation.lng]} 
+                        icon={customIcon}
+                      >
+                        <Popup>
+                          <div className="text-center">
+                            <p className="font-semibold">Você está aqui</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}
+                            </p>
+                          </div>
+                        </Popup>
+                      </Marker>
+                      <RecenterMap lat={userLocation.lat} lng={userLocation.lng} />
+                    </MapContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {isLoading ? (
              <div className="flex justify-center p-8"><Loader2 className="animate-spin w-8 h-8 text-primary"/></div>

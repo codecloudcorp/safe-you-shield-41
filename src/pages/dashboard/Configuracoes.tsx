@@ -37,6 +37,7 @@ import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import api from "@/services/api";
+import { useNotifications } from "@/hooks/useNotifications";
 
 // Interface para Tipagem
 interface UserProfile {
@@ -97,11 +98,34 @@ const Configuracoes = () => {
   const [ambassadorPix, setAmbassadorPix] = useState("");
   const [ambassadorReferral, setAmbassadorReferral] = useState("");
 
-  // Settings states (Visuais)
+  const { isSupported, permission, requestPermission, fcmToken } = useNotifications();
+
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (permission === 'granted' && fcmToken) {
+      setPushNotifications(true);
+    } else if (permission === 'denied') {
+      setPushNotifications(false);
+    }
+  }, [permission, fcmToken]);
+
+  const handlePushNotificationToggle = async (checked: boolean) => {
+    if (checked) {
+      const granted = await requestPermission();
+      if (granted) {
+        setPushNotifications(true);
+      } else {
+        setPushNotifications(false);
+      }
+    } else {
+      setPushNotifications(false);
+      toast.info("Notificações push desativadas");
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,22 +136,29 @@ const Configuracoes = () => {
       }
 
       try {
-        // Busca dados reais do backend
-        // Nota: O endpoint /users/me deve retornar { nome, email, telefone, nascimento, roles: [], isTwoFactorEnabled, ... }
         const response = await api.get("/users/me");
         const userData = response.data;
 
+        console.log("Dados do usuário recebidos:", userData);
+
         setUserEmail(userData.email || "");
-        setUserRoles(userData.roles || []); // Ex: ["USER", "EMBAIXADOR"]
-        setTwoFactorEnabled(userData.isTwoFactorEnabled);
+        
+        const rolesArray = Array.isArray(userData.roles) 
+          ? userData.roles.map((r: any) => typeof r === 'string' ? r : r.name || r)
+          : [];
+        setUserRoles(rolesArray);
+        
+        setTwoFactorEnabled(userData.isTwoFactorEnabled || false);
 
         const loadedProfile = {
             nome: userData.nome || "",
             email: userData.email || "",
             telefone: userData.telefone || "",
-            nascimento: userData.nascimento || "", // Formato YYYY-MM-DD
-            avatarBase64: userData.fotoBase64 || "" // Se o backend mandar a foto
+            nascimento: userData.nascimento ? (typeof userData.nascimento === 'string' ? userData.nascimento : userData.nascimento.toString()) : "",
+            avatarBase64: userData.fotoBase64 || ""
         };
+
+        console.log("Perfil carregado:", loadedProfile);
 
         setOriginalProfileData(loadedProfile);
         setProfileData(loadedProfile);
@@ -549,9 +580,24 @@ const Configuracoes = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center"><Bell className="w-5 h-5 text-primary" /></div>
-                        <div><p className="font-medium">Push</p><p className="text-sm text-muted-foreground">Notificações no navegador</p></div>
+                        <div>
+                          <p className="font-medium">Push</p>
+                          <p className="text-sm text-muted-foreground">
+                            {!isSupported 
+                              ? "Navegador não suporta notificações push"
+                              : permission === 'granted' && fcmToken
+                              ? "Notificações ativas"
+                              : permission === 'denied'
+                              ? "Permissão negada - ative nas configurações do navegador"
+                              : "Notificações no navegador"}
+                          </p>
+                        </div>
                       </div>
-                      <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
+                      <Switch 
+                        checked={pushNotifications && isSupported && permission === 'granted'} 
+                        onCheckedChange={handlePushNotificationToggle}
+                        disabled={!isSupported}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">

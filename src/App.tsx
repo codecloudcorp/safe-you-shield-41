@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
 import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -25,56 +26,56 @@ import LGPD from "./pages/LGPD";
 import CookiesPolicy from "./pages/CookiesPolicy";
 import ProtectionTips from "./pages/ProtectionTips";
 import Embaixadoras from "./pages/Embaixadoras";
+import { setupForegroundNotifications } from "./lib/notifications";
 
-// Cria uma instância do cliente React Query
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      {/* Toasters para notificações */}
-      <Toaster />
-      <Sonner />
-      
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          {/* Rotas Públicas */}
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Rotas Protegidas (Dashboard do Cliente) */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/consulta" element={<Consulta />} />
-          <Route path="/dashboard/consulta/detalhe" element={<ConsultaDetalhe />} />
-          <Route path="/dashboard/consulta/:id" element={<ConsultaDetalhe />} />
-          <Route path="/dashboard/historico" element={<Historico />} />
-          <Route path="/dashboard/contatos" element={<Contatos />} />
-          <Route path="/dashboard/alertas" element={<Alertas />} />
-          <Route path="/dashboard/configuracoes" element={<Configuracoes />} />
-          
-          {/* Dashboards Específicas (Admin e Embaixadora) */}
-          <Route path="/embaixadora" element={<EmbaixadoraDashboard />} />
-          <Route path="/embaixadora/configuracoes" element={<EmbaixadoraConfiguracoes />} />
-          
-          <Route path="/admin" element={<AdminDashboard />} />
-          
-          {/* Páginas Institucionais e Legais */}
-          <Route path="/termos-de-uso" element={<TermsOfUse />} />
-          <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
-          <Route path="/central-de-ajuda" element={<HelpCenter />} />
-          <Route path="/lgpd" element={<LGPD />} />
-          <Route path="/politica-de-cookies" element={<CookiesPolicy />} />
-          <Route path="/dicas-de-protecao" element={<ProtectionTips />} />
-          <Route path="/embaixadoras" element={<Embaixadoras />} />
-          
-          {/* Rota de Erro 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => {
+    setupForegroundNotifications();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/consulta" element={<Consulta />} />
+            <Route path="/dashboard/consulta/detalhe" element={<ConsultaDetalhe />} />
+            <Route path="/dashboard/consulta/:id" element={<ConsultaDetalhe />} />
+            <Route path="/dashboard/historico" element={<Historico />} />
+            <Route path="/dashboard/contatos" element={<Contatos />} />
+            <Route path="/dashboard/alertas" element={<Alertas />} />
+            <Route path="/dashboard/configuracoes" element={<Configuracoes />} />
+            
+            <Route path="/embaixadora" element={<EmbaixadoraDashboard />} />
+            <Route path="/embaixadora/configuracoes" element={<EmbaixadoraConfiguracoes />} />
+            
+            <Route path="/admin" element={<AdminDashboard />} />
+            
+            <Route path="/termos-de-uso" element={<TermsOfUse />} />
+            <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
+            <Route path="/central-de-ajuda" element={<HelpCenter />} />
+            <Route path="/lgpd" element={<LGPD />} />
+            <Route path="/politica-de-cookies" element={<CookiesPolicy />} />
+            <Route path="/dicas-de-protecao" element={<ProtectionTips />} />
+            <Route path="/embaixadoras" element={<Embaixadoras />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
