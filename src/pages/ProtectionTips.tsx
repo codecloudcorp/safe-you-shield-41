@@ -5,26 +5,26 @@ import {
   ArrowLeft, 
   Eye, 
   Users, 
-  MapPin, 
   Phone, 
-  Lock, 
   AlertTriangle,
   Heart,
   Home,
-  MessageCircle,
   Camera,
-  FileText,
   CheckCircle,
   UserCheck,
   Baby,
   Car,
   Smartphone,
-  HandMetal
+  HandMetal,
+  X // Importado ícone X
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button"; // Importado Button
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 // Import signal images
 import signalHelp1 from "@/assets/signal-help-1.png";
@@ -34,7 +34,8 @@ import angelShot2 from "@/assets/angel-shot-2.png";
 import safetyWord1 from "@/assets/safety-word-1.png";
 import safetyWord2 from "@/assets/safety-word-2.png";
 
-const ProtectionTips = () => {
+// --- COMPONENTE REUTILIZÁVEL (EXPORTADO) ---
+export const ProtectionTipsContent = ({ isModal = false, onClose }: { isModal?: boolean; onClose?: () => void }) => {
   const [activeTab, setActiveTab] = useState("mulheres");
 
   const themeColors = {
@@ -199,7 +200,6 @@ const ProtectionTips = () => {
     }
   ];
 
-
   const renderTipCards = (tips: typeof womenTips) => (
     <div className="grid md:grid-cols-2 gap-6">
       {tips.map((category, index) => (
@@ -270,7 +270,6 @@ const ProtectionTips = () => {
               transition={{ delay: 0.3 + index * 0.1 }}
             >
               <Card className="h-full bg-white/80 backdrop-blur-sm border-border/50 overflow-hidden">
-                {/* Signal Image(s) */}
                 <div className={`aspect-video overflow-hidden ${signal.images.length > 1 ? 'grid grid-cols-2 gap-1' : ''}`}>
                   {signal.images.map((img, imgIndex) => (
                     <img 
@@ -321,156 +320,174 @@ const ProtectionTips = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-white border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-              <span className="hidden sm:inline">Voltar</span>
-            </Link>
+    <>
+      <div className={`sticky top-0 z-50 bg-white border-b border-border ${isModal ? 'px-6 py-4' : 'container mx-auto px-4 py-4'}`}>
+        <div className="flex items-center justify-between">
+          
+          {isModal ? (
+            // CABEÇALHO PARA MODAL (DASHBOARD)
+            <div className="flex items-center gap-2">
+               <Shield className="w-6 h-6 text-lavender" />
+               <span className="font-bold text-lg">Central de Dicas</span>
+            </div>
+          ) : (
+             // CABEÇALHO PARA PÁGINA PÚBLICA
+             <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+                <span className="hidden sm:inline">Voltar</span>
+             </Link>
+          )}
+
+          {!isModal && (
             <Link to="/" className="flex items-center gap-2">
               <Shield className="w-8 h-8 text-lavender" />
               <span className="font-bold text-xl text-foreground">Safe You</span>
             </Link>
-            <div className="w-20" />
-          </div>
+          )}
+
+          {isModal ? (
+             // BOTÃO FECHAR (SÓ NO MODAL)
+             <Button variant="ghost" size="icon" onClick={onClose}>
+                 <X className="w-5 h-5" />
+             </Button>
+          ) : (
+             <div className="w-20" />
+          )}
         </div>
-      </header>
+      </div>
 
-      {/* Hero Section */}
-      <motion.section 
-        key={activeTab}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className={`bg-gradient-to-br ${currentTheme.gradient} py-12 md:py-16 transition-colors duration-500`}
-      >
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
-          >
-            <div className={`inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border ${currentTheme.badge} mb-4 transition-colors duration-300`}>
-              <Shield className={`w-5 h-5 ${currentTheme.icon} transition-colors duration-300`} />
-              <span className={`text-sm font-medium ${currentTheme.badgeText} transition-colors duration-300`}>Guia de Proteção</span>
-            </div>
-            <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-3">
-              Dicas de Proteção
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
-              Orientações práticas para você se proteger. Conhecimento é sua primeira linha de defesa.
-            </p>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* Tabs Section */}
-      <section className="py-10 md:py-16">
-        <div className="container mx-auto px-4">
-          <Tabs defaultValue="mulheres" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full max-w-sm mx-auto grid-cols-2 mb-8 h-12">
-              <TabsTrigger value="mulheres" className="flex items-center gap-2 data-[state=active]:bg-rose-soft/30">
-                <Heart className="w-4 h-4" />
-                <span className="hidden sm:inline">Mulheres</span>
-              </TabsTrigger>
-              <TabsTrigger value="familia" className="flex items-center gap-2 data-[state=active]:bg-safe-green/20">
-                <Users className="w-4 h-4" />
-                <span className="hidden sm:inline">Família</span>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="mulheres">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Proteção e Segurança</h2>
-                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">
-                    Dicas essenciais para sua segurança no dia a dia, desde encontros até segurança digital
-                  </p>
-                </div>
-
-                {/* Help Signals Section */}
-                {renderHelpSignalsSection()}
-
-                <Separator className="my-8" />
-
-                <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
-                  <Eye className="w-5 h-5 text-lavender" />
-                  Dicas de Prevenção
-                </h3>
-
-                {renderTipCards(womenTips)}
-              </motion.div>
-            </TabsContent>
-
-            <TabsContent value="familia">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Proteja Quem Você Ama</h2>
-                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">
-                    Orientações para manter toda a família segura em casa e fora dela
-                  </p>
-                </div>
-                {renderTipCards(familyTips)}
-              </motion.div>
-            </TabsContent>
-
-          </Tabs>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className={`py-12 bg-gradient-to-r ${
-        activeTab === "mulheres" ? "from-rose-soft/10 to-lavender/10" :
-        "from-safe-green/10 to-safe-green/5"
-      } transition-colors duration-500`}>
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-xl mx-auto"
-          >
-            <h2 className="text-2xl font-bold text-foreground mb-3">
-              A melhor proteção é a informação
-            </h2>
-            <p className="text-muted-foreground mb-6 text-sm">
-              Use o Safe You para verificar pessoas antes de se relacionar ou contratar serviços.
-            </p>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 bg-lavender text-white px-6 py-3 rounded-full font-medium hover:bg-lavender/90 transition-colors shadow-lg hover:shadow-xl"
+      <div className={isModal ? "p-6" : ""}>
+        {/* Hero Section */}
+        <motion.section 
+            key={activeTab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className={`bg-gradient-to-br ${currentTheme.gradient} py-12 md:py-16 transition-colors duration-500 ${isModal ? 'rounded-2xl' : ''}`}
+        >
+            <div className={isModal ? "px-4" : "container mx-auto px-4"}>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="text-center max-w-3xl mx-auto"
             >
-              <Shield className="w-5 h-5" />
-              Fazer uma Verificação
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+                <div className={`inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border ${currentTheme.badge} mb-4 transition-colors duration-300`}>
+                <Shield className={`w-5 h-5 ${currentTheme.icon} transition-colors duration-300`} />
+                <span className={`text-sm font-medium ${currentTheme.badgeText} transition-colors duration-300`}>Guia de Proteção</span>
+                </div>
+                <h1 className={`${isModal ? 'text-2xl md:text-4xl' : 'text-3xl md:text-5xl'} font-bold text-foreground mb-3`}>
+                Dicas de Proteção
+                </h1>
+                <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
+                Orientações práticas para você se proteger. Conhecimento é sua primeira linha de defesa.
+                </p>
+            </motion.div>
+            </div>
+        </motion.section>
 
-      {/* Footer */}
-      <footer className="bg-foreground text-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Shield className="w-6 h-6" />
-            <span className="font-bold">Safe You</span>
-          </div>
-          <p className="text-white/60 text-sm">
-            © {new Date().getFullYear()} Safe You. Todos os direitos reservados.
-          </p>
-        </div>
-      </footer>
+        {/* Tabs Section */}
+        <section className="py-10 md:py-16">
+            <div className={isModal ? "px-4" : "container mx-auto px-4"}>
+            <Tabs defaultValue="mulheres" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full max-w-sm mx-auto grid-cols-2 mb-8 h-12">
+                <TabsTrigger value="mulheres" className="flex items-center gap-2 data-[state=active]:bg-rose-soft/30">
+                    <Heart className="w-4 h-4" />
+                    <span className="hidden sm:inline">Mulheres</span>
+                </TabsTrigger>
+                <TabsTrigger value="familia" className="flex items-center gap-2 data-[state=active]:bg-safe-green/20">
+                    <Users className="w-4 h-4" />
+                    <span className="hidden sm:inline">Família</span>
+                </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="mulheres">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <div className="text-center mb-8">
+                    <h2 className="text-2xl font-bold text-foreground mb-2">Proteção e Segurança</h2>
+                    <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+                        Dicas essenciais para sua segurança no dia a dia, desde encontros até segurança digital
+                    </p>
+                    </div>
+
+                    {renderHelpSignalsSection()}
+
+                    <Separator className="my-8" />
+
+                    <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+                    <Eye className="w-5 h-5 text-lavender" />
+                    Dicas de Prevenção
+                    </h3>
+
+                    {renderTipCards(womenTips)}
+                </motion.div>
+                </TabsContent>
+
+                <TabsContent value="familia">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <div className="text-center mb-8">
+                    <h2 className="text-2xl font-bold text-foreground mb-2">Proteja Quem Você Ama</h2>
+                    <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+                        Orientações para manter toda a família segura em casa e fora dela
+                    </p>
+                    </div>
+                    {renderTipCards(familyTips)}
+                </motion.div>
+                </TabsContent>
+            </Tabs>
+            </div>
+        </section>
+
+        {/* CTA Section - Só aparece se NÃO for modal */}
+        {!isModal && (
+            <section className={`py-12 bg-gradient-to-r ${
+            activeTab === "mulheres" ? "from-rose-soft/10 to-lavender/10" :
+            "from-safe-green/10 to-safe-green/5"
+            } transition-colors duration-500`}>
+            <div className="container mx-auto px-4 text-center">
+                <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="max-w-xl mx-auto"
+                >
+                <h2 className="text-2xl font-bold text-foreground mb-3">
+                    A melhor proteção é a informação
+                </h2>
+                <p className="text-muted-foreground mb-6 text-sm">
+                    Use o Safe You para verificar pessoas antes de se relacionar ou contratar serviços.
+                </p>
+                <Link
+                    to="/"
+                    className="inline-flex items-center gap-2 bg-lavender text-white px-6 py-3 rounded-full font-medium hover:bg-lavender/90 transition-colors shadow-lg hover:shadow-xl"
+                >
+                    <Shield className="w-5 h-5" />
+                    Fazer uma Verificação
+                </Link>
+                </motion.div>
+            </div>
+            </section>
+        )}
+      </div>
+    </>
+  );
+};
+
+// --- PÁGINA PÚBLICA (Componente Default) ---
+const ProtectionTips = () => {
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <ProtectionTipsContent />
+      <Footer />
     </div>
   );
 };

@@ -17,6 +17,7 @@ import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { consultationService } from "@/services/api"; // CORREÇÃO: Importando o serviço correto
 
 const Consulta = () => {
   const navigate = useNavigate();
@@ -28,10 +29,11 @@ const Consulta = () => {
   const [searchProgress, setSearchProgress] = useState(0);
   const [searchStep, setSearchStep] = useState("");
   
-  const searchTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+  // Refs para intervalos de animação
+  const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const isLoggedIn = localStorage.getItem("userToken"); // Ajustado para userToken
     if (!isLoggedIn) {
       navigate("/login");
     }
@@ -55,101 +57,94 @@ const Consulta = () => {
 
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCPF(e.target.value);
-    if (formatted.length <= 14) {
-      setCpfValue(formatted);
-    }
+    if (formatted.length <= 14) setCpfValue(formatted);
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhone(e.target.value);
-    if (formatted.length <= 15) {
-      setPhoneValue(formatted);
-    }
+    if (formatted.length <= 15) setPhoneValue(formatted);
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNameValue(e.target.value);
   };
 
-  const searchSteps = [
-    "Validando dados informados...",
-    "Consultando bases criminais...",
-    "Verificando processos cíveis...",
-    "Analisando restrições financeiras...",
-    "Compilando resultados..."
-  ];
-
   const hasAnyField = cpfValue.trim().length > 0 || phoneValue.trim().length > 0 || nameValue.trim().length > 0;
 
-  const triggerHapticFeedback = (type: 'light' | 'medium' | 'success') => {
-    if ('vibrate' in navigator) {
-      const patterns = {
-        light: [30],
-        medium: [50],
-        success: [50, 50, 100]
-      };
-      navigator.vibrate(patterns[type]);
-    }
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
+  // Lógica de Busca Real conectada ao Backend
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!hasAnyField) return;
     
-    searchTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
-    searchTimeoutsRef.current = [];
-    
     setIsSearching(true);
     setSearchProgress(0);
-    setSearchStep(searchSteps[0]);
-    
-    triggerHapticFeedback('light');
+    setSearchStep("Iniciando conexão segura com DataJud...");
 
-    const totalDuration = 3000;
-    const stepDuration = totalDuration / searchSteps.length;
-    
-    searchSteps.forEach((step, index) => {
-      const timeout = setTimeout(() => {
-        setSearchStep(step);
-        setSearchProgress(((index + 1) / searchSteps.length) * 100);
+    // Animação de progresso falsa enquanto carrega (para UX)
+    let progress = 0;
+    progressInterval.current = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress > 90) progress = 90; // Trava em 90% até a API responder
+        setSearchProgress(progress);
         
-        if (index < searchSteps.length - 1) {
-          triggerHapticFeedback('light');
-        }
-      }, stepDuration * index);
-      searchTimeoutsRef.current.push(timeout);
-    });
+        if (progress > 30 && progress < 60) setSearchStep("Consultando bases criminais e cíveis...");
+        if (progress >= 60) setSearchStep("Processando inteligência de dados...");
+    }, 300);
 
-    const completeTimeout = setTimeout(() => {
-      setIsSearching(false);
-      setSearchProgress(0);
-      searchTimeoutsRef.current = [];
-      
-      triggerHapticFeedback('success');
-      
-      // Navigate to details page with search data
-      navigate("/dashboard/consulta/detalhe", { 
-        state: { 
-          cpf: cpfValue || undefined,
-          phone: phoneValue || undefined,
-          name: nameValue || undefined,
-        } 
-      });
-      
-      toast.success("Consulta realizada com sucesso!");
-    }, totalDuration);
-    searchTimeoutsRef.current.push(completeTimeout);
+    try {
+        // 1. Determina o termo de busca (Prioridade: CPF > Nome > Telefone)
+        let termo = "";
+        let isCpf = false;
+
+        if (cpfValue.trim().length > 0) {
+            termo = cpfValue;
+            isCpf = true;
+        } else if (nameValue.trim().length > 0) {
+            termo = nameValue;
+            isCpf = false;
+        } else {
+            termo = phoneValue;
+            isCpf = false;
+        }
+
+        // 2. Chama o Backend
+        const response = await consultationService.consultar({ termo, isCpf });
+        
+        // 3. Finaliza animação
+        if (progressInterval.current) clearInterval(progressInterval.current);
+        setSearchProgress(100);
+        setSearchStep("Análise concluída!");
+
+        // 4. Navega para os detalhes enviando os dados REAIS da API
+        setTimeout(() => {
+            setIsSearching(false);
+            navigate("/dashboard/consulta/detalhe", { 
+                state: { 
+                    apiData: response.data, // <--- AQUI ESTÁ O DADO QUE FALTAVA
+                    searchParams: { 
+                        cpf: cpfValue,
+                        phone: phoneValue,
+                        name: nameValue,
+                    } 
+                } 
+            });
+            toast.success("Consulta realizada com sucesso!");
+        }, 500);
+
+    } catch (error) {
+        if (progressInterval.current) clearInterval(progressInterval.current);
+        setIsSearching(false);
+        setSearchProgress(0);
+        console.error(error);
+        toast.error("Erro ao realizar consulta. Verifique os dados ou tente mais tarde.");
+    }
   };
 
   const handleCancelSearch = () => {
-    searchTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
-    searchTimeoutsRef.current = [];
-    
+    if (progressInterval.current) clearInterval(progressInterval.current);
     setIsSearching(false);
     setSearchProgress(0);
     setSearchStep("");
-    
-    triggerHapticFeedback('medium');
   };
 
   return (
@@ -200,6 +195,7 @@ const Consulta = () => {
                           value={cpfValue}
                           onChange={handleCPFChange}
                           className="h-12 pl-10"
+                          disabled={isSearching}
                         />
                       </div>
                     </div>
@@ -214,6 +210,7 @@ const Consulta = () => {
                           value={phoneValue}
                           onChange={handlePhoneChange}
                           className="h-12 pl-10"
+                          disabled={isSearching}
                         />
                       </div>
                     </div>
@@ -228,6 +225,7 @@ const Consulta = () => {
                           value={nameValue}
                           onChange={handleNameChange}
                           className="h-12 pl-10"
+                          disabled={isSearching}
                         />
                       </div>
                     </div>
@@ -293,42 +291,6 @@ const Consulta = () => {
                     value={searchProgress} 
                     className="h-2 bg-muted"
                   />
-                  <div className="mt-4 grid grid-cols-5 gap-2">
-                    {searchSteps.map((step, index) => {
-                      const stepProgress = ((index + 1) / searchSteps.length) * 100;
-                      const isCompleted = searchProgress >= stepProgress;
-                      const isCurrent = searchStep === step;
-                      return (
-                        <motion.div
-                          key={index}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: index * 0.1 }}
-                          className={cn(
-                            "flex flex-col items-center gap-1 p-2 rounded-lg transition-all",
-                            isCompleted ? "bg-lavender/20" : "bg-muted/30",
-                            isCurrent && "ring-2 ring-lavender/50"
-                          )}
-                        >
-                          <span className={cn(
-                            "text-xs text-center font-medium",
-                            isCompleted ? "text-lavender" : "text-muted-foreground"
-                          )}>
-                            {index + 1}
-                          </span>
-                          {isCurrent ? (
-                            <motion.div
-                              animate={{ scale: [1, 1.2, 1] }}
-                              transition={{ duration: 0.5, repeat: Infinity }}
-                              className="w-2 h-2 rounded-full bg-lavender"
-                            />
-                          ) : (
-                            <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
-                          )}
-                        </motion.div>
-                      );
-                    })}
-                  </div>
                   <div className="mt-4 flex justify-center">
                     <Button
                       variant="outline"

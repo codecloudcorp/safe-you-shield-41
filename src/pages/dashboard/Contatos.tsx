@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,8 @@ import {
   MapPin,
   Clock,
   Loader2,
-  Navigation
+  Navigation,
+  Share2
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
@@ -30,6 +31,7 @@ import { toast } from "sonner";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { contactService, userService } from "@/services/api"; // Importando contactService e userService
 
 // Fix for default marker icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -39,7 +41,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-// Custom marker icon
 const customIcon = new L.Icon({
   iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
@@ -50,7 +51,6 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-// Component to recenter map when location changes
 const RecenterMap = ({ lat, lng }: { lat: number; lng: number }) => {
   const map = useMap();
   useEffect(() => {
@@ -66,15 +66,13 @@ interface Contact {
   phone: string;
   email: string;
   isEmergency: boolean;
-  locationSharing?: {
+  locationActive?: boolean; // Atualizado para refletir o DTO
+  locationSharing?: { // Mantido para compatibilidade visual
     active: boolean;
     duration: string;
     startedAt: Date;
   };
 }
-
-// Lista vazia - será preenchida com dados reais quando integrado ao backend
-const initialContacts: Contact[] = [];
 
 const Contatos = () => {
   const navigate = useNavigate();
@@ -88,11 +86,16 @@ const Contatos = () => {
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationAddress, setLocationAddress] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false); // Loading state geral
   
-  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  // Refs para controle do Rastreamento em Tempo Real
+  const watchIdRef = useRef<number | null>(null);
+  const lastSentTimeRef = useRef<number>(0);
+  const [isTracking, setIsTracking] = useState(false);
+  
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   
-  // Form state
   const [formData, setFormData] = useState({
     name: "",
     relation: "",
@@ -116,10 +119,119 @@ const Contatos = () => {
     { value: "always", label: "Sempre ativo" },
   ];
 
+  // --- LÓGICA DE RASTREAMENTO ROBUSTA ---
+  
+  const startTracking = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocalização não suportada.");
+      return;
+    }
+
+    // Se já estiver rastreando, não faz nada
+    if (watchIdRef.current !== null) return;
+
+    setIsTracking(true);
+    
+    // Configurações para evitar Timeout (aumentado para 30s) e aceitar cache recente
+    const geoOptions = {
+        enableHighAccuracy: true,
+        timeout: 30000, 
+        maximumAge: 10000 
+    };
+
+    const handlePosition = async (position: GeolocationPosition) => {
+        const { latitude, longitude } = position.coords;
+        setCurrentLocation({ lat: latitude, lng: longitude });
+
+        // Envia para o backend a cada 10 segundos (Throttling)
+        const now = Date.now();
+        if (now - lastSentTimeRef.current > 10000) {
+          try {
+            await userService.updateLocation(latitude, longitude);
+            lastSentTimeRef.current = now;
+            console.log("📍 Localização enviada:", latitude, longitude);
+          } catch (error) {
+            console.error("Erro envio silencioso:", error);
+          }
+        }
+    };
+
+    const handleError = (error: GeolocationPositionError) => {
+        console.warn("Erro GPS (Alta Precisão):", error.message);
+        
+        // Se der timeout ou erro com alta precisão, tenta reiniciar com baixa precisão
+        if (error.code === 3 || error.code === 2) { 
+            console.log("Tentando modo de baixa precisão...");
+            // Limpa o watcher atual
+            if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+            
+            // Reinicia com baixa precisão
+            watchIdRef.current = navigator.geolocation.watchPosition(
+                handlePosition,
+                (err) => console.error("Erro fatal GPS:", err),
+                { enableHighAccuracy: false, timeout: 30000, maximumAge: 30000 }
+            );
+        } else if (error.code === 1) {
+            toast.error("Permissão de localização negada.");
+            setIsTracking(false);
+        }
+    };
+
+    // Inicia o watcher principal
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      handlePosition,
+      handleError,
+      geoOptions
+    );
+  };
+
+  const stopTracking = () => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    setIsTracking(false);
+  };
+
+  // Limpa o rastreamento ao desmontar o componente
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (!isLoggedIn) {
+    return () => stopTracking();
+  }, []);
+
+  // ------------------------------
+
+  const fetchContacts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await contactService.list();
+      const mappedContacts = response.data.map((c: any) => ({
+        ...c,
+        locationSharing: c.locationActive ? { active: true, duration: 'Ativo', startedAt: new Date() } : undefined
+      }));
+      setContacts(mappedContacts);
+      
+      // Verifica se deve manter o rastreamento ativo
+      const hasActiveSharing = mappedContacts.some((c: any) => c.locationActive);
+      if (hasActiveSharing && watchIdRef.current === null) {
+        startTracking();
+      } else if (!hasActiveSharing && watchIdRef.current !== null) {
+        stopTracking();
+      }
+
+    } catch (error) {
+      toast.error("Erro ao carregar contatos.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // CORREÇÃO: Verifica ambas as chaves possíveis para o token
+    const token = localStorage.getItem("userToken") || localStorage.getItem("token");
+    if (!token) {
       navigate("/login");
+    } else {
+      fetchContacts();
     }
   }, [navigate]);
 
@@ -133,76 +245,75 @@ const Contatos = () => {
     });
   };
 
-  const handleAddContact = (e: React.FormEvent) => {
+  const handleAddContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.name.trim() || !formData.phone.trim()) {
       toast.error("Nome e telefone são obrigatórios");
       return;
     }
+    try {
+      await contactService.save(formData);
+      toast.success("Contato adicionado com sucesso!");
+      fetchContacts();
+      resetForm();
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      toast.error("Erro ao salvar contato.");
+    }
+  };
 
-    const newContact: Contact = {
-      id: Date.now(),
-      name: formData.name.trim(),
-      relation: formData.relation.trim(),
-      phone: formData.phone.trim(),
-      email: formData.email.trim(),
-      isEmergency: formData.isEmergency
+  const handleEditContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedContact) return;
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      toast.error("Nome e telefone são obrigatórios");
+      return;
+    }
+    try {
+      await contactService.save({ ...formData, id: selectedContact.id });
+      toast.success("Contato atualizado com sucesso!");
+      fetchContacts();
+      resetForm();
+      setSelectedContact(null);
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      toast.error("Erro ao atualizar contato.");
+    }
+  };
+
+  const handleDeleteContact = async () => {
+    if (!selectedContact) return;
+    try {
+      await contactService.delete(selectedContact.id);
+      setContacts(prev => prev.filter(c => c.id !== selectedContact.id));
+      toast.success("Contato removido com sucesso!");
+      setSelectedContact(null);
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      toast.error("Erro ao excluir contato.");
+    }
+  };
+
+  const handleToggleEmergency = async (contact: Contact) => {
+    const updatedData = {
+        id: contact.id,
+        name: contact.name,
+        phone: contact.phone,
+        relation: contact.relation,
+        email: contact.email,
+        isEmergency: !contact.isEmergency
     };
-
-    setContacts(prev => [...prev, newContact]);
-    toast.success("Contato adicionado com sucesso!");
-    resetForm();
-    setIsAddDialogOpen(false);
-  };
-
-  const handleEditContact = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedContact) return;
-    
-    if (!formData.name.trim() || !formData.phone.trim()) {
-      toast.error("Nome e telefone são obrigatórios");
-      return;
+    try {
+        await contactService.save(updatedData);
+        await fetchContacts();
+        toast.success(
+            !contact.isEmergency 
+              ? "Contato adicionado como emergência!" 
+              : "Contato removido dos contatos de emergência"
+          );
+    } catch (error) {
+        toast.error("Erro ao atualizar status.");
     }
-
-    setContacts(prev => prev.map(c => 
-      c.id === selectedContact.id 
-        ? {
-            ...c,
-            name: formData.name.trim(),
-            relation: formData.relation.trim(),
-            phone: formData.phone.trim(),
-            email: formData.email.trim(),
-            isEmergency: formData.isEmergency
-          }
-        : c
-    ));
-    
-    toast.success("Contato atualizado com sucesso!");
-    resetForm();
-    setSelectedContact(null);
-    setIsEditDialogOpen(false);
-  };
-
-  const handleDeleteContact = () => {
-    if (!selectedContact) return;
-    
-    setContacts(prev => prev.filter(c => c.id !== selectedContact.id));
-    toast.success("Contato removido com sucesso!");
-    setSelectedContact(null);
-    setIsDeleteDialogOpen(false);
-  };
-
-  const handleToggleEmergency = (contact: Contact) => {
-    setContacts(prev => prev.map(c => 
-      c.id === contact.id ? { ...c, isEmergency: !c.isEmergency } : c
-    ));
-    toast.success(
-      contact.isEmergency 
-        ? "Contato removido dos contatos de emergência" 
-        : "Contato adicionado como emergência!"
-    );
   };
 
   const openEditDialog = (contact: Contact) => {
@@ -224,21 +335,19 @@ const Contatos = () => {
 
   const openLocationDialog = (contact: Contact) => {
     setSelectedContact(contact);
-    setLocationDuration(contact.locationSharing?.duration || "1h");
+    setLocationDuration("1h");
     setCurrentLocation(null);
     setLocationAddress("");
     setIsLocationDialogOpen(true);
     
-    // Get current location
     setIsLoadingLocation(true);
+    // Pega a posição inicial apenas para centralizar o mapa no modal
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
           setCurrentLocation({ lat: latitude, lng: longitude });
-          console.log("Localização obtida:", latitude, longitude);
           
-          // Try to get address from coordinates (reverse geocoding)
           try {
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
@@ -250,50 +359,71 @@ const Contatos = () => {
           } catch (error) {
             console.error("Erro ao obter endereço:", error);
           }
-          
           setIsLoadingLocation(false);
         },
         (error) => {
-          console.error("Erro ao obter localização:", error);
-          toast.error("Não foi possível obter sua localização. Verifique as permissões.");
+          toast.error("Não foi possível obter sua localização inicial.");
           setIsLoadingLocation(false);
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     } else {
-      toast.error("Geolocalização não suportada pelo seu navegador");
-      setIsLoadingLocation(false);
+      toast.error("Geolocalização não suportada.");
+      setIsLocationDialogOpen(false);
     }
   };
 
-  const handleStartLocationSharing = () => {
+  const handleStartLocationSharing = async () => {
     if (!selectedContact || !currentLocation) return;
 
-    setContacts(prev => prev.map(c => 
-      c.id === selectedContact.id 
-        ? { 
-            ...c, 
-            locationSharing: {
-              active: true,
-              duration: locationDuration,
-              startedAt: new Date()
-            }
-          }
-        : c
-    ));
-    
-    const durationLabel = durationOptions.find(d => d.value === locationDuration)?.label;
-    toast.success(`Localização compartilhada com ${selectedContact.name} por ${durationLabel}`);
-    setIsLocationDialogOpen(false);
+    try {
+      // 1. Salvar no Backend (ativa a flag)
+      await contactService.startLocation(selectedContact.id, locationDuration);
+      
+      // 2. Forçar início do rastreamento (caso não tenha iniciado pelo fetchContacts)
+      startTracking();
+      
+      // 3. Atualizar UI
+      await fetchContacts();
+      
+      // 4. Gerar Link e Abrir WhatsApp
+      const durationLabel = durationOptions.find(d => d.value === locationDuration)?.label;
+      const userEmail = localStorage.getItem('userEmail') || 'user';
+      
+      const trackingLink = `https://safeyou.app/track/${userEmail}`;
+      const mapsLink = `https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
+      
+      const message = `*SafeYou - Localização em Tempo Real* 📍\n\nOlá ${selectedContact.name}, estou compartilhando minha localização com você por *${durationLabel}*.\n\nAcompanhe meu trajeto aqui: ${trackingLink}\n\n(Caso não consiga acessar, veja minha última posição conhecida: ${mapsLink})`;
+      
+      const cleanPhone = selectedContact.phone.replace(/\D/g, '');
+      const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`;
+      
+      window.open(whatsappUrl, '_blank');
+
+      toast.success(`Rastreamento iniciado!`);
+      setIsLocationDialogOpen(false);
+
+    } catch (error) {
+      toast.error("Erro ao ativar compartilhamento.");
+    }
   };
 
-  const handleStopLocationSharing = (contact: Contact) => {
-    setContacts(prev => prev.map(c => 
-      c.id === contact.id 
-        ? { ...c, locationSharing: undefined }
-        : c
-    ));
-    toast.success(`Compartilhamento de localização com ${contact.name} encerrado`);
+  const handleStopLocationSharing = async (contact: Contact) => {
+    try {
+        await contactService.stopLocation(contact.id);
+        
+        // Verifica se ainda há compartilhamentos ativos
+        const activeShares = contacts.filter(c => c.locationSharing?.active && c.id !== contact.id);
+        if (activeShares.length === 0) {
+            stopTracking();
+            toast.info("Rastreamento desligado (economia de bateria).");
+        }
+
+        await fetchContacts();
+        toast.success(`Compartilhamento encerrado.`);
+    } catch (error) {
+        toast.error("Erro ao parar compartilhamento.");
+    }
   };
 
   const filteredContacts = contacts.filter(c => 
@@ -319,7 +449,15 @@ const Contatos = () => {
         <header className="bg-white border-b border-border sticky top-0 z-40">
           <div className="px-6 py-4 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Contatos</h1>
+              <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                Contatos
+                {isTracking && (
+                  <span className="flex items-center gap-1 text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full animate-pulse border border-red-200">
+                    <span className="w-2 h-2 bg-red-600 rounded-full"></span>
+                    GPS Ativo
+                  </span>
+                )}
+              </h1>
               <p className="text-muted-foreground text-sm">
                 Gerencie seus contatos de emergência e confiança
               </p>
@@ -417,275 +555,82 @@ const Contatos = () => {
             </CardContent>
           </Card>
 
-          {/* Emergency Contacts */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Card className="border-primary/20 bg-gradient-to-r from-rose-soft/5 to-lavender/5">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-primary">
-                  <Shield className="w-5 h-5" />
-                  Contatos de Emergência
-                </CardTitle>
-                <CardDescription>
-                  Estes contatos serão notificados em caso de alerta
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {emergencyContacts.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <UserPlus className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Nenhum contato de emergência cadastrado</p>
-                  </div>
-                ) : (
-                  emergencyContacts.map((contact, index) => (
-                    <motion.div
-                      key={contact.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between p-4 bg-white rounded-xl border border-primary/10"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-rose-soft to-lavender rounded-full flex items-center justify-center text-white font-medium text-lg">
-                          {contact.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-foreground">{contact.name}</p>
-                            <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">
-                              {contact.relation}
-                            </span>
-                            {contact.locationSharing?.active && (
-                              <span className="px-2 py-0.5 bg-safe-green/10 text-safe-green text-xs rounded-full flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                Localização ativa
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Phone className="w-3 h-3" />
-                              {contact.phone}
-                            </span>
-                            {contact.email && (
-                              <span className="flex items-center gap-1">
-                                <Mail className="w-3 h-3" />
-                                {contact.email}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {contact.locationSharing?.active ? (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-safe-green border-safe-green hover:bg-safe-green/10"
-                            onClick={() => handleStopLocationSharing(contact)}
-                          >
-                            <MapPin className="w-4 h-4 mr-1" />
-                            Parar
-                          </Button>
-                        ) : (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-primary border-primary hover:bg-primary/10"
-                            onClick={() => openLocationDialog(contact)}
-                          >
-                            <MapPin className="w-4 h-4 mr-1" />
-                            Localização
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(contact)}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => openDeleteDialog(contact)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+          {isLoading ? (
+             <div className="flex justify-center p-8"><Loader2 className="animate-spin w-8 h-8 text-primary"/></div>
+          ) : (
+            <>
+            {/* Emergency Contacts */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="border-primary/20 bg-gradient-to-r from-rose-soft/5 to-lavender/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-primary">
+                    <Shield className="w-5 h-5" />
+                    Contatos de Emergência
+                  </CardTitle>
+                  <CardDescription>Estes contatos serão notificados em caso de alerta</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {emergencyContacts.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <UserPlus className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>Nenhum contato de emergência cadastrado</p>
+                    </div>
+                  ) : (
+                    emergencyContacts.map((contact, index) => (
+                      <ContactCard 
+                        key={contact.id} 
+                        contact={contact} 
+                        index={index} 
+                        onLocation={openLocationDialog}
+                        onStopLocation={handleStopLocationSharing}
+                        onEdit={openEditDialog}
+                        onDelete={openDeleteDialog}
+                        onToggleEmergency={handleToggleEmergency}
+                      />
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* Other Contacts */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card className="border-border/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-primary" />
-                  Outros Contatos
-                </CardTitle>
-                <CardDescription>
-                  Contatos de confiança cadastrados
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {otherContacts.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Nenhum contato adicional cadastrado</p>
-                  </div>
-                ) : (
-                  otherContacts.map((contact, index) => (
-                    <motion.div
-                      key={contact.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between p-4 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center text-foreground font-medium text-lg">
-                          {contact.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-foreground">{contact.name}</p>
-                            <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs rounded-full">
-                              {contact.relation}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Phone className="w-3 h-3" />
-                              {contact.phone}
-                            </span>
-                            {contact.email && (
-                              <span className="flex items-center gap-1">
-                                <Mail className="w-3 h-3" />
-                                {contact.email}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="text-primary" onClick={() => handleToggleEmergency(contact)}>
-                          <Heart className="w-4 h-4 mr-1" />
-                          Tornar emergência
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(contact)}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => openDeleteDialog(contact)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Other Contacts */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <Card className="border-border/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-primary" />
+                    Outros Contatos
+                  </CardTitle>
+                  <CardDescription>Contatos de confiança cadastrados</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {otherContacts.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>Nenhum contato adicional cadastrado</p>
+                    </div>
+                  ) : (
+                    otherContacts.map((contact, index) => (
+                      <ContactCard 
+                        key={contact.id} 
+                        contact={contact} 
+                        index={index} 
+                        isOther
+                        onLocation={openLocationDialog}
+                        onStopLocation={handleStopLocationSharing}
+                        onEdit={openEditDialog}
+                        onDelete={openDeleteDialog}
+                        onToggleEmergency={handleToggleEmergency}
+                      />
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+            </>
+          )}
         </div>
       </main>
-
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
-        setIsEditDialogOpen(open);
-        if (!open) {
-          resetForm();
-          setSelectedContact(null);
-        }
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Contato</DialogTitle>
-            <DialogDescription>
-              Atualize as informações do contato
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleEditContact} className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Nome completo *</Label>
-              <Input 
-                id="edit-name" 
-                placeholder="Digite o nome" 
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-relation">Relação</Label>
-              <Input 
-                id="edit-relation" 
-                placeholder="Ex: Mãe, Amiga, Irmão" 
-                value={formData.relation}
-                onChange={(e) => setFormData(prev => ({ ...prev, relation: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-phone">Telefone *</Label>
-              <Input 
-                id="edit-phone" 
-                placeholder="(00) 00000-0000" 
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-email">E-mail</Label>
-              <Input 
-                id="edit-email" 
-                type="email" 
-                placeholder="email@exemplo.com" 
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox 
-                id="edit-emergency" 
-                checked={formData.isEmergency}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isEmergency: checked === true }))}
-              />
-              <Label htmlFor="edit-emergency" className="text-sm cursor-pointer">Contato de emergência</Label>
-            </div>
-            <div className="flex gap-3 pt-4">
-              <Button type="button" variant="outline" className="flex-1" onClick={() => setIsEditDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit" className="flex-1 bg-gradient-to-r from-rose-soft to-lavender text-white">
-                Atualizar
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => {
-        setIsDeleteDialogOpen(open);
-        if (!open) setSelectedContact(null);
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Excluir Contato</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir {selectedContact?.name}? Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex gap-3 pt-4">
-            <Button variant="outline" className="flex-1" onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" className="flex-1" onClick={handleDeleteContact}>
-              Excluir
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Location Sharing Dialog */}
       <Dialog open={isLocationDialogOpen} onOpenChange={(open) => {
@@ -693,133 +638,139 @@ const Contatos = () => {
         if (!open) setSelectedContact(null);
       }}>
         <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] flex flex-col overflow-hidden">
-          <DialogHeader className="flex-shrink-0">
+          <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" />
               Compartilhar Localização
             </DialogTitle>
             <DialogDescription>
-              Compartilhe sua localização em tempo real com <strong>{selectedContact?.name}</strong>
+              Compartilhe via <strong>WhatsApp</strong> com {selectedContact?.name}
             </DialogDescription>
           </DialogHeader>
           
           <div className="flex-1 overflow-y-auto space-y-4 py-2 pr-1">
-            {/* Map Section */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Navigation className="w-4 h-4 text-muted-foreground" />
-                Sua localização atual
-              </Label>
-              <div className="h-40 sm:h-48 rounded-xl overflow-hidden border border-border relative">
+             <div className="h-40 sm:h-48 rounded-xl overflow-hidden border border-border relative">
                 {isLoadingLocation ? (
                   <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                      <p className="text-sm text-muted-foreground">Obtendo localização...</p>
-                    </div>
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : currentLocation ? (
-                  <MapContainer
-                    center={[currentLocation.lat, currentLocation.lng]}
-                    zoom={15}
-                    style={{ height: "100%", width: "100%" }}
-                    scrollWheelZoom={false}
-                  >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <Marker position={[currentLocation.lat, currentLocation.lng]} icon={customIcon}>
-                      <Popup>Você está aqui</Popup>
-                    </Marker>
+                  <MapContainer center={[currentLocation.lat, currentLocation.lng]} zoom={15} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    <Marker position={[currentLocation.lat, currentLocation.lng]} icon={customIcon} />
                     <RecenterMap lat={currentLocation.lat} lng={currentLocation.lng} />
                   </MapContainer>
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
-                    <div className="flex flex-col items-center gap-2 text-center p-4">
-                      <MapPin className="w-8 h-8 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
-                        Não foi possível obter sua localização
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              {locationAddress && (
-                <p className="text-xs text-muted-foreground line-clamp-2" title={locationAddress}>
-                  📍 {locationAddress}
-                </p>
-              )}
-            </div>
-
-            {/* Contact Info */}
-            <div className="p-3 bg-gradient-to-r from-rose-soft/10 to-lavender/10 rounded-xl border border-primary/10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-rose-soft to-lavender rounded-full flex items-center justify-center text-white flex-shrink-0">
-                  {selectedContact?.name.charAt(0)}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-medium text-foreground truncate">{selectedContact?.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">{selectedContact?.phone}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Duration Selector */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                Duração do compartilhamento
-              </Label>
-              <Select value={locationDuration} onValueChange={setLocationDuration}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione a duração" />
-                </SelectTrigger>
-                <SelectContent className="z-[100]">
-                  {durationOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Note */}
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground">
-                <strong className="text-foreground">Nota:</strong> O contato receberá um link para acompanhar sua localização. 
-                Você pode interromper o compartilhamento a qualquer momento.
-              </p>
-            </div>
+                ) : null}
+             </div>
+             
+             <div className="space-y-2">
+               <Label>Duração</Label>
+               <Select value={locationDuration} onValueChange={setLocationDuration}>
+                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                 <SelectContent>
+                   {durationOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                 </SelectContent>
+               </Select>
+             </div>
           </div>
 
-          <div className="flex gap-3 flex-shrink-0 pt-4 border-t border-border mt-2">
-            <Button variant="outline" className="flex-1" onClick={() => setIsLocationDialogOpen(false)}>
-              Cancelar
-            </Button>
+          <div className="flex gap-3 pt-4 border-t">
+            <Button variant="outline" className="flex-1" onClick={() => setIsLocationDialogOpen(false)}>Cancelar</Button>
             <Button 
-              className="flex-1 bg-gradient-to-r from-rose-soft to-lavender text-white"
+              className="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white" 
               onClick={handleStartLocationSharing}
               disabled={!currentLocation || isLoadingLocation}
             >
-              {isLoadingLocation ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Carregando...
-                </>
-              ) : (
-                <>
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Compartilhar
-                </>
-              )}
+              {isLoadingLocation ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Share2 className="w-4 h-4 mr-2" />}
+              Compartilhar no WhatsApp
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit and Delete Dialogs */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+         <DialogContent>
+            <DialogHeader><DialogTitle>Editar</DialogTitle></DialogHeader>
+            <form onSubmit={handleEditContact} className="space-y-4 mt-4">
+                <Input placeholder="Nome" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                <Input placeholder="Relação" value={formData.relation} onChange={e => setFormData({...formData, relation: e.target.value})} />
+                <Input placeholder="Telefone" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                <Input placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                <div className="flex items-center gap-2">
+                    <Checkbox checked={formData.isEmergency} onCheckedChange={(c) => setFormData({...formData, isEmergency: c === true})} />
+                    <Label>Emergência</Label>
+                </div>
+                <Button type="submit" className="w-full bg-gradient-to-r from-rose-soft to-lavender text-white">Salvar</Button>
+            </form>
+         </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+            <DialogHeader><DialogTitle>Confirmar Exclusão</DialogTitle></DialogHeader>
+            <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} className="flex-1">Cancelar</Button>
+                <Button variant="destructive" onClick={handleDeleteContact} className="flex-1">Excluir</Button>
+            </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };
+
+const ContactCard = ({ contact, index, isOther = false, onLocation, onStopLocation, onEdit, onDelete, onToggleEmergency }: any) => (
+  <motion.div
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: index * 0.05 }}
+    className={cn(
+      "flex items-center justify-between p-4 rounded-xl transition-colors",
+      isOther ? "bg-muted/30 hover:bg-muted/50" : "bg-white border border-primary/10"
+    )}
+  >
+    <div className="flex items-center gap-4">
+      <div className={cn("w-12 h-12 rounded-full flex items-center justify-center text-foreground font-medium text-lg", isOther ? "bg-muted" : "bg-gradient-to-br from-rose-soft to-lavender text-white")}>
+        {contact.name.charAt(0)}
+      </div>
+      <div>
+        <div className="flex items-center gap-2">
+          <p className="font-medium text-foreground">{contact.name}</p>
+          <span className={cn("px-2 py-0.5 text-xs rounded-full", isOther ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary")}>
+            {contact.relation}
+          </span>
+          {contact.locationSharing?.active && (
+            <span className="px-2 py-0.5 bg-safe-green/10 text-safe-green text-xs rounded-full flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              Ativo
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{contact.phone}</span>
+        </div>
+      </div>
+    </div>
+    <div className="flex items-center gap-2">
+        {isOther && (
+            <Button variant="ghost" size="sm" className="text-primary" onClick={() => onToggleEmergency(contact)}>
+                <Heart className="w-4 h-4 mr-1" /> Tornar emergência
+            </Button>
+        )}
+        {contact.locationSharing?.active ? (
+            <Button variant="outline" size="sm" className="text-safe-green border-safe-green hover:bg-safe-green/10" onClick={() => onStopLocation(contact)}>
+                <MapPin className="w-4 h-4 mr-1" /> Parar
+            </Button>
+        ) : (
+            <Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary/10" onClick={() => onLocation(contact)}>
+                <MapPin className="w-4 h-4 mr-1" /> Localização
+            </Button>
+        )}
+        <Button variant="ghost" size="icon" onClick={() => onEdit(contact)}><Edit className="w-4 h-4" /></Button>
+        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => onDelete(contact)}><Trash2 className="w-4 h-4" /></Button>
+    </div>
+  </motion.div>
+);
 
 export default Contatos;

@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const HeroSection = () => {
   const [searchValue, setSearchValue] = useState("");
+  const navigate = useNavigate(); // Initialize navigate hook
 
   return (
     <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden pt-16 md:pt-20">
@@ -105,7 +107,10 @@ const HeroSection = () => {
                       className="pl-10 md:pl-12 h-12 md:h-14 bg-transparent border-0 text-sm md:text-base placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                   </div>
-                  <Button className="sm:w-auto w-full h-12 md:h-14 px-6 md:px-8 bg-primary hover:bg-primary/90 text-white rounded-lg md:rounded-xl font-semibold gap-2 text-sm md:text-base">
+                  <Button 
+                    onClick={() => navigate("/login")} // REDIRECT TO LOGIN
+                    className="sm:w-auto w-full h-12 md:h-14 px-6 md:px-8 bg-primary hover:bg-primary/90 text-white rounded-lg md:rounded-xl font-semibold gap-2 text-sm md:text-base"
+                  >
                     <span className="hidden sm:inline">Verificar Agora</span>
                     <span className="sm:hidden">Verificar</span>
                     <ArrowRight className="w-4 h-4" />
@@ -163,7 +168,7 @@ const HeroSection = () => {
           >
             <div className="bg-white rounded-2xl shadow-strong p-6 xl:p-8 border border-border/30 max-w-md ml-auto relative">
               {/* Decorative badge */}
-              <div className="absolute -top-3 -right-3 px-3 py-1 bg-gradient-to-r from-rose-soft to-lavender text-white text-xs font-medium rounded-full shadow-md flex items-center gap-1">
+              <div className="absolute -top-0 -right-0 px-3 py-1 bg-gradient-to-r from-rose-soft to-lavender text-white text-xs font-medium rounded-full shadow-md flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
                 Exemplo
               </div>

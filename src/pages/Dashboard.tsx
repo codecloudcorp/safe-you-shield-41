@@ -5,44 +5,100 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { 
   Shield, 
   Bell, 
-  Search,
-  Users,
-  CheckCircle,
-  FileText,
-  ArrowRight,
-  Crown // Importei o ícone Crown
+  Search, 
+  Users, 
+  CheckCircle, 
+  FileText, 
+  ArrowRight, 
+  Crown
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { cn } from "@/lib/utils";
+import { contactService, consultationService, userService } from "@/services/api";
+import { Dialog, DialogContent } from "@/components/ui/dialog"; // Importar Dialog
+import { ProtectionTipsContent } from "./ProtectionTips"; // Importar o conteúdo das dicas
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState("");
+  const [userName, setUserName] = useState("Usuária");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isTipsOpen, setIsTipsOpen] = useState(false); // Estado para controlar a janela de dicas
+
+  // Estados para dados reais
+  const [consultationCount, setConsultationCount] = useState(0);
+  const [contactsCount, setContactsCount] = useState(0);
+  const [activeAlertsCount, setActiveAlertsCount] = useState(0);
+  const [protectionDays, setProtectionDays] = useState(0);
+  const [userPlan, setUserPlan] = useState("Gratuito");
+  const [recentConsultations, setRecentConsultations] = useState<Array<{ cpf: string; status: string; date: string }>>([]);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const token = localStorage.getItem("userToken") || localStorage.getItem("token");
     const email = localStorage.getItem("userEmail");
     
-    if (!isLoggedIn) {
+    if (!token) {
       navigate("/login");
       return;
     }
     
     setUserEmail(email || "");
+
+    const fetchData = async () => {
+        try {
+            const userRes = await userService.me();
+            const user = userRes.data;
+            setUserName(user.nome ? user.nome.split(" ")[0] : "Usuária");
+            
+            if (user.createdAt) {
+                const created = new Date(user.createdAt);
+                const now = new Date();
+                const diffTime = Math.abs(now.getTime() - created.getTime());
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                setProtectionDays(diffDays);
+            } else {
+                setProtectionDays(1);
+            }
+
+            if (user.roles && user.roles.includes("EMBAIXADOR")) {
+                setUserPlan("Embaixadora");
+            } else {
+                setUserPlan("Gratuito");
+            }
+
+            const contactsRes = await contactService.list();
+            const contacts = contactsRes.data;
+            setContactsCount(contacts.length);
+            const activeShares = contacts.filter((c: any) => c.locationActive).length;
+            setActiveAlertsCount(activeShares);
+
+            const historyRes = await consultationService.getHistory();
+            const history = historyRes.data;
+            setConsultationCount(history.length);
+
+            const recent = history.slice(0, 3).map((h: any) => ({
+                cpf: h.termoPesquisado,
+                status: h.riscoIdentificado === 'SEGURO' ? 'Seguro' : 'Risco',
+                date: new Date(h.dataConsulta).toLocaleDateString('pt-BR')
+            }));
+            setRecentConsultations(recent);
+
+        } catch (error) {
+            console.error("Erro ao carregar dados da dashboard", error);
+        }
+    };
+
+    fetchData();
   }, [navigate]);
 
   const stats = [
-    { label: "Consultas Realizadas", value: "0", icon: Search, color: "from-rose-soft to-lavender", route: "/dashboard/historico" },
-    { label: "Alertas Ativos", value: "0", icon: Bell, color: "from-lavender to-turquoise", route: "/dashboard/alertas" },
-    { label: "Contatos Protegidos", value: "0", icon: Users, color: "from-turquoise to-mint", route: "/dashboard/contatos" },
-    { label: "Dias de Proteção", value: "0", icon: Shield, color: "from-mint to-trust-blue", route: "/dashboard/configuracoes" },
-    // NOVO CARD ADICIONADO AQUI
-    { label: "Seu Plano", value: "Gratuito", icon: Crown, color: "from-amber-400 to-orange-400", route: "/dashboard/configuracoes?tab=plano" },
+    { label: "Consultas Realizadas", value: consultationCount.toString(), icon: Search, color: "from-rose-soft to-lavender", route: "/dashboard/historico" },
+    { label: "Alertas Ativos", value: activeAlertsCount.toString(), icon: Bell, color: "from-lavender to-turquoise", route: "/dashboard/contatos" },
+    { label: "Contatos Protegidos", value: contactsCount.toString(), icon: Users, color: "from-turquoise to-mint", route: "/dashboard/contatos" },
+    { label: "Dias de Proteção", value: protectionDays.toString(), icon: Shield, color: "from-mint to-trust-blue", route: "/dashboard/configuracoes" },
+    { label: "Seu Plano", value: userPlan, icon: Crown, color: "from-amber-400 to-orange-400", route: "/dashboard/configuracoes?tab=plano" },
   ];
-
-  const recentConsultations: Array<{ cpf: string; status: string; date: string }> = [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,17 +107,15 @@ const Dashboard = () => {
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
       />
 
-      {/* Main Content */}
       <main className={cn(
         "transition-all duration-300 min-h-screen",
         sidebarCollapsed ? "md:ml-20 ml-0" : "md:ml-64 ml-0"
       )}>
-        {/* Header */}
         <header className="bg-white border-b border-border sticky top-0 z-40">
           <div className="px-4 md:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                Olá, {userEmail.split("@")[0] || "Usuária"}! 👋
+                Olá, {userName}! 👋
               </h1>
               <p className="text-muted-foreground text-sm">
                 Bem-vinda ao seu painel de proteção
@@ -75,9 +129,12 @@ const Dashboard = () => {
                 onClick={() => navigate("/dashboard/alertas")}
               >
                 <Bell className="w-5 h-5" />
+                {activeAlertsCount > 0 && (
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
               </Button>
               <div className="w-10 h-10 bg-gradient-to-br from-rose-soft to-lavender rounded-full flex items-center justify-center text-white font-medium">
-                {userEmail.charAt(0).toUpperCase() || "U"}
+                {userName.charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
@@ -134,8 +191,7 @@ const Dashboard = () => {
                         <p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p>
                         <p className="text-2xl md:text-3xl font-bold text-foreground mt-1">{stat.value}</p>
                         
-                        {/* Texto extra apenas para o card de Plano */}
-                        {stat.label === "Seu Plano" && (
+                        {stat.label === "Seu Plano" && stat.value === "Gratuito" && (
                           <p className="text-xs text-primary mt-1 font-medium hover:underline">Fazer Upgrade →</p>
                         )}
                       </div>
@@ -149,7 +205,7 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* Recent Consultations - Full Width */}
+          {/* Recent Consultations */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -202,7 +258,7 @@ const Dashboard = () => {
                         <div>
                           <p className="font-medium text-foreground font-mono">{consultation.cpf}</p>
                           <p className="text-sm text-muted-foreground">
-                            CPF • {consultation.date}
+                            {consultation.status} • {consultation.date}
                           </p>
                         </div>
                       </div>
@@ -233,10 +289,11 @@ const Dashboard = () => {
                       Sempre verifique o histórico de uma pessoa antes de encontros presenciais. 
                       Use nossa ferramenta de consulta para garantir sua segurança.
                     </p>
+                    {/* Botão Modificado para Abrir o Modal */}
                     <Button 
                       variant="link" 
                       className="px-0 mt-2 text-primary"
-                      onClick={() => navigate("/dicas-protecao")}
+                      onClick={() => setIsTipsOpen(true)}
                     >
                       Ver mais dicas →
                     </Button>
@@ -247,6 +304,13 @@ const Dashboard = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* JANELA MODAL DE DICAS */}
+      <Dialog open={isTipsOpen} onOpenChange={setIsTipsOpen}>
+          <DialogContent className="max-w-6xl h-[90vh] p-0 overflow-y-auto overflow-x-hidden">
+              <ProtectionTipsContent isModal onClose={() => setIsTipsOpen(false)} />
+          </DialogContent>
+      </Dialog>
     </div>
   );
 };
