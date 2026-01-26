@@ -47,8 +47,6 @@ const Login = () => {
         const response = await api.post("/auth/login", payload);
 
         // Se chegou aqui, login ok (200)
-        // O backend retorna is2faRequired no 403, mas se o axios não interceptar, tratamos aqui
-        // No Java o controller retorna 403 se is2faRequired, então cairá no catch.
         
         const { token, roles, newTrustedDeviceToken } = response.data;
 
@@ -65,27 +63,39 @@ const Login = () => {
         toast.success("Login realizado com sucesso!");
 
         // LÓGICA DO LEQUE (SELEÇÃO DE PERFIL)
-        if (roles.length > 1) {
+        if (roles && roles.length > 1) {
             // Se tiver mais de um perfil, mostra a tela de seleção
             setUserRoles(roles);
             setShowRoleSelection(true);
             setIsLoading(false);
-        } else {
+        } else if (roles && roles.length === 1) {
             // Se tiver apenas um, redireciona direto
             redirectToRole(roles[0]);
+        } else {
+            // Fallback para USER se não vier roles
+            redirectToRole("USER");
         }
 
     } catch (error: any) {
-        // Intercepta a exigência de 2FA (403 Forbidden)
-        if (error.response && error.response.status === 403 && error.response.data.is2faRequired) {
+        // Intercepta a exigência de 2FA (403 Forbidden com flag específica)
+        // O backend deve retornar um JSON com { is2faRequired: true } no corpo do erro 403
+        if (error.response && error.response.status === 403 && error.response.data?.is2faRequired) {
             setRequires2FA(true);
             toast.info("Autenticação em duas etapas necessária.");
             setIsLoading(false);
             return;
         }
 
-        console.error(error);
-        toast.error(requires2FA ? "Código incorreto." : "Erro ao fazer login. Verifique suas credenciais.");
+        console.error("Erro no login:", error);
+        
+        if (requires2FA) {
+             toast.error("Código de verificação incorreto.");
+        } else if (error.response?.status === 403) {
+             // Se for 403 mas não for 2FA, é credencial inválida ou bloqueio
+             toast.error("Acesso negado. Verifique suas credenciais.");
+        } else {
+             toast.error("Erro ao fazer login. Verifique seus dados.");
+        }
         setIsLoading(false);
     }
   };

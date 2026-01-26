@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   Users, Activity, DollarSign, ShieldAlert, Search, 
-  MoreHorizontal, Edit, Trash2, Plus, LogOut, Save, CreditCard, Clock, Tag, Ticket, UserCircle, Key, QrCode
+  MoreHorizontal, Edit, Trash2, Plus, LogOut, Save, CreditCard, Clock, Tag, Ticket, UserCircle, Key, QrCode, CheckCircle2, Copy
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetFooter, SheetClose } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
@@ -17,8 +18,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"; 
 import { useNavigate } from "react-router-dom";
 import api from "@/services/api"; 
+// import { toast } from "sonner"; // Descomente se estiver usando sonner
 
-// Interfaces
+// --- INTERFACES ---
 interface UserData {
   id?: string;
   name: string;
@@ -35,6 +37,10 @@ interface UserData {
   durationValue: number;
   durationUnit: "DAYS" | "MONTHS" | "YEARS" | "LIFETIME";
   status: "ACTIVE" | "EXPIRED" | "BANNED";
+  // Campos de visualização vindos do backend
+  planExpiresAt?: string; 
+  expires?: string; 
+  credits?: number;
 }
 
 interface CouponData {
@@ -73,7 +79,7 @@ const initialFormState: UserData = {
   pix: "",
   referralCode: "",
   planType: "AVULSO",
-  creditsToAdd: 0,
+  creditsToAdd: 2, // Padrão: 2 créditos (Avulso)
   durationValue: 1,
   durationUnit: "MONTHS",
   status: "ACTIVE"
@@ -81,7 +87,9 @@ const initialFormState: UserData = {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<any[]>([]);
+  
+  // --- STATES ---
+  const [users, setUsers] = useState<UserData[]>([]);
   const [coupons, setCoupons] = useState<CouponData[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogData[]>([]);
   const [metrics, setMetrics] = useState<DashboardMetrics>({ onlineUsers: 0, monthlyRevenue: 0, latency: "..." });
@@ -103,68 +111,75 @@ export default function AdminDashboard() {
       is2FAEnabled: false
   });
 
-  // Fetch Data on Load
-  useEffect(() => {
-    const fetchData = async () => {
-        try {
-            // 1. Profile
-            const profileRes = await api.get('/users/profile');
-            setAdminProfile(prev => ({
-                ...prev,
-                name: profileRes.data.name,
-                email: profileRes.data.email,
-                cpf: profileRes.data.cpf || "",         
-                whatsapp: profileRes.data.whatsapp || "", 
-                is2FAEnabled: profileRes.data.is2FAEnabled
-            }));
+  // 2FA Setup State
+  const [is2FADialogOpen, setIs2FADialogOpen] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [secret, setSecret] = useState("");
 
-            // 2. Users
-            const usersRes = await api.get('/admin/users');
-            setUsers(usersRes.data);
+  // --- FETCH DATA ---
+  const fetchData = async () => {
+    try {
+        const profileRes = await api.get('/users/profile');
+        setAdminProfile(prev => ({
+            ...prev,
+            name: profileRes.data.name,
+            email: profileRes.data.email,
+            cpf: profileRes.data.cpf || "",         
+            whatsapp: profileRes.data.whatsapp || "", 
+            // Garante booleano e verifica diferentes formatos vindos do Java
+            is2FAEnabled: !!(profileRes.data.is2faEnabled || profileRes.data.is2FAEnabled)
+        }));
 
-            // 3. Coupons
-            const couponsRes = await api.get('/admin/coupons');
-            setCoupons(couponsRes.data);
+        const usersRes = await api.get('/admin/users');
+        setUsers(usersRes.data);
 
-            // 4. Audit Logs
-            const auditRes = await api.get('/admin/audit');
-            setAuditLogs(auditRes.data);
+        const couponsRes = await api.get('/admin/coupons');
+        setCoupons(couponsRes.data);
 
-            // 5. Real Metrics
-            const metricsRes = await api.get('/admin/metrics');
-            setMetrics(metricsRes.data);
+        const auditRes = await api.get('/admin/audit');
+        setAuditLogs(auditRes.data);
 
-        } catch (error) {
-            console.error("Erro ao carregar dados:", error);
-            // Opcional: Redirecionar para login se não autorizado
-            // navigate('/login');
+        const metricsRes = await api.get('/admin/metrics');
+        setMetrics(metricsRes.data);
+
+    } catch (error: any) {
+        console.error("Erro ao carregar dados:", error);
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            alert("Sessão expirada ou sem permissão. Faça login novamente.");
+            localStorage.clear(); 
+            navigate('/login');
         }
-    };
-    
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [navigate]);
 
-  // Handlers
+  // --- HANDLERS ---
   const handleOpenCreate = () => {
     setSheetMode("CREATE");
     setFormData(initialFormState);
     setIsSheetOpen(true);
   };
 
-  const handleOpenEdit = (user: any) => {
+  const handleOpenEdit = (user: UserData) => {
     setSheetMode("EDIT");
     setFormData({
       ...initialFormState,
       id: user.id,
       name: user.name,
       email: user.email,
-      roles: user.roles, // Array from backend
+      roles: user.roles,
       cpf: user.cpf || "",
       whatsapp: user.whatsapp || "",
-      password: "", // Senha vazia na edição
+      password: "", 
       confirmPassword: "",
-      creditsToAdd: 0, 
-      durationValue: 1, // Default para UI
+      planType: user.planType || "AVULSO",
+      creditsToAdd: 0, // Resetamos para 0 ao abrir
+      durationValue: 1, 
+      durationUnit: "MONTHS",
       pix: user.pix || "",
       referralCode: user.referralCode || ""
     });
@@ -176,53 +191,125 @@ export default function AdminDashboard() {
         const roles = prev.roles.includes(role)
             ? prev.roles.filter(r => r !== role) 
             : [...prev.roles, role];
-        // Ensure at least USER role if empty
         return { ...prev, roles: roles.length > 0 ? roles : ["USER"] };
     });
   };
 
-  // --- AÇÃO DE SALVAR (CRIAR OU EDITAR) ---
+  // --- AÇÃO DE SALVAR ---
   const handleSave = async () => {
     try {
       if (sheetMode === "CREATE") {
         await api.post("/admin/users", formData);
         alert("Usuário criado com sucesso!");
       } else {
-        // CORREÇÃO: Implementação da edição real (PUT)
-        // O backend precisa ter o endpoint PUT /admin/users/{id} ou similar
-        // Se não tiver, vamos usar o endpoint de criar como "upsert" ou alertar para implementar
-        // Assumindo que você vai criar o endpoint PUT no AdminController:
-        
-        // await api.put(`/admin/users/${formData.id}`, formData); 
-        // Como o endpoint PUT específico de admin não foi explicitado no backend anterior,
-        // vou manter o alerta mas indicando onde colocar a chamada.
-        // Se você quiser que funcione AGORA, use o create se o backend suportar upsert,
-        // mas o ideal é criar o método update no AdminController.
-        
-        alert("Edição enviada! (Certifique-se que o backend tem o método PUT /admin/users implementado)");
+        const payload = {
+            name: formData.name,
+            email: formData.email,
+            cpf: formData.cpf,
+            whatsapp: formData.whatsapp,
+            roles: formData.roles,
+            planType: formData.planType,
+            creditsToAdd: formData.creditsToAdd,
+            durationValue: formData.durationValue,
+            durationUnit: formData.durationUnit,
+            ...(formData.password ? { password: formData.password } : {})
+        };
+
+        await api.put(`/admin/users/${formData.id}`, payload);
+        alert("Usuário atualizado com sucesso!");
       }
       setIsSheetOpen(false);
-      // Recarregar lista para ver as mudanças reais
-      const usersRes = await api.get('/admin/users');
-      setUsers(usersRes.data);
+      fetchData(); 
     } catch (error) {
       console.error("Erro ao salvar usuário", error);
-      alert("Erro ao salvar usuário.");
+      alert("Erro ao salvar usuário. Verifique os dados.");
     }
   };
 
   const handleDelete = async (userId: string) => {
     if (confirm("Tem certeza que deseja banir/remover este usuário?")) {
         try {
-            // await api.delete(`/admin/users/${userId}`); // Descomente quando criar o endpoint no backend
-            // Logic to update local state visually
-            setUsers(users.filter(u => u.id !== userId));
-            alert("Usuário removido visualmente (Requer endpoint DELETE no backend)");
+            await api.delete(`/admin/users/${userId}`);
+            fetchData();
+            alert("Usuário removido.");
         } catch (error) {
             console.error("Erro ao deletar", error);
+            alert("Erro ao remover usuário.");
         }
     }
   }
+
+  // --- LÓGICA DE 2FA (CORRIGIDA) ---
+  const handleToggle2FA = async (checked: boolean) => {
+      if (checked) {
+          // ATIVAR 2FA
+          try {
+              // Endpoint corrigido: /api/2fa/setup
+              const res = await api.post("/api/2fa/setup"); 
+              
+              // Verificação robusta para evitar erro de undefined
+              const data = res.data;
+              const rawImage = data?.qrCode || data?.qrCodeImage; 
+              
+              if (rawImage && typeof rawImage === 'string') {
+                  const imageUrl = rawImage.startsWith('data:') ? rawImage : `data:image/png;base64,${rawImage}`;
+                  setQrCodeUrl(imageUrl); 
+                  setSecret(data.secret); 
+                  setIs2FADialogOpen(true);
+              } else {
+                  console.error("QR Code inválido:", data);
+                  alert("Erro: O servidor não retornou um QR Code válido.");
+              }
+          } catch (error: any) {
+              console.error("Erro ao iniciar setup 2FA", error);
+              if (error.response?.status === 403) {
+                  alert("Erro 403: Acesso negado. Verifique se o backend (SecurityConfig) permite acesso a /api/2fa/**.");
+              } else {
+                  alert("Erro ao gerar QR Code. Verifique o servidor.");
+              }
+          }
+      } else {
+          // DESATIVAR 2FA
+          if(confirm("Tem certeza que deseja desativar a segurança em duas etapas?")) {
+              try {
+                  await api.put("/users/profile", { 
+                      ...adminProfile, 
+                      is2FAEnabled: false 
+                  });
+                  setAdminProfile(prev => ({ ...prev, is2FAEnabled: false }));
+                  alert("2FA Desativado.");
+              } catch (error) {
+                  alert("Erro ao desativar 2FA");
+              }
+          }
+      }
+  };
+
+  const handleVerify2FA = async () => {
+      try {
+          // Endpoint corrigido: /api/2fa/activate
+          await api.post("/api/2fa/activate", {
+              code: twoFactorCode
+          });
+          
+          setAdminProfile(prev => ({ ...prev, is2FAEnabled: true }));
+          setIs2FADialogOpen(false);
+          setTwoFactorCode("");
+          alert("Autenticação de Dois Fatores ativada com sucesso!");
+      } catch (error: any) {
+          console.error("Erro validação 2FA", error);
+          if (error.response?.status === 403) {
+             alert("Erro 403: Código inválido ou endpoint bloqueado no backend.");
+          } else {
+             alert("Erro ao ativar 2FA. Tente novamente.");
+          }
+      }
+  };
+
+  const copySecretToClipboard = () => {
+      navigator.clipboard.writeText(secret);
+      alert("Chave copiada para a área de transferência!");
+  };
 
   const handleCreateCoupon = async () => {
       if (!newCoupon.code || newCoupon.discount <= 0 || !newCoupon.validUntil) {
@@ -239,8 +326,7 @@ export default function AdminDashboard() {
 
       try {
           await api.post("/admin/coupons", couponPayload);
-          const couponsRes = await api.get('/admin/coupons');
-          setCoupons(couponsRes.data);
+          fetchData();
           setNewCoupon({ code: "", discount: 0, validUntil: "", maxUses: "" });
           alert("Cupom criado com sucesso!");
       } catch (error) {
@@ -253,7 +339,7 @@ export default function AdminDashboard() {
       if(confirm("Deseja remover este cupom?")) {
           try {
             await api.delete(`/admin/coupons/${id}`);
-            setCoupons(coupons.filter(c => c.id !== id));
+            fetchData();
           } catch (error) {
             console.error("Erro ao deletar cupom", error);
           }
@@ -266,9 +352,7 @@ export default function AdminDashboard() {
               name: adminProfile.name,
               email: adminProfile.email,
               cpf: adminProfile.cpf,
-              whatsapp: adminProfile.whatsapp,
-              roles: [], // Backend ignora se não for necessário
-              is2FAEnabled: adminProfile.is2FAEnabled
+              whatsapp: adminProfile.whatsapp
           });
           
           if (adminProfile.newPassword && adminProfile.newPassword === adminProfile.confirmNewPassword) {
@@ -279,7 +363,6 @@ export default function AdminDashboard() {
           }
           
           alert("Perfil atualizado com sucesso!");
-          // Limpa campos de senha
           setAdminProfile({...adminProfile, currentPassword: "", newPassword: "", confirmNewPassword: ""});
       } catch (error) {
           console.error("Erro ao atualizar perfil", error);
@@ -287,41 +370,9 @@ export default function AdminDashboard() {
       }
   };
 
-  // --- CORREÇÃO 2FA ---
-  const toggle2FA = async () => {
-      try {
-        // Chama o endpoint real de alternar status (usando profile update ou endpoint específico)
-        // Como simplificação, estamos atualizando via profile update se não houver endpoint específico de toggle
-        const novoStatus = !adminProfile.is2FAEnabled;
-        
-        // Se precisar de lógica real de QR Code, o backend deve retornar o segredo aqui.
-        // Para "funcionar" o toggle visualmente persistente:
-        await api.put("/users/profile", {
-             name: adminProfile.name,
-             email: adminProfile.email,
-             cpf: adminProfile.cpf,
-             whatsapp: adminProfile.whatsapp,
-             roles: [],
-             is2FAEnabled: novoStatus
-        });
-
-        setAdminProfile({...adminProfile, is2FAEnabled: novoStatus});
-        
-        if (novoStatus) {
-            alert("2FA Ativado! (Em produção, aqui exibiríamos o QR Code)");
-        } else {
-            alert("2FA Desativado.");
-        }
-      } catch (error) {
-        console.error("Erro 2FA", error);
-        alert("Erro ao alterar status 2FA");
-      }
-  };
-
   return (
     <div className="flex min-h-screen bg-gray-100">
       
-      {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-white hidden md:flex flex-col fixed h-full shadow-2xl">
         <div className="p-6 border-b border-slate-800">
           <h1 className="text-xl font-bold flex items-center gap-2">
@@ -364,7 +415,7 @@ export default function AdminDashboard() {
       <main className="flex-1 md:ml-64 p-8 overflow-y-auto">
         <h2 className="text-3xl font-bold tracking-tight mb-6 text-slate-800">Painel de Controle</h2>
 
-        {/* Real Metrics Display */}
+        {/* MÉTRICAS */}
         <div className="grid gap-4 md:grid-cols-3 mb-8">
           <MetricCard 
             title="Usuários Online" 
@@ -374,8 +425,9 @@ export default function AdminDashboard() {
           />
           <MetricCard 
             title="Faturamento Mensal" 
-            // Formatação segura para moeda
-            value={`R$ ${metrics.monthlyRevenue ? metrics.monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}`} 
+            value={metrics.monthlyRevenue 
+                ? metrics.monthlyRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+                : 'R$ 0,00'} 
             icon={DollarSign} 
             sub="Total confirmado este mês" 
           />
@@ -424,7 +476,10 @@ export default function AdminDashboard() {
                   <TableBody>
                     {users.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.name}<br/><span className="text-xs text-gray-500">{user.email}</span></TableCell>
+                        <TableCell className="font-medium">
+                            {user.name}<br/>
+                            <span className="text-xs text-gray-500">{user.email}</span>
+                        </TableCell>
                         <TableCell>
                           <div className="flex gap-1 flex-wrap">
                             {user.roles && user.roles.map((role: string) => (
@@ -436,11 +491,24 @@ export default function AdminDashboard() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={user.plan === 'Active' ? "default" : "destructive"} className={user.plan === 'Active' ? "bg-green-500" : ""}>
-                            {user.plan || "N/A"}
-                          </Badge>
+                          <div className="flex flex-col gap-1">
+                            <Badge variant={user.status === 'ACTIVE' ? "default" : "destructive"} 
+                                   className={user.status === 'ACTIVE' ? "bg-green-500 w-fit" : "w-fit"}>
+                                {user.planType || "SEM PLANO"}
+                            </Badge>
+                            {user.credits !== undefined && user.credits !== null && (
+                                <span className="text-xs text-muted-foreground font-semibold">
+                                    {user.credits} créditos
+                                </span>
+                            )}
+                          </div>
                         </TableCell>
-                        <TableCell>{user.expires}</TableCell>
+                        <TableCell>
+                            {user.planExpiresAt || user.expires
+                                ? new Date(user.planExpiresAt || user.expires!).toLocaleDateString('pt-BR') 
+                                : <span className="text-muted-foreground">-</span>
+                            }
+                        </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -451,7 +519,7 @@ export default function AdminDashboard() {
                               <DropdownMenuItem onClick={() => handleOpenEdit(user)}>
                                 <Edit className="mr-2 h-4 w-4" /> Editar & Plano
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(user.id)}>
+                              <DropdownMenuItem className="text-red-600" onClick={() => user.id && handleDelete(user.id)}>
                                 <Trash2 className="mr-2 h-4 w-4" /> Banir
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -473,7 +541,7 @@ export default function AdminDashboard() {
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Código (Ex: MULHER10)</Label>
+                                <Label>Código</Label>
                                 <Input 
                                     placeholder="PROMO2026" 
                                     value={newCoupon.code}
@@ -665,14 +733,14 @@ export default function AdminDashboard() {
                             </div>
                             <Switch 
                                 checked={adminProfile.is2FAEnabled}
-                                onCheckedChange={toggle2FA}
+                                onCheckedChange={handleToggle2FA}
                             />
                         </div>
                     </CardHeader>
                     <CardContent>
                         {adminProfile.is2FAEnabled ? (
                             <div className="flex items-center gap-3 text-green-700 bg-green-100 p-3 rounded-md border border-green-200">
-                                <ShieldAlert className="w-5 h-5" />
+                                <CheckCircle2 className="w-5 h-5" />
                                 <span>Sua conta está protegida com 2FA.</span>
                             </div>
                         ) : (
@@ -686,7 +754,7 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
-          {/* ABA AUDITORIA (Exibe Logs Reais) */}
+          {/* ABA AUDITORIA */}
           <TabsContent value="audit">
             <Card>
                 <CardHeader>
@@ -845,30 +913,30 @@ export default function AdminDashboard() {
                     <Label className="flex items-center gap-2"><CreditCard className="w-4 h-4"/> Selecione o Plano</Label>
                     <div className="flex gap-4">
                         <div className={`flex-1 border p-4 rounded-lg cursor-pointer text-center transition-colors ${formData.planType === 'AVULSO' ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'}`}
-                             onClick={() => setFormData({...formData, planType: "AVULSO"})}>
+                             onClick={() => setFormData({...formData, planType: "AVULSO", creditsToAdd: 2})}>
                             <p className="font-bold text-gray-800">Avulso</p>
-                            <p className="text-xs text-gray-500">2 consultas/mês</p>
+                            <p className="text-xs text-gray-500">R$ 25,00 - 2 consultas/mês</p>
                         </div>
                         <div className={`flex-1 border p-4 rounded-lg cursor-pointer text-center transition-colors ${formData.planType === 'ANUAL' ? 'bg-green-50 border-green-500' : 'hover:bg-gray-50'}`}
-                             onClick={() => setFormData({...formData, planType: "ANUAL"})}>
+                             onClick={() => setFormData({...formData, planType: "ANUAL", creditsToAdd: 12})}>
                             <p className="font-bold text-gray-800">Anual</p>
-                            <p className="text-xs text-gray-500">20 consultas/mês</p>
+                            <p className="text-xs text-gray-500">R$ 92,00 - 12 consultas/mês</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="space-y-3 pb-4 border-b">
-                    <Label className="flex items-center gap-2"><DollarSign className="w-4 h-4"/> Créditos de Consulta (Opcional)</Label>
+                    <Label className="flex items-center gap-2"><DollarSign className="w-4 h-4"/> Adicionar Créditos de Consulta</Label>
                     <div className="flex gap-2">
                         <Input type="number" value={formData.creditsToAdd} onChange={(e) => setFormData({...formData, creditsToAdd: parseInt(e.target.value)})} className="flex-1" />
                         <Button variant="outline" onClick={() => setFormData({...formData, creditsToAdd: formData.creditsToAdd + 5})}>+5</Button>
                         <Button variant="outline" onClick={() => setFormData({...formData, creditsToAdd: formData.creditsToAdd + 10})}>+10</Button>
                     </div>
-                    <p className="text-xs text-muted-foreground">Estes créditos serão somados ao saldo inicial do usuário.</p>
+                    <p className="text-xs text-muted-foreground">Estes créditos serão somados ao saldo atual do usuário.</p>
                 </div>
 
                 <div className="space-y-3">
-                    <Label className="flex items-center gap-2"><Clock className="w-4 h-4"/> Tempo de Vigência</Label>
+                    <Label className="flex items-center gap-2"><Clock className="w-4 h-4"/> Adicionar Tempo de Vigência</Label>
                     <div className="flex gap-2 items-end">
                         <div className="flex-1 space-y-1">
                             <span className="text-xs text-gray-500">Quantidade</span>
@@ -888,7 +956,7 @@ export default function AdminDashboard() {
                             </select>
                         </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">Define por quanto tempo o acesso/plano estará ativo.</p>
+                    <p className="text-xs text-muted-foreground">O tempo será adicionado à data de expiração atual.</p>
                 </div>
               </TabsContent>
             </Tabs>
@@ -903,6 +971,56 @@ export default function AdminDashboard() {
           </SheetFooter>
         </SheetContent>
       </Sheet>
+
+      {/* MODAL DE 2FA (QR CODE CORRIGIDO) */}
+      <Dialog open={is2FADialogOpen} onOpenChange={setIs2FADialogOpen}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>Configurar Google Authenticator</DialogTitle>
+                <DialogDescription>
+                    Escaneie o QR Code abaixo com o app Google Authenticator no seu celular e digite o código gerado.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col items-center justify-center p-4 gap-4">
+                {qrCodeUrl ? (
+                    <img src={qrCodeUrl} alt="QR Code 2FA" className="w-48 h-48 border rounded-lg shadow-sm" />
+                ) : (
+                    <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg flex items-center justify-center text-xs text-gray-500">
+                        Carregando...
+                    </div>
+                )}
+                
+                <div className="w-full max-w-[250px] space-y-2">
+                    <Label className="text-center block">Código de 6 dígitos</Label>
+                    <Input 
+                        className="text-center text-lg tracking-widest"
+                        placeholder="000000"
+                        maxLength={6}
+                        value={twoFactorCode}
+                        onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ''))}
+                    />
+                </div>
+
+                {secret && (
+                    <div className="flex flex-col items-center gap-2 mt-2 w-full">
+                        <span className="text-xs text-gray-500">Não consegue escanear? Use a chave:</span>
+                        <div className="flex gap-2 w-full">
+                            <Input value={secret} readOnly className="text-xs bg-gray-50 text-center font-mono" />
+                            <Button size="icon" variant="outline" onClick={copySecretToClipboard}>
+                                <Copy className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIs2FADialogOpen(false)}>Cancelar</Button>
+                <Button onClick={handleVerify2FA} disabled={twoFactorCode.length !== 6}>
+                    Verificar e Ativar
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
